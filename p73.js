@@ -86,3 +86,28 @@ subHTML=function(k){
  }catch(e){}
  return h;
 };
+/* ---- 補強：外觀與出身一致 ---- */
+const KCN={jp:'JP',kr:'KR',de:'DE',vn:'VN',id:'ID',ph:'PH',th:'TH',sgm:'MY',sgi:'IN',hi:'IN'};
+function nameCountry(n){
+ if(!n||!/^[A-Za-z]/.test(n))return null;
+ const t=n.split(' '),last=t[t.length-1];
+ for(const k in NM){const p=NM[k];if(!p||!p.s)continue;if(p.s.includes(last)||p.s.includes(t[0])){if(k==='en')return (S.cn&&['US','CA','AU','GB'].includes(S.cn))?S.cn:'US';return KCN[k]||null}}
+ return null;
+}
+const _po73=pOrigin;
+pOrigin=function(p){
+ if(p&&!p.res&&!p.cn&&/^[A-Za-z]/.test(p.n||'')){const c=nameCountry(p.n);if(c){p.cn=c;return c}}
+ return _po73(p);
+};
+const _pbF73b=pbFix;
+pbFix=function(p){
+ const b=_pbF73b(p);
+ try{if(b&&p&&!b.hfix2){const o=pOrigin(p);if(o!=='TW'&&PBHM.includes(b.hm))b.hm=CITY[o]?pick(CITY[o])+'（'+(CNAME[o]||o)+'）':((CNS[o]&&CNS[o].n)||'海外');b.hfix2=1}}catch(e){}
+ return b;
+};
+/* 男性頭像不再出現長髮／雙馬尾等髮型（使用者自選髮型不受影響） */
+const _avS73=avSVG;
+avSVG=function(a,size){
+ try{const g=a&&a.g;if(g&&g.hs!=null&&a.sx!=='女'&&[2,3,6,7,8,9].includes(g.hs)){const sh=[0,1,5,11];a=Object.assign({},a,{g:Object.assign({},g,{hs:sh[g.hs%sh.length]})})}}catch(e){}
+ return _avS73(a,size);
+};

@@ -100,6 +100,9 @@ otAct=function(id,k){
    let d=R(3,6),why=[];
    if(p.v===A.place){d+=5;why.push('這正是對方喜歡的地方')}else if(p.v===A.dP){d-=6;why.push('這不是對方喜歡的地方')}
    if(tn===A.tone){d+=4;why.push('你的態度剛好是對方吃的類型')}else if(tn===A.dT){d-=4;why.push('這種態度讓對方有點招架不住')}
+   const HPL={'爬山':'山上看夜景','烘焙':'咖啡廳','攝影':'美術館展覽','看展':'美術館展覽','旅行':'海邊兜風','閱讀':'咖啡廳','養貓':'咖啡廳','打籃球':'遊樂園','彈吉他':'夜市小吃','桌遊':'咖啡廳'};
+   otProf(t);if(HPL[t.hb]===p.v){d+=3;why.push('剛好是對方愛好「'+t.hb+'」會喜歡的地方')}
+   if(['護理師','律師','記者','廚師'].includes(t.pj)&&chance(.25)){d-=3;why.push('對方臨時被工作叫走了一陣子')}
    if(S.looks>70)d+=2;if(S.happy>70)d+=1;if(chance(.12))d-=R(2,5);
    if(k==='p')d=Math.round(d*.7);
    otAdd(t,k,d);chg('happy',d>=6?4:d<0?-2:1);

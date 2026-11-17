@@ -118,7 +118,7 @@ lfHandle=function(x,y,z,u){
   if(!y)return null;
   if(y==='buy'){const [i,m]=String(z).split('_');return buyNew(+i,m)}
   if(y==='sell')return sellNew(z);
-  if(y==='prepay'){if(!S.mort)return B('沒有房貸。');if(S.money<1e6)return B('現金不足。');S.money-=1e6;S.mort.left=Math.max(0,S.mort.left-1e6);if(S.mort.left<=1){S.mort=null;return G('房貸全部還清了！')}if(S.mort.rate!=null)S.mort.pay=Math.round(ann(S.mort.left,S.mort.rate,S.mort.yrs));return G('提前還款 NT$1,000,000，未來利息減少。')}
+  if(y==='prepay'){if(!S.mort)return B('沒有房貸。');const pa=Math.min(S.mort.left,Math.max(1e5,view.ppAmt||1e6));if(S.money<pa)return B('現金不足。');S.money-=pa;S.mort.left=Math.max(0,S.mort.left-pa);if(S.mort.left<=1){S.mort=null;return G('房貸全部還清了！')}if(S.mort.rate!=null)S.mort.pay=Math.round(ann(S.mort.left,S.mort.rate,S.mort.yrs));return G('提前還款 '+money(pa)+'，未來利息減少。')}
   if(y==='refi'){if(!S.mort||S.mort.rate==null)return B('目前無法轉貸。');if(S.money<30000)return B('現金不足。');S.money-=30000;S.mort.rate=mrate();S.mort.fixed=0;return G('你轉貸成功，利率降低。')}
   return null}
  return _lf35(x,y,z,u)};

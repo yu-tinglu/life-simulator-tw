@@ -5908,7 +5908,7 @@ lfHandle=function(x,y,z,u){
   if(!y)return null;
   if(y==='buy'){const [i,m]=String(z).split('_');return buyNew(+i,m)}
   if(y==='sell')return sellNew(z);
-  if(y==='prepay'){if(!S.mort)return B('沒有房貸。');if(S.money<1e6)return B('現金不足。');S.money-=1e6;S.mort.left=Math.max(0,S.mort.left-1e6);if(S.mort.left<=1){S.mort=null;return G('房貸全部還清了！')}if(S.mort.rate!=null)S.mort.pay=Math.round(ann(S.mort.left,S.mort.rate,S.mort.yrs));return G('提前還款 NT$1,000,000，未來利息減少。')}
+  if(y==='prepay'){if(!S.mort)return B('沒有房貸。');const pa=Math.min(S.mort.left,Math.max(1e5,view.ppAmt||1e6));if(S.money<pa)return B('現金不足。');S.money-=pa;S.mort.left=Math.max(0,S.mort.left-pa);if(S.mort.left<=1){S.mort=null;return G('房貸全部還清了！')}if(S.mort.rate!=null)S.mort.pay=Math.round(ann(S.mort.left,S.mort.rate,S.mort.yrs));return G('提前還款 '+money(pa)+'，未來利息減少。')}
   if(y==='refi'){if(!S.mort||S.mort.rate==null)return B('目前無法轉貸。');if(S.money<30000)return B('現金不足。');S.money-=30000;S.mort.rate=mrate();S.mort.fixed=0;return G('你轉貸成功，利率降低。')}
   return null}
  return _lf35(x,y,z,u)};
@@ -8943,6 +8943,31 @@ subHTML=function(k){
  }catch(e){}
  return h;
 };
+/* ---- 補強：外觀與出身一致 ---- */
+const KCN={jp:'JP',kr:'KR',de:'DE',vn:'VN',id:'ID',ph:'PH',th:'TH',sgm:'MY',sgi:'IN',hi:'IN'};
+function nameCountry(n){
+ if(!n||!/^[A-Za-z]/.test(n))return null;
+ const t=n.split(' '),last=t[t.length-1];
+ for(const k in NM){const p=NM[k];if(!p||!p.s)continue;if(p.s.includes(last)||p.s.includes(t[0])){if(k==='en')return (S.cn&&['US','CA','AU','GB'].includes(S.cn))?S.cn:'US';return KCN[k]||null}}
+ return null;
+}
+const _po73=pOrigin;
+pOrigin=function(p){
+ if(p&&!p.res&&!p.cn&&/^[A-Za-z]/.test(p.n||'')){const c=nameCountry(p.n);if(c){p.cn=c;return c}}
+ return _po73(p);
+};
+const _pbF73b=pbFix;
+pbFix=function(p){
+ const b=_pbF73b(p);
+ try{if(b&&p&&!b.hfix2){const o=pOrigin(p);if(o!=='TW'&&PBHM.includes(b.hm))b.hm=CITY[o]?pick(CITY[o])+'（'+(CNAME[o]||o)+'）':((CNS[o]&&CNS[o].n)||'海外');b.hfix2=1}}catch(e){}
+ return b;
+};
+/* 男性頭像不再出現長髮／雙馬尾等髮型（使用者自選髮型不受影響） */
+const _avS73=avSVG;
+avSVG=function(a,size){
+ try{const g=a&&a.g;if(g&&g.hs!=null&&a.sx!=='女'&&[2,3,6,7,8,9].includes(g.hs)){const sh=[0,1,5,11];a=Object.assign({},a,{g:Object.assign({},g,{hs:sh[g.hs%sh.length]})})}}catch(e){}
+ return _avS73(a,size);
+};
 /* ---- p74：創業股權玩法（股權結構表、創投輪次與對賭、員工認股權、股票質押借款、公司買回庫藏股）---- */
 function eqFix(co){if(!co.eq)co.eq={vc:0,esop:0,pl:0,neg:0,rounds:[]};return co.eq}
 const eqPrice=co=>Math.max(10,coValue(co)/co.shares);
@@ -9241,6 +9266,9 @@ otAct=function(id,k){
    let d=R(3,6),why=[];
    if(p.v===A.place){d+=5;why.push('這正是對方喜歡的地方')}else if(p.v===A.dP){d-=6;why.push('這不是對方喜歡的地方')}
    if(tn===A.tone){d+=4;why.push('你的態度剛好是對方吃的類型')}else if(tn===A.dT){d-=4;why.push('這種態度讓對方有點招架不住')}
+   const HPL={'爬山':'山上看夜景','烘焙':'咖啡廳','攝影':'美術館展覽','看展':'美術館展覽','旅行':'海邊兜風','閱讀':'咖啡廳','養貓':'咖啡廳','打籃球':'遊樂園','彈吉他':'夜市小吃','桌遊':'咖啡廳'};
+   otProf(t);if(HPL[t.hb]===p.v){d+=3;why.push('剛好是對方愛好「'+t.hb+'」會喜歡的地方')}
+   if(['護理師','律師','記者','廚師'].includes(t.pj)&&chance(.25)){d-=3;why.push('對方臨時被工作叫走了一陣子')}
    if(S.looks>70)d+=2;if(S.happy>70)d+=1;if(chance(.12))d-=R(2,5);
    if(k==='p')d=Math.round(d*.7);
    otAdd(t,k,d);chg('happy',d>=6?4:d<0?-2:1);
@@ -9344,7 +9372,7 @@ function frmHTML(id,o){
 /* 輸入狀態與快速金額 */
 (function(){try{
  document.addEventListener('input',e=>{const t=e.target;if(t&&t.id&&t.id.startsWith('frm_')){const p=t.id.split('_'),st=frmState(p[1]);st[p[2]]=t.value}},true);
- document.addEventListener('change',e=>{const t=e.target;if(t&&t.id&&t.id.startsWith('frm_')){const p=t.id.split('_'),st=frmState(p[1]);st[p[2]]=t.value;if(p[2]==='s'&&typeof render==='function'&&view.tab!=null){const x=document.getElementById('frm_'+p[1]+'_a');if(x)st.a=x.value;try{render();showSheet(view.tab,view.sub)}catch(err){}}}},true);
+ document.addEventListener('change',e=>{const t=e.target;if(t&&t.id&&t.id.startsWith('frm_')){const p=t.id.split('_'),st=frmState(p[1]);st[p[2]]=t.value;if((p[2]==='s'||p[1]==='hb')&&typeof render==='function'&&view.tab!=null){const x=document.getElementById('frm_'+p[1]+'_a');if(x)st.a=x.value;try{render();showSheet(view.tab,view.sub)}catch(err){}}}},true);
  document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('[data-fill]'):null;if(!b)return;e.preventDefault();e.stopPropagation();const [id,v]=b.dataset.fill.split(':'),x=document.getElementById(id);if(x){x.value=v;const p=id.split('_');frmState(p[1])[p[2]]=v}},true);
  const st=document.createElement('style');st.textContent=`.frm{display:grid;gap:8px;margin:6px 0 12px}.frm label{font-size:12px;color:var(--mut,#8a7f72)}.frm select,.frm input{width:100%;box-sizing:border-box;padding:12px;font-size:15px;font-family:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:var(--r,12px);-webkit-appearance:none;appearance:none}.frm select{background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:34px}.frm .chips{display:flex;gap:6px;flex-wrap:wrap}.frm .chips button{padding:6px 10px;font-size:12.5px;border:1px solid var(--line);background:var(--card);border-radius:999px;color:var(--ink)}.frm .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}.frm .acts .btn{margin:0}`;document.head.appendChild(st);
 }catch(e){}})();
@@ -9390,7 +9418,7 @@ fxHTML=function(){
  cnInit();
  const opts=CNK.map(k=>{const c=CNS[k],fx=S.fx[k],hv=S.fxh[k]||0;return [k,`${c.n} ${c.sym}・1=NT$${fx.toFixed(fx<1?4:2)}${hv?'・持有 '+fmtL(k,hv):''}`]});
  let h='<p class="sub">買進外幣＝把新台幣換成外幣存款，賺匯差與當地利息；買賣各有 0.5% 價差。</p>';
- h+=frmHTML('fx',{sl:'幣別',opts,def:'500000',btns:[['b','買進','p'],['s','賣出此金額'],['a','全部賣出']]});
+ h+=frmHTML('fx',{sl:'幣別',opts,def:'500000',btns:[['b','買進','p'],['s','賣出'],['a','全部賣出']]});
  const held=CNK.filter(k=>S.fxh[k]>0);
  if(held.length)h+=`<table class="rt"><tr class="h"><td colspan="2">目前持有</td></tr>`+held.map(k=>`<tr><td>${CNS[k].n}</td><td>${fmtL(k,S.fxh[k])}・約 ${money(S.fxh[k]*S.fx[k])}</td></tr>`).join('')+`</table>`;
  return h+`<button class="btn" data-a="cn:sub:">← 返回</button>`;
@@ -9427,7 +9455,7 @@ pfHTML=function(){
  let n=0;h=h.replace(re,()=>n++===0?'@@PFSEL@@':'');
  if(n){
   const opts=ks.map(k=>[k,`${PFN[k][0]}・持有 ${money(S.pf[k]||0)}`]);
-  h=h.replace('@@PFSEL@@',frmHTML('pf',{sl:'投資商品',opts,def:'1000000',btns:[['b','買進','p'],['s','賣出此金額'],['a','全部賣出']]}));
+  h=h.replace('@@PFSEL@@',frmHTML('pf',{sl:'投資商品',opts,def:'1000000',btns:[['b','買進','p'],['s','賣出'],['a','全部賣出']]}));
  }
  return h;
 };
@@ -9453,6 +9481,237 @@ const _hd78b=handle;
 handle=function(a){
  if(typeof a==='string'&&S&&a.startsWith('frmgo:cm:')){const g=frmGet('cm');return _hd78b('co:'+g.s)}
  return _hd78b(a);
+};
+/* ---- p79：其餘金額類操作改為「下拉＋自填金額」（公司融資增資擴廠、贈與子女、提前還房貸）---- */
+const _frmH79=frmHTML;
+frmHTML=function(id,o){
+ if(o.opts&&o.opts.length)return _frmH79(id,o);
+ const st=frmState(id),a=st.a!=null?st.a:(o.def||'');
+ let h=`<div class="frm"><label for="frm_${id}_a">${o.al||'金額（新台幣）'}</label><input id="frm_${id}_a" type="text" inputmode="decimal" autocomplete="off" placeholder="例如 500000 或 50萬" value="${a}">`;
+ h+=`<div class="chips">${(o.chips||[100000,500000,1000000,5000000]).map(v=>`<button type="button" data-fill="frm_${id}_a:${v}">${v>=1e8?v/1e8+' 億':v/1e4+' 萬'}</button>`).join('')}</div>`;
+ h+=`<div class="acts">${o.btns.map(b=>`<button class="btn ${b[2]||''}" data-a="frmgo:${id}:${b[0]}">${b[1]}</button>`).join('')}</div></div>`;
+ return h;
+};
+const _coH79=coHTML;
+coHTML=function(sub){
+ let h=_coH79(sub);const co=S.co;if(!co)return h;
+ if(sub==='co:fin'){
+  const corp=co.form!=='獨資',lm=creditLimit(co);
+  h=h.replace(/<button class="btn" data-a="co:(loan|repay|self|ext):[^"]*"[^>]*>[\s\S]*?<\/button>/g,'');
+  const opts=[['loan','向銀行借款'],['repayn','償還借款'],...(corp?[['ext','引進投資人增資'],['self','創辦人增資（個人出資）']]:[])];
+  h=h.replace('<div class="sec">現金增資</div>','');
+  h+=`<div class="sub">可再借額度約 ${money(lm)}・你的現金 ${money(S.money)}・公司現金 ${money(co.L.cash)}</div>`+frmHTML('cl',{sl:'要做什麼？',opts,def:'1000000',chips:[500000,1000000,5000000,20000000],btns:[['go','確認','p']]});
+  const bk='<button class="btn" data-a="co:menu:main">← 公司主頁</button>';h=h.replace(bk,'')+bk;
+ }
+ if(sub==='co:capex'){
+  h=h.replace(/<button class="btn" data-a="co:capex:[^"]*"[^>]*>[\s\S]*?<\/button>/g,'');
+  h=h.replace(/(<button class="btn" data-a="co:menu:main">)/,frmHTML('cx',{sl:'',opts:null,def:'1000000',al:'擴廠投資金額（新台幣，含 5% 營業稅）',chips:[1000000,5000000,10000000,50000000],btns:[['go','投資','p']]})+'$1');
+ }
+ return h;
+};
+const _cho79=coHandle;
+coHandle=function(x,y,z){
+ if(x==='repayn'){const co=S.co,L=co.L,a=Math.min(+y,-L.loan,Math.max(0,L.cash));if(!(a>0))return B('無法還款（沒有借款或公司現金不足）。');const r=repayLoan(co,a);view.csub='co:fin';return r?G('已還款 '+money(r)):B('無法還款。')}
+ return _cho79(x,y,z);
+};
+const _kh79=kidHTML;
+kidHTML=function(i){
+ let h=_kh79(i);
+ h=h.replace(/<button class="btn" data-a="kid:gift:\d+:\d+"[^>]*>[\s\S]*?<\/button>/g,'');
+ h=h.replace(/(<button class="btn" data-a="back">← 返回<\/button>)$/,frmHTML('kg'+i,{opts:null,def:'1000000',chips:[500000,1000000,5000000,20000000],al:'贈與現金（新台幣，依規定課贈與稅）',btns:[['go','贈與','p']]})+'$1');
+ return h;
+};
+const _hs79=hsHTML;
+hsHTML=function(){
+ let h=_hs79();
+ if(S.mort){
+  h=h.replace(/<button class="btn" data-a="lf:hs:prepay:main"[^>]*>[\s\S]*?<\/button>/,frmHTML('hp',{opts:null,def:'1000000',al:'提前還款金額（新台幣，貸款餘額 '+money(S.mort.left)+'）',chips:[500000,1000000,5000000,10000000],btns:[['go','提前還款','p']]}));
+ }
+ return h;
+};
+const _hd79=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&a.startsWith('frmgo:')){
+  const p=a.split(':'),id=p[1],g=frmGet(id),amt=g.a;
+  const bad=m=>{view.msg=B(m);render();try{showSheet(view.tab,view.sub)}catch(e){}};
+  if(id==='cl'||id==='cx'||id==='hp'||/^kg\d+$/.test(id)){
+   if(!(amt>0))return bad('請輸入金額，例如 500000 或 50萬。');
+   if(id==='cl')return _hd79('co:'+g.s+':'+amt);
+   if(id==='cx')return _hd79('co:capex:'+amt);
+   if(id==='hp'){view.ppAmt=amt;return _hd79('lf:hs:prepay:main')}
+   return _hd79('kid:gift:'+id.slice(2)+':'+amt);
+  }
+ }
+ return _hd79(a);
+};
+/* ---- p80：今年建議（依狀態推薦下一步）、存檔下載成檔案與從檔案匯入 ---- */
+function advList(){
+ const a=[];if(!S||S.dead)return a;
+ try{
+  const lc=livingCost(),cash=Math.max(0,S.money),bk=typeof bkTotal==='function'?bkTotal():0,pf=typeof pfSum==='function'?pfSum():0;
+  if(S.health<45)a.push(['身體狀況不太好','去看醫生或多運動','open:act']);
+  else if((S.stress||0)>70)a.push(['壓力偏高','安排休息、旅行或紓壓活動','open:act']);
+  if(S.age>=18&&S.age<65&&!S.job&&!S.school&&!S.co&&!(S.flags&&S.flags.retired))a.push(['目前沒有工作','到職業頁找工作或創業','open:job']);
+  if(S.age>=18&&cash>lc*2&&bk+pf<cash*.3)a.push(['有閒置現金','拿一部分存定存或買投資組合','open:ast']);
+  if(S.mort&&cash>S.mort.left*.4&&(S.mort.rate||0)>.025)a.push(['房貸利率偏高','現金充裕可考慮提前還款','lf:hs']);
+  if(S.age>=18&&S.age<=45&&!S.partner&&!(S.crush&&S.crush.length)&&!S.on)a.push(['還沒有心儀的對象','到人際關係認識新朋友','rom:go:h']);
+  if((S.ap||0)>=3&&(S.partner||(S.crush&&S.crush.length)))a.push(['還有行動點可以用','和心儀對象聊天、約會或看專屬章節','rom:go:h']);
+  if(S.co&&S.co.rec&&S.co.rec.NI<0)a.push(['公司去年虧損','看診斷並執行經營改善','open:job']);
+  if(S.age>=16&&S.age<=40&&!S.school&&S.edu>=3&&!(S.skills&&Object.keys(S.skills).length))a.push(['可以培養一項技能','提升收入與機會','lf:skill']);
+ }catch(e){}
+ return a.slice(0,3);
+}
+const _ah80=actHTML;
+actHTML=function(){
+ let h=_ah80();const l=advList();
+ if(l.length){
+  const box=`<div class="item"><b>今年建議</b>${l.map(x=>`<div class="sub" style="margin-top:6px"><b>${x[0]}</b>：${x[1]}<br><button class="mini" data-a="${x[2]}">前往</button></div>`).join('')}</div>`;
+  h=h.replace(/(<h3>[^<]*<\/h3>)/,'$1'+box);if(!h.includes('今年建議'))h=box+h;
+ }
+ return h;
+};
+/* 存檔檔案 */
+const _sh80=setHTML;
+setHTML=function(){
+ return _sh80().replace('<button class="btn" data-a="lf:set:copy">',`<button class="btn p" data-a="lf:set:dl">下載存檔檔案<small>分享或存到「檔案」，換手機時用</small></button><label class="btn" style="display:block;text-align:left"><input id="impfile" type="file" accept=".json,application/json,text/plain" style="display:none">從檔案匯入存檔<small style="display:block">選擇之前下載的存檔檔案</small></label><button class="btn" data-a="lf:set:copy">`);
+};
+const _lf80=lfHandle;
+lfHandle=function(x,y,z){
+ if(x==='set'&&y==='dl'){
+  try{
+   const txt=expAll(),fn='life-sim-backup-'+new Date().toISOString().slice(0,10)+'.json',f=new File([txt],fn,{type:'application/json'});
+   if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(()=>{});}
+   else{const u=URL.createObjectURL(new Blob([txt],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},1000)}
+   try{localStorage.setItem('lifesim_lastbk',String(Date.now()))}catch(e){}
+   return G('已產生存檔檔案。若沒有出現下載或分享，請改用「複製存檔文字」。');
+  }catch(e){return B('這個環境無法下載檔案，請改用「複製存檔文字」。')}
+ }
+ return _lf80(x,y,z);
+};
+(function(){try{document.addEventListener('change',e=>{const t=e.target;if(!t||t.id!=='impfile'||!t.files||!t.files[0])return;const r=new FileReader();r.onload=()=>{try{const m=impAll(String(r.result||''));view.msg=m;render();showSheet(view.tab,view.sub)}catch(err){}};r.readAsText(t.files[0])},true)}catch(e){}})();
+/* ---- p81：情敵故事線（出現→交鋒→結局），只發生在心儀對象身上 ---- */
+function rvList(stage){return S.crush.map((c,i)=>({t:c,k:String(i)})).filter(x=>x.t.aff>=(stage===0?40:25)&&(stage===0?!x.t.rv:x.t.rv&&x.t.rv.s===stage&&S.age-x.t.rv.y>=1)&&!otDist(x.t,x.k))}
+E.push({id:'otrv_a',min:16,max:60,w:2,if:()=>rvList(0).length>0&&!S.jail,run:()=>{
+ const g=pick(rvList(0)),t=g.t,nm=t.n,rn=fullName(t.sx==='男'?'女':'男'),rv={n:rn,s:1,y:S.age,sc:0};
+ return {t:`你發現${rn}也在接近${nm}，兩人聊得很開心。（情敵）`,c:[
+  ch('大方打招呼，照常相處',()=>{t.rv=rv;rv.sc+=1;otAdd(t,g.k,3);return N(`你沒有亂了陣腳，${nm}覺得你很穩重。（好感 +3）`)}),
+  ch('主動拉近和對方的距離',()=>{t.rv=rv;rv.sc+=2;otAdd(t,g.k,5);return G(`你多找了${nm}幾次，${nm}看起來很開心。（好感 +5）`)}),
+  ch('假裝不在意',()=>{t.rv=rv;rv.sc-=2;otAdd(t,g.k,-4);return B(`你的冷淡讓${nm}有點不解。（好感 -4）`)})]}}});
+E.push({id:'otrv_b',min:16,max:65,w:3,if:()=>rvList(1).length>0&&!S.jail,run:()=>{
+ const g=pick(rvList(1)),t=g.t,nm=t.n,rv=t.rv;
+ return {t:`${rv.n}約你私下聊聊：「我是認真的，希望公平競爭。」（情敵交鋒）`,c:[
+  ch('說：「那就各憑本事，但別傷到${nm}。」'.replace('${nm}',nm),()=>{rv.s=2;rv.y=S.age;rv.sc+=2;otAdd(t,g.k,4);return G(`你的態度很坦蕩，傳到${nm}耳中，印象加分。（好感 +4）`)}),
+  ch('用心準備，約'+nm+'做對方喜歡的事（NT$3,000）',()=>{if(S.money<3000)return B('你的錢不夠。');S.money-=3000;rv.s=2;rv.y=S.age;rv.sc+=3;otAdd(t,g.k,8);return G(`你把心思放在${nm}身上，而不是對手。（好感 +8）`)}),
+  ch('在背後說對方壞話',()=>{rv.s=2;rv.y=S.age;rv.sc-=4;otAdd(t,g.k,-9);chg('happy',-3);return B(`${nm}聽到後皺起眉頭：「這不像你。」（好感 -9）`)})]}}});
+E.push({id:'otrv_c',min:16,max:70,w:4,if:()=>rvList(2).length>0&&!S.jail,run:()=>{
+ const g=pick(rvList(2)),t=g.t,nm=t.n,rv=t.rv,sc=rv.sc+(t.aff-50)/12;
+ rv.s=3;
+ if(sc>=3||t.aff>=70){otAdd(t,g.k,10);chg('happy',8);log(`${nm}在你與${rv.n}之間，選擇了你。`,'good');return {t:`${nm}告訴你：「我想清楚了，我在意的人是你。」${rv.n}後來也祝福了你們。`,c:[ch('握住對方的手',()=>G('你們的距離更近了。（好感 +10）'))]}}
+ if(sc<=-1&&t.aff<45){const idx=S.crush.indexOf(t);log(`${nm}最後和${rv.n}走在了一起。`,'bad');return {t:`${nm}說：「對不起，我選擇了${rv.n}。」你們的緣分到此為止。`,c:[ch('祝福對方，轉身離開',()=>{const i=S.crush.indexOf(t);if(i>=0)S.crush.splice(i,1);chg('happy',-8);return B('這段暗戀結束了，你需要一些時間走出來。')}),ch('說出心裡的話',()=>{const i=S.crush.indexOf(t);if(i>=0)S.crush.splice(i,1);chg('happy',-5);return N('你把心意說了出來，雖然沒有結果，但心裡舒坦了一些。')})]}}
+ return {t:`${rv.n}主動退出了：「我看得出來，${nm}心裡還在猶豫。」局勢回到你和${nm}之間。`,c:[ch('把握機會好好相處',()=>{otAdd(t,g.k,4);return G('你們的關係悄悄拉近了。（好感 +4）')})]}}});
+/* ---- p82：海外房產——任何國家只要開放外國人購屋都能買（規定與稅費為遊戲簡化）---- */
+const FREG={
+ JP:{fee:.07,ltv:.5,spr:.015,tx:.0145,y:.04,cg:.2},KR:{fee:.05,ltv:.4,spr:.045,tx:.003,y:.03,cg:.22},US:{fee:.03,ltv:.6,spr:.065,tx:.011,y:.05,cg:.2},
+ CA:{ban:'加拿大禁止非公民、非永久居民購買住宅（至少到 2027 年）。取得永居或公民身分後可買。',ok:['pr','cit'],fee:.035,ltv:.75,spr:.045,tx:.009,y:.045,cg:.25},
+ AU:{newOnly:1,note:'外國人只能買新建案（價格約 +10%），並要多付外國人印花稅與審查費。',fee:.12,ltv:.6,spr:.06,tx:.005,y:.04,cg:.23},
+ GB:{fee:.09,ltv:.6,spr:.05,tx:.006,y:.05,cg:.24},DE:{fee:.10,ltv:.6,spr:.04,tx:.0035,y:.035,cg:.25},
+ SG:{note:'外國人購買住宅要加徵 60% 額外印花稅（永居 5%、公民首間免）。只能買私人公寓。',condo:1,fee:.64,feePR:.09,feeC:.04,ltv:.55,spr:.035,tx:.004,y:.03,cg:0},
+ IN:{ban:'印度規定外國籍人士不得購買住宅。取得公民身分後可買。',ok:['cit'],fee:.07,ltv:.6,spr:.09,tx:.002,y:.03,cg:.125},
+ NZ:{ban:'紐西蘭禁止非居民外國人購買現有住宅。取得居留後可買。',ok:['pr','cit'],fee:.03,ltv:.7,spr:.065,tx:.004,y:.04,cg:.15},
+ CH:{ban:'瑞士對外國人購屋有嚴格配額與許可。取得永居後可買。',ok:['pr','cit'],fee:.05,ltv:.6,spr:.02,tx:.002,y:.03,cg:.25},
+ ID:{ban:'印尼外國人不得持有土地所有權（簡化為不開放）。取得公民身分後可買。',ok:['cit'],fee:.08,ltv:.4,spr:.09,tx:.003,y:.05,cg:.025},
+ TH:{condo:1,note:'泰國外國人只能買公寓（外籍持分上限 49%）。',fee:.06,ltv:.4,spr:.06,tx:.002,y:.05,cg:.2},
+ PH:{condo:1,note:'菲律賓外國人只能買公寓。',fee:.07,ltv:.4,spr:.08,tx:.01,y:.05,cg:.06},
+ VN:{condo:1,note:'越南外國人只能買公寓，使用年限約 50 年。',fee:.05,ltv:.4,spr:.08,tx:.002,y:.05,cg:.02},
+ MY:{fee:.06,ltv:.5,spr:.055,tx:.004,y:.04,cg:.3},CN:{note:'土地使用權 70 年。',fee:.05,ltv:.5,spr:.04,tx:.003,y:.025,cg:.2},
+ AE:{fee:.05,ltv:.5,spr:.05,tx:0,y:.065,cg:0},MX:{fee:.07,ltv:.5,spr:.09,tx:.003,y:.06,cg:.25}
+};
+const FDEF={fee:.06,ltv:.5,spr:.06,tx:.006,y:.045,cg:.2};
+const FRAT={JP:16,KR:14,US:6,CA:9,AU:10,GB:10,DE:9,SG:16,IN:12,CN:14,CH:11,NZ:9,TH:10,MY:8,PH:12,VN:15,ID:9,AE:6,MX:8};
+const fxn=k=>(S.fx&&S.fx[k])||fxr(k);
+const fReg=k=>Object.assign({},FDEF,FREG[k]||{});
+function fAllowed(k){const r=fReg(k);if(!r.ban)return true;const ab=S.ab;return !!(S.cn===k&&ab&&r.ok.includes(ab.visa))}
+function fTypes(k){
+ const r=fReg(k),c=CITY[k]||[],r1=FRAT[k]||9,w=wTW(k),nm=CNS[k]?CNS[k].n:k,up=r.newOnly?1.1:1;
+ const t=[[0,`${c[0]||nm+'首都圈'}公寓`,w*r1*up,'apt'],[1,`${c[1]||nm+'二線城市'}公寓`,w*r1*.65*up,'apt']];
+ if(!r.condo)t.push([2,`${nm}郊區獨棟住宅`,w*r1*.8*up,'house']);
+ return t.map(x=>({i:x[0],n:x[1],p:Math.round(x[2]/1e4)*1e4,kind:x[3]}));
+}
+function fCosts(k){
+ const r=fReg(k),ab=S.ab;let fee=r.fee;
+ if(k==='SG'){const v=S.cn==='SG'&&ab?ab.visa:'';fee=v==='cit'?r.feeC:v==='pr'?r.feePR:r.fee}
+ return {fee,ltv:r.ltv,rate:r.spr,tx:r.tx,y:r.y,r};
+}
+function buyForeign(k,ti,mode){
+ if(!fAllowed(k))return B('目前的身分不能在這個國家購買住宅。');
+ const t=fTypes(k).find(x=>x.i===ti);if(!t)return B('找不到這個房型。');
+ const c=fCosts(k),pr=t.p,fee=Math.round(pr*c.fee),cash=mode==='c',down=cash?pr:Math.round(pr*(1-c.ltv));
+ if(S.money<down+fee)return B(`需要 ${money(down+fee)}（含頭期款與 ${(c.fee*100).toFixed(1)}% 的稅費與手續費）。`);
+ S.money-=down+fee;hmEnsure();
+ const yrs=20,rate=Math.max(.01,c.rate+(Math.random()-.5)*.006),o={n:t.n,c:'F_'+k,cn:k,value:pr,bp:pr,vl:pr/fxn(k),since:S.age,y:c.y,vac:0,tx:c.tx,self:0};
+ if(!cash)o.mort=mkMort(pr-down,yrs,{rate,fixed:yrs});
+ S.props.push(o);chg('happy',S.cn===k?8:5);
+ const m=`你在${CNS[k].n}買下「${t.n}」，成交價 ${money(pr)}，稅費約 ${money(fee)}${cash?'（全額現金）':`，貸款 ${money(pr-down)}（利率約 ${(rate*100).toFixed(1)}%，${yrs} 年，以新台幣試算）`}。${S.cn===k?'你住在這裡，等於省下租金。':'未住時會出租。'}`;
+ log(m,'good');return G(m);
+}
+const _hv82=hvYear;
+hvYear=function(h){
+ if(!h.cn)return _hv82(h);
+ const g=Math.max(-.08,Math.min(.1,(wageGrow()-1)+nrm()*.025));
+ h.vl=(h.vl||h.value/fxn(h.cn))*(1+g);return Math.round(h.vl*fxn(h.cn));
+};
+const _y82=yearly;
+yearly=function(){
+ _y82();
+ try{(S.props||[]).forEach(p=>{if(p.cn)S.money+=Math.round(p.value*.011)-Math.round(p.value*(p.tx||0))})}catch(e){}
+};
+const _sn82=sellNew;
+sellNew=function(idx){
+ const p=idx!=='main'?S.props[+idx]:null;
+ if(!p||!p.cn)return _sn82(idx);
+ const r=fReg(p.cn),hold=S.age-p.since,fee=Math.round(p.value*.05),gain=Math.max(0,p.value-p.bp-fee);
+ let rate=r.cg;if(p.cn==='DE'&&hold>=10)rate=0;const tax=Math.round(gain*rate),net=p.value-fee-tax-(p.mort?p.mort.left:0);
+ S.money+=net;S.props.splice(+idx,1);
+ const m=`你賣掉了${p.n}，成交價 ${money(p.value)}，仲介與費用 ${money(fee)}、資本利得稅約 ${money(tax)}，還清貸款後淨得 ${money(net)}。`;log(m,net>0?'good':'bad');return N(m);
+};
+/* 購屋介面：國家＋房型＋付款方式下拉 */
+function hbOpts(){
+ const cur=S.cn||'TW',seen=new Set(['TW']),L=[['TW','台灣']];
+ const add=k=>{if(!CNS[k]||seen.has(k))return;seen.add(k);L.push([k,CNS[k].n+(fAllowed(k)?'':'（目前不能買）')])};
+ if(cur!=='TW')add(cur);CNK.forEach(add);WK.slice().sort((a,b)=>(CNS[a]?CNS[a].n:a).localeCompare(CNS[b]?CNS[b].n:b,'zh-Hant')).forEach(add);
+ return L;
+}
+function hbHTML(){
+ hmEnsure();const st=frmState('hb'),cs=hbOpts(),k=cs.some(x=>x[0]===st.s)?st.s:(S.cn||'TW');st.s=k;
+ const sel=(id,opts,val)=>`<select id="frm_hb_${id}">${opts.map(x=>`<option value="${x[0]}" ${String(x[0])===String(val)?'selected':''}>${x[1]}</option>`).join('')}</select>`;
+ let types,pay,info='',dis=false;
+ if(k==='TW'){
+  types=HL.map((x,i)=>[i,`${x.n}・${money(hPrice(x))}`]);
+  const y=calYear();pay=S.house?[['i','貸款買入（投資用）'],['ic','現金買入（投資用）']]:[['l','貸款 20 年'],['c','全額現金'],...((y>=2023&&S.age<=39)?[['y','新青安（20–39 歲首購）']]:[])];
+ }else{
+  const r=fReg(k),ts=fTypes(k),c=fCosts(k);types=ts.map(x=>[x.i,`${x.n}・${money(x.p)}`]);pay=[['l',`貸款 20 年（成數 ${Math.round(c.ltv*100)}%）`],['c','全額現金']];
+  if(!fAllowed(k)){dis=true;info=r.ban}else info=`稅費與手續費約 ${(c.fee*100).toFixed(1)}%、貸款利率約 ${(c.rate*100).toFixed(1)}%、年持有稅約 ${(c.tx*100).toFixed(2)}%、租金報酬約 ${(c.y*100).toFixed(1)}%。${r.note||''}`;
+ }
+ const t=types.some(x=>String(x[0])===String(st.t))?st.t:types[0][0],m=pay.some(x=>x[0]===st.m)?st.m:pay[0][0];st.t=t;st.m=m;
+ return `<div class="frm"><label>國家</label>${sel('s',cs,k)}<label>房型</label>${sel('t',types,t)}<label>付款方式</label>${sel('m',pay,m)}${info?`<div class="sub" style="line-height:1.6">${info}</div>`:''}<div class="acts"><button class="btn p" data-a="frmgo:hb:buy" ${dis?'disabled':''}>購買</button></div></div>`;
+}
+const _hs82=hsHTML;
+hsHTML=function(){
+ let h=_hs82();const re=/<div class="item"><b>[^<]*<\/b>　[^<]*<\/div><div class="seg"><button data-a="lf:hs:buy:[\s\S]*?<\/div>/g;
+ let n=0;h=h.replace(re,()=>n++===0?'@@HB@@':'');
+ if(n)h=h.replace('@@HB@@',hbHTML());
+ (S.props||[]).forEach(p=>{if(p.cn)h=h.replace(`<div class="sec">投資房：${p.n}</div>`,`<div class="sec">${S.cn===p.cn?'海外自住':'海外投資房'}：${p.n}</div>`)});
+ return h;
+};
+const _hd82=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&a==='frmgo:hb:buy'){
+  const st=frmState('hb');let k=st.s,t=st.t,m=st.m;
+  try{const g=i=>{const e=document.getElementById('frm_hb_'+i);return e&&e.value!==''?e.value:null};k=g('s')||k;t=g('t')||t;m=g('m')||m}catch(e){}
+  if(k==='TW')return _hd82(`lf:hs:buy:${t}_${m}`);
+  const r=buyForeign(k,+t,m);view.msg=r;render();try{showSheet(view.tab,view.sub)}catch(e){}return;
+ }
+ return _hd82(a);
 };
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){

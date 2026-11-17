@@ -22,7 +22,7 @@ function frmHTML(id,o){
 /* 輸入狀態與快速金額 */
 (function(){try{
  document.addEventListener('input',e=>{const t=e.target;if(t&&t.id&&t.id.startsWith('frm_')){const p=t.id.split('_'),st=frmState(p[1]);st[p[2]]=t.value}},true);
- document.addEventListener('change',e=>{const t=e.target;if(t&&t.id&&t.id.startsWith('frm_')){const p=t.id.split('_'),st=frmState(p[1]);st[p[2]]=t.value;if(p[2]==='s'&&typeof render==='function'&&view.tab!=null){const x=document.getElementById('frm_'+p[1]+'_a');if(x)st.a=x.value;try{render();showSheet(view.tab,view.sub)}catch(err){}}}},true);
+ document.addEventListener('change',e=>{const t=e.target;if(t&&t.id&&t.id.startsWith('frm_')){const p=t.id.split('_'),st=frmState(p[1]);st[p[2]]=t.value;if((p[2]==='s'||p[1]==='hb')&&typeof render==='function'&&view.tab!=null){const x=document.getElementById('frm_'+p[1]+'_a');if(x)st.a=x.value;try{render();showSheet(view.tab,view.sub)}catch(err){}}}},true);
  document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('[data-fill]'):null;if(!b)return;e.preventDefault();e.stopPropagation();const [id,v]=b.dataset.fill.split(':'),x=document.getElementById(id);if(x){x.value=v;const p=id.split('_');frmState(p[1])[p[2]]=v}},true);
  const st=document.createElement('style');st.textContent=`.frm{display:grid;gap:8px;margin:6px 0 12px}.frm label{font-size:12px;color:var(--mut,#8a7f72)}.frm select,.frm input{width:100%;box-sizing:border-box;padding:12px;font-size:15px;font-family:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:var(--r,12px);-webkit-appearance:none;appearance:none}.frm select{background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:34px}.frm .chips{display:flex;gap:6px;flex-wrap:wrap}.frm .chips button{padding:6px 10px;font-size:12.5px;border:1px solid var(--line);background:var(--card);border-radius:999px;color:var(--ink)}.frm .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}.frm .acts .btn{margin:0}`;document.head.appendChild(st);
 }catch(e){}})();
@@ -68,7 +68,7 @@ fxHTML=function(){
  cnInit();
  const opts=CNK.map(k=>{const c=CNS[k],fx=S.fx[k],hv=S.fxh[k]||0;return [k,`${c.n} ${c.sym}・1=NT$${fx.toFixed(fx<1?4:2)}${hv?'・持有 '+fmtL(k,hv):''}`]});
  let h='<p class="sub">買進外幣＝把新台幣換成外幣存款，賺匯差與當地利息；買賣各有 0.5% 價差。</p>';
- h+=frmHTML('fx',{sl:'幣別',opts,def:'500000',btns:[['b','買進','p'],['s','賣出此金額'],['a','全部賣出']]});
+ h+=frmHTML('fx',{sl:'幣別',opts,def:'500000',btns:[['b','買進','p'],['s','賣出'],['a','全部賣出']]});
  const held=CNK.filter(k=>S.fxh[k]>0);
  if(held.length)h+=`<table class="rt"><tr class="h"><td colspan="2">目前持有</td></tr>`+held.map(k=>`<tr><td>${CNS[k].n}</td><td>${fmtL(k,S.fxh[k])}・約 ${money(S.fxh[k]*S.fx[k])}</td></tr>`).join('')+`</table>`;
  return h+`<button class="btn" data-a="cn:sub:">← 返回</button>`;
@@ -105,7 +105,7 @@ pfHTML=function(){
  let n=0;h=h.replace(re,()=>n++===0?'@@PFSEL@@':'');
  if(n){
   const opts=ks.map(k=>[k,`${PFN[k][0]}・持有 ${money(S.pf[k]||0)}`]);
-  h=h.replace('@@PFSEL@@',frmHTML('pf',{sl:'投資商品',opts,def:'1000000',btns:[['b','買進','p'],['s','賣出此金額'],['a','全部賣出']]}));
+  h=h.replace('@@PFSEL@@',frmHTML('pf',{sl:'投資商品',opts,def:'1000000',btns:[['b','買進','p'],['s','賣出'],['a','全部賣出']]}));
  }
  return h;
 };
