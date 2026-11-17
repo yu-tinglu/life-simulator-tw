@@ -78,7 +78,7 @@ function giftTo(k,amt){
 // ---- 遺產試算（dry=true 為「若現在過世」預估）----
 function estateCalc(dry){
  cnInit();const k=S.cn,E=EST[k];
- const A={cash:Math.max(0,S.money),house:(S.house?S.house.value:0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0),car:S.car?S.car.value:0,fx:0,inv:S.inv?S.inv.v*S.fx[S.inv.cn]:0,pf:pfSum(),co:typeof stake==='function'?stake(S.co):0,live:S.tr&&S.tr.kind==='live'?S.tr.v:0};
+ const A={cash:Math.max(0,S.money)+(typeof bkTotal==='function'?bkTotal():0),house:(S.house?S.house.value:0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0),car:S.car?S.car.value:0,fx:0,inv:S.inv?S.inv.v*S.fx[S.inv.cn]:0,pf:pfSum(),co:typeof stake==='function'?stake(S.co):0,live:S.tr&&S.tr.kind==='live'?S.tr.v:0};
  for(const q in S.fxh)A.fx+=S.fxh[q]*S.fx[q];
  const debts=Math.max(0,-S.money)+(S.mort?S.mort.left:0);
  let add=0,credit=0;

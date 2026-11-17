@@ -23,7 +23,7 @@ if(typeof E!=='undefined')E.push(
  ch('搬家另找',()=>{S.money-=R(15,40)*1000;S.stress=cl(S.stress+5);return N('搬家與押金、仲介費花了一筆錢，但租金回到原本水準。')})]})},
 {id:'hevict',min:22,max:80,w:1,if:()=>!S.house&&S.age>=22,run:()=>({t:'房東說要賣房子，希望你在三個月內搬走。',c:[
  ch('趕緊找新房子',()=>{S.money-=R(20,50)*1000;S.stress=cl(S.stress+6);return B('倉促搬家，花了不少錢也很累。')}),
- ch('依租約主張權益',()=>{S.stress=cl(S.stress+3);S.money-=5000;return N('你依租約和房東協商，拿到一些搬遷補貼。')})]})},
+ ch('依租約主張權益',()=>{S.stress=cl(S.stress+3);const b=R(10,30)*1000;S.money+=b;return N(`你依租約和房東協商，拿到搬遷補貼 ${money(b)}。`)})]})},
 {id:'hrate',min:25,max:80,w:2,if:()=>!!S.mort,run:()=>({t:'央行升息，銀行通知房貸利率調升。',c:[
  ch('照常繳款',()=>{const l=Math.round(S.mort.left*.004);S.money-=l;return B(`今年多繳利息約 ${money(l)}。`)}),
  ch('洽銀行轉貸',()=>{S.money-=15000;const l=Math.round(S.mort.left*.002);S.money-=l;return N(`轉貸手續費 ${money(15000)}，今年多繳利息約 ${money(l)}。`)})]})},

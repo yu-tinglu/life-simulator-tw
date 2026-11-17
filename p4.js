@@ -40,11 +40,11 @@ function yearly(){
  if(a>=28)chg('looks',-R(0,a>50?2:1));
  if(a>60)chg('smarts',-R(0,2));
  if(S.flags.smoker)chg('health',-R(0,2));
- if(a>=6&&a<18){const pm={清寒:2000,小康:8000,富裕:30000}[S.fam];S.money+=pm;log(`${a===6?'爸媽開始固定給你零用錢（遊戲設定：依家境每年 清寒 NT$2,000／小康 NT$8,000／富裕 NT$30,000，非官方統計）。':'零用錢'}今年收到 ${money(pm)}。`)}
+ if(a>=6&&a<18){const pm={清寒:2000,小康:8000,富裕:30000}[S.fam];ldset('零用錢（父母給）');S.money+=pm;ldset(null);log(`${a===6?'爸媽開始固定給你零用錢（遊戲設定：依家境每年 清寒 NT$2,000／小康 NT$8,000／富裕 NT$30,000，非官方統計）。':'零用錢'}今年收到 ${money(pm)}。`)}
  if(a===6)enroll('小學',6,0);
  if(S.school){
   S.grade=cl(S.grade+R(-3,3)+(S.smarts-50)/12);chg('smarts',R(0,2));
-  S.money-=S.tuition;
+  ldset('學費');S.money-=S.tuition;ldset(null);
   if(a>=S.schoolEnd){const was=S.school;graduate();if(was==='碩士')queue.push(E_PHD)}
  }
  S.army=false;
@@ -54,21 +54,21 @@ function yearly(){
  if(a===65){S.flags.retired=1;S.pension=(S.job&&!S.job.founder&&S.job.years>=10)?360000:150000;if(S.job&&!S.job.founder){log(`你退休了，每年領退休金 ${money(S.pension)}。`);S.job=null}else log(`你滿 65 歲，開始領老年年金 ${money(S.pension)}（公司仍由你持有）。`)}
  if(!jailed&&!S.army){
   if(S.job&&S.job.founder){S.job.years++}
-  else if(S.job){const j=S.job;S.money+=j.var?varIncome(j):j.sal;j.years++;
+  else if(S.job){const j=S.job;ldset('薪資');S.money+=j.var?varIncome(j):j.sal;ldset(null);j.years++;
    j.perf=cl(j.perf+R(-15,15)+(S.smarts-50)/10);
    if(j.perf>65&&chance(.25)){j.lv++;chg('happy',5);log(`你升遷了！現在的職稱是 Lv.${j.lv} ${j.t}，年薪 ${money(j.sal)}。`,'good')}
    else if((j.perf<30&&chance(.3))||chance(.015+layoffAdj())){log(`你被${j.t}的公司解僱了。`,'bad');chg('happy',-8);S.job=null}}
-  if(!S.job&&S.flags.retired||S.job&&S.job.founder&&S.flags.retired)S.money+=S.pension;
+  if(!S.job&&S.flags.retired||S.job&&S.job.founder&&S.flags.retired){ldset('退休金');S.money+=S.pension;ldset(null)}
  }
  if(S.co&&!jailed)coRun();
  if(a>=18&&!jailed){
   const sup=a<23&&(S.mom.alive||S.dad.alive)&&!S.job&&S.cn==='TW';
-  S.money-=S.army||sup?0:livingCost();
+  ldset('生活支出');S.money-=S.army||sup?0:livingCost();ldset(null);
  }
  S.kids.forEach(kidYear);
  if(S.mort)mortYear();
  if(S.house)S.house.value=hvYear(S.house);
- if(S.car){S.money-=40000;S.car.value=Math.round(S.car.value*.9)}
+ if(S.car){ldset('汽車養護');S.money-=40000;ldset(null);S.car.value=Math.round(S.car.value*.9)}
  if(S.money<0&&a>=18){S.money=Math.round(S.money*1.04);chg('happy',-4);if(chance(.3))log('你負債累累，壓力很大。','bad')}
  for(const p of [S.mom,S.dad]){if(!p.alive)continue;const pa=p.off+a;p.rel=cl(p.rel-R(0,2));
   if(pa>60&&chance((pa-60)*.007+(pa>85?.1:0))){p.alive=false;chg('happy',-R(10,25));log(`你的${p.role}${p.n}過世了，享年 ${pa} 歲（${famCause(pa,p.role==='母親')}）。`,'bad');funeral(p.role);parentEstate(p)}}

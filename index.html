@@ -233,7 +233,12 @@ const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const chance=p=>Math.random()<p;
 const cl=v=>Math.max(0,Math.min(100,Math.round(v)));
-const money=n=>(n<0?'-':'')+'NT$'+Math.abs(Math.round(n)).toLocaleString('en-US');
+let MNY_TW=false;
+function money(n){
+ let sym='NT$',v=n;
+ try{if(!MNY_TW&&S&&S.cn&&S.cn!=='TW'&&CNS[S.cn]){const f=fxr(S.cn);if(f>0){v=n/f;sym=CNS[S.cn].sym}}}catch(e){}
+ return (v<0?'-':'')+sym+Math.abs(Math.round(v)).toLocaleString('en-US');
+}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const SUR='陳林黃張李王吳劉蔡楊許鄭謝郭洪曾邱廖賴徐'.split('');
 const MG=['家豪','志明','建宏','俊傑','承翰','冠宇','柏翰','宗翰','信宏','彥廷','宇軒','哲瑋','品睿','子謙','奕辰'];
@@ -250,7 +255,7 @@ let S=null,queue=[],busy=false;
 const log=(t,c)=>S.log[S.log.length-1].lines.push({t:typeof logV==='function'?logV(t):t,c:c||''});
 const chg=(k,d)=>{S[k]=cl(S[k]+d)};
 const ch=(l,f)=>({l,f}),G=t=>[t,'good'],B=t=>[t,'bad'],N=t=>[t,''];
-const netWorth=()=>S.money-(S.sloan||0)+(S.house?S.house.value:0)-(S.mort?S.mort.left:0)+(S.car?S.car.value:0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0)+(typeof stake==="function"?stake(S.co):0)+(typeof cnAssets==="function"?cnAssets():0);
+const netWorth=()=>S.money-(S.sloan||0)+(typeof bkTotal==='function'?bkTotal():0)+(S.house?S.house.value:0)-(S.mort?S.mort.left:0)+(S.car?S.car.value:0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0)+(typeof stake==="function"?stake(S.co):0)+(typeof cnAssets==="function"?cnAssets():0);
 const JOBSRAW=`便利商店店員,42,2,0;餐廳服務生,39,2,0;外送員,60,2,0;工廠作業員,56,2,10;清潔人員,40,2,0;社區警衛,42,2,0;搬運工,50,2,0;洗車員,38,2,0;農場工人,40,2,0;遠洋漁工,45,2,0;水泥工,60,2,0;油漆工,60,2,0;水電工,65,2,15;板模工,68,2,0;鋼筋工,70,2,0;計程車司機,55,2,0;貨車司機,62,2,0;遊覽車司機,58,2,0;倉儲理貨員,48,2,0;市場攤商,50,2,0,0,1;洗碗工,36,2,0;美髮助理,36,2,0;停車場管理員,38,2,0;資源回收員,42,2,0;
 行政助理,52,3,30;廚師,58,3,25;業務專員,65,3,35,40;約僱公務員,70,3,55;美髮設計師,55,3,20,40;美甲師,48,3,10,45;汽車技師,60,3,25;機車技師,50,3,20;電機技術員,66,3,35;機械操作員,62,3,25;銀行櫃員,68,3,40,40;客服專員,48,3,20;百貨專櫃人員,52,3,10,45;咖啡師,45,3,10;麵包師傅,54,3,20;消防員,80,3,40;警察,85,3,45;職業軍人,75,3,35;空服員,80,3,35,60;地勤人員,60,3,30,40;保母,48,3,10;導遊,50,3,25;領隊,55,3,30;房仲業務,60,3,30,35,1;保險業務員,60,3,30,35,1;直銷商,40,3,0,0,1;網拍賣家,45,3,20,0,1;電競選手,60,3,40,0,1;實況主,50,3,10,50,1;健身教練,56,3,20,45;瑜伽老師,50,3,15,45;按摩師,45,3,10;刺青師,60,3,20,0,1;花藝師,45,3,10;攝影師,56,3,25,40;影片剪輯師,55,3,35;婚禮企劃,55,3,30,40;調酒師,55,3,20,40;茶藝師,50,3,15;郵務士,62,3,20;捷運站務員,68,3,30;
 護理師,72,4,55;老師,78,4,55;會計師,85,4,60;軟體工程師,120,4,65;律師,150,4,75;高考公務員,90,4,60;建築師,110,4,65;土木工程師,90,4,60;電機工程師,105,4,60;機械工程師,90,4,55;化學工程師,95,4,60;半導體製程工程師,160,4,65;IC設計工程師,190,4,75;韌體工程師,120,4,65;前端工程師,100,4,60;後端工程師,115,4,65;資料科學家,130,4,70;AI工程師,180,4,75;資安工程師,125,4,70;系統管理員,85,4,55;產品經理,130,4,65;UI設計師,80,4,45;平面設計師,55,4,35;行銷企劃,65,4,40;公關人員,70,4,40,40;記者,60,4,50;編輯,55,4,50;自由作家,50,4,55,0,1;翻譯,60,4,55;藥師,100,4,65;物理治療師,75,4,55;職能治療師,72,4,55;營養師,60,4,50;獸醫師,85,4,65;中醫師,120,4,65;社工師,55,4,45;人資專員,65,4,45;財務分析師,95,4,65;銀行理專,90,4,50;證券營業員,80,4,55,0,1;精算師,140,4,80;內部稽核,80,4,60;稅務人員,80,4,55;海關關員,85,4,55;外交官,100,4,70;記帳士,70,4,50;地政士,75,4,50;不動產估價師,90,4,60;機師,250,4,65;船長,180,4,60;航管員,120,4,70;
@@ -507,11 +512,11 @@ function yearly(){
  if(a>=28)chg('looks',-R(0,a>50?2:1));
  if(a>60)chg('smarts',-R(0,2));
  if(S.flags.smoker)chg('health',-R(0,2));
- if(a>=6&&a<18){const pm={清寒:2000,小康:8000,富裕:30000}[S.fam];S.money+=pm;log(`${a===6?'爸媽開始固定給你零用錢（遊戲設定：依家境每年 清寒 NT$2,000／小康 NT$8,000／富裕 NT$30,000，非官方統計）。':'零用錢'}今年收到 ${money(pm)}。`)}
+ if(a>=6&&a<18){const pm={清寒:2000,小康:8000,富裕:30000}[S.fam];ldset('零用錢（父母給）');S.money+=pm;ldset(null);log(`${a===6?'爸媽開始固定給你零用錢（遊戲設定：依家境每年 清寒 NT$2,000／小康 NT$8,000／富裕 NT$30,000，非官方統計）。':'零用錢'}今年收到 ${money(pm)}。`)}
  if(a===6)enroll('小學',6,0);
  if(S.school){
   S.grade=cl(S.grade+R(-3,3)+(S.smarts-50)/12);chg('smarts',R(0,2));
-  S.money-=S.tuition;
+  ldset('學費');S.money-=S.tuition;ldset(null);
   if(a>=S.schoolEnd){const was=S.school;graduate();if(was==='碩士')queue.push(E_PHD)}
  }
  S.army=false;
@@ -521,21 +526,21 @@ function yearly(){
  if(a===65){S.flags.retired=1;S.pension=(S.job&&!S.job.founder&&S.job.years>=10)?360000:150000;if(S.job&&!S.job.founder){log(`你退休了，每年領退休金 ${money(S.pension)}。`);S.job=null}else log(`你滿 65 歲，開始領老年年金 ${money(S.pension)}（公司仍由你持有）。`)}
  if(!jailed&&!S.army){
   if(S.job&&S.job.founder){S.job.years++}
-  else if(S.job){const j=S.job;S.money+=j.var?varIncome(j):j.sal;j.years++;
+  else if(S.job){const j=S.job;ldset('薪資');S.money+=j.var?varIncome(j):j.sal;ldset(null);j.years++;
    j.perf=cl(j.perf+R(-15,15)+(S.smarts-50)/10);
    if(j.perf>65&&chance(.25)){j.lv++;chg('happy',5);log(`你升遷了！現在的職稱是 Lv.${j.lv} ${j.t}，年薪 ${money(j.sal)}。`,'good')}
    else if((j.perf<30&&chance(.3))||chance(.015+layoffAdj())){log(`你被${j.t}的公司解僱了。`,'bad');chg('happy',-8);S.job=null}}
-  if(!S.job&&S.flags.retired||S.job&&S.job.founder&&S.flags.retired)S.money+=S.pension;
+  if(!S.job&&S.flags.retired||S.job&&S.job.founder&&S.flags.retired){ldset('退休金');S.money+=S.pension;ldset(null)}
  }
  if(S.co&&!jailed)coRun();
  if(a>=18&&!jailed){
   const sup=a<23&&(S.mom.alive||S.dad.alive)&&!S.job&&S.cn==='TW';
-  S.money-=S.army||sup?0:livingCost();
+  ldset('生活支出');S.money-=S.army||sup?0:livingCost();ldset(null);
  }
  S.kids.forEach(kidYear);
  if(S.mort)mortYear();
  if(S.house)S.house.value=hvYear(S.house);
- if(S.car){S.money-=40000;S.car.value=Math.round(S.car.value*.9)}
+ if(S.car){ldset('汽車養護');S.money-=40000;ldset(null);S.car.value=Math.round(S.car.value*.9)}
  if(S.money<0&&a>=18){S.money=Math.round(S.money*1.04);chg('happy',-4);if(chance(.3))log('你負債累累，壓力很大。','bad')}
  for(const p of [S.mom,S.dad]){if(!p.alive)continue;const pa=p.off+a;p.rel=cl(p.rel-R(0,2));
   if(pa>60&&chance((pa-60)*.007+(pa>85?.1:0))){p.alive=false;chg('happy',-R(10,25));log(`你的${p.role}${p.n}過世了，享年 ${pa} 歲（${famCause(pa,p.role==='母親')}）。`,'bad');funeral(p.role);parentEstate(p)}}
@@ -1473,7 +1478,7 @@ function giftTo(k,amt){
 // ---- 遺產試算（dry=true 為「若現在過世」預估）----
 function estateCalc(dry){
  cnInit();const k=S.cn,E=EST[k];
- const A={cash:Math.max(0,S.money),house:(S.house?S.house.value:0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0),car:S.car?S.car.value:0,fx:0,inv:S.inv?S.inv.v*S.fx[S.inv.cn]:0,pf:pfSum(),co:typeof stake==='function'?stake(S.co):0,live:S.tr&&S.tr.kind==='live'?S.tr.v:0};
+ const A={cash:Math.max(0,S.money)+(typeof bkTotal==='function'?bkTotal():0),house:(S.house?S.house.value:0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0),car:S.car?S.car.value:0,fx:0,inv:S.inv?S.inv.v*S.fx[S.inv.cn]:0,pf:pfSum(),co:typeof stake==='function'?stake(S.co):0,live:S.tr&&S.tr.kind==='live'?S.tr.v:0};
  for(const q in S.fxh)A.fx+=S.fxh[q]*S.fx[q];
  const debts=Math.max(0,-S.money)+(S.mort?S.mort.left:0);
  let add=0,credit=0;
@@ -1797,7 +1802,7 @@ function kidGrad(k){
 }
 function kidYear(k){
  kidFix(k);k.age++;
- if(k.age<18)S.money-=kidCost();
+ if(k.age<18){ldset('子女養育費',k.n);S.money-=kidCost();ldset(null)}
  if(k.sch)S.money-=k.tu;
  if(k.tutor&&k.sch&&k.age<22)S.money-=120000;
  if(k.train&&k.age<22)S.money-=60000;
@@ -2654,7 +2659,7 @@ function npcYear(){
  if(p&&(p.married||p.cohab)&&S.age>=18){pFix2(p);
   if(p.jl>0){p.jl--}
   const pa=S.age+(p.off||0),inc=(pa<65&&!p.jl)?Math.round(p.inc*.78):0,cost=kidCost();
-  S.money+=inc-cost;
+  ldset('配偶收入分擔',p.n);S.money+=inc;ldset('配偶份生活與家庭開支',p.n);S.money-=cost;ldset(null);
   if(!p.fl){p.fl=1;log(`${p.n}（${p.job}）與你共同生活：分擔收入約 ${money(inc)}、家庭支出增加約 ${money(cost)}／年（估算）。`)}}
 }
 const _lc=livingCost;
@@ -3116,8 +3121,8 @@ if(typeof E!=='undefined')E.push(
   ch('掛掉電話，打 165 反詐騙專線',()=>{S.karma=cl(S.karma+1);return G('你確認是詐騙，沒有損失。')}),
   ch('照指示操作',()=>{const l=Math.min(Math.max(0,S.money)*.5,R(100,800)*1000);S.money-=l;S.stress=cl(S.stress+10);chg('happy',-8);return B(`你被騙走 ${money(Math.round(l))}。`)})]})},
 {id:'moto',min:16,max:75,w:2,if:()=>S.age>=18,run:()=>({t:'你騎機車時被轉彎車擦撞倒地。',c:[
-  ch('報警、就醫、留下紀錄',()=>{const h=R(2,9);chg('health',-h);S.money-=R(10,60)*1000;return B(`你骨折住院，健康 −${h}，但依規定求償。`)}),
-  ch('私下和解',()=>{chg('health',-R(1,5));S.money-=R(5,30)*1000;return B('你和對方私下和解，自己吸收了不少醫藥費。')})]})}
+  ch('報警、就醫、留下紀錄',()=>{const h=R(2,9),c=R(10,50)*1000,g=R(30,120)*1000;chg('health',-h);S.money+=g-c;return G(`你骨折住院，健康 −${h}。先自付醫療與看護費 ${money(c)}，依法向對方與強制險求償取得 ${money(g)}，實際多得 ${money(g-c)}。`)}),
+  ch('私下和解',()=>{const c=R(5,30)*1000,g=R(0,15)*1000;chg('health',-R(1,5));S.money+=g-c;return B(`你和對方私下和解，對方賠 ${money(g)}，但你自付醫藥費 ${money(c)}，實際${g-c>=0?'多得':'少了'} ${money(Math.abs(g-c))}。`)})]})}
 );
 const COVS=[{id:'covid22',min:3,max:100,w:0,if:()=>S.year===2022&&!S.flags.cv22,run:()=>{S.flags.cv22=1;if(chance(.6)){chg('health',-R(0,4));S.stress=cl(S.stress+4);return [`2022 年本土疫情大流行，你確診居家隔離，休息幾天後康復。`,'bad']}return [`2022 年本土疫情大流行，你幸運沒有確診。`,'']}},
 {id:'covid21',min:3,max:100,w:0,if:()=>S.year===2021&&!S.flags.cv21,run:()=>{S.flags.cv21=1;S.stress=cl(S.stress+6);chg('happy',-3);const j=S.job&&/餐|服務|零售|旅|店|導遊|空服/.test(S.job.t);if(j){const l=Math.round(S.job.sal*.15);S.money-=l;return [`2021 年 5 月三級警戒，你的工作受影響，這年少賺約 ${money(l)}。`,'bad']}return [`2021 年 5 月三級警戒，學校與公司改為遠距，生活大亂。`,'bad']}}];
@@ -3146,7 +3151,7 @@ if(typeof E!=='undefined')E.push(
  ch('搬家另找',()=>{S.money-=R(15,40)*1000;S.stress=cl(S.stress+5);return N('搬家與押金、仲介費花了一筆錢，但租金回到原本水準。')})]})},
 {id:'hevict',min:22,max:80,w:1,if:()=>!S.house&&S.age>=22,run:()=>({t:'房東說要賣房子，希望你在三個月內搬走。',c:[
  ch('趕緊找新房子',()=>{S.money-=R(20,50)*1000;S.stress=cl(S.stress+6);return B('倉促搬家，花了不少錢也很累。')}),
- ch('依租約主張權益',()=>{S.stress=cl(S.stress+3);S.money-=5000;return N('你依租約和房東協商，拿到一些搬遷補貼。')})]})},
+ ch('依租約主張權益',()=>{S.stress=cl(S.stress+3);const b=R(10,30)*1000;S.money+=b;return N(`你依租約和房東協商，拿到搬遷補貼 ${money(b)}。`)})]})},
 {id:'hrate',min:25,max:80,w:2,if:()=>!!S.mort,run:()=>({t:'央行升息，銀行通知房貸利率調升。',c:[
  ch('照常繳款',()=>{const l=Math.round(S.mort.left*.004);S.money-=l;return B(`今年多繳利息約 ${money(l)}。`)}),
  ch('洽銀行轉貸',()=>{S.money-=15000;const l=Math.round(S.mort.left*.002);S.money-=l;return N(`轉貸手續費 ${money(15000)}，今年多繳利息約 ${money(l)}。`)})]})},
@@ -4098,7 +4103,7 @@ cEv('US','bill',22,90,3,'一張急診帳單寄到你家，金額讓你倒抽一�
 /* ===== 日本 ===== */
 cEv('JP','hanami',8,90,3,'春天櫻花盛開，公司要新人去公園佔位子辦花見（お花見）。',['主動去佔位，順便認識前輩|nt+3 h+2 m-3000|g:你在櫻花樹下跟前輩聊開，之後工作好說話多了。','婉拒，自己找個安靜的地方賞櫻|h+3 m-1500|g:一個人看櫻花，也很舒服。','加班沒空去|st+3 h-1|n:你錯過了整個春天。']);
 cEv('JP','nomi',22,60,4,'年底的忘年会，上司一直勸酒，大家默默等你要不要去續攤（二次會）。',['陪到二次會，給上司面子|nt+3 hl-1 m-8000 st+2|n:你在職場關係上加了分，但隔天頭很痛。','喝一輪就先回家|m-4000|n:你不失禮也不勉強。','婉拒（職場可能留下印象）|h+1 st-2 nt-2|n:你保護了自己的時間，但同事私下有些閒話。'],()=>hasJob());
-cEv('JP','otoshidama',3,17,3,'新年到了，日本小孩會收到長輩給的「お年玉」。',['收下並存起來|m+30000 fin+1|g:你把壓歲錢存進銀行。','買了喜歡的遊戲|m+30000 h+3 fin-1|n:你一轉眼就花光了。']);
+cEv('JP','otoshidama',3,17,3,'新年到了，日本小孩會收到長輩給的「お年玉」。',['收下並存起來|m+30000 fin+1|g:你把壓歲錢存進銀行。','買了喜歡的遊戲|h+3 fin-1|n:你一轉眼就花光了。']);
 cEv('JP','otoshi2',22,90,3,'新年到了，成人要準備お年玉給晚輩。',['包給姪子外甥們|m-20000 h+3 fam+2|g:孩子們開心地跟你說謝謝。','只包象徵性金額|m-6000|n:你的荷包保住了。','窩在家看紅白歌合戰|h+3 m-3000|g:你度過了安靜的跨年。']);
 cEv('JP','overwork',22,60,3,'你的主管要求你繼續做「サービス残業」（不給薪的加班）。日本的 36 協定限制了加班時數，但現場仍常見灰色地帶。',['拒絕，並向勞動基準監督署諮詢|pf-3 st-3 nt-1 h+2|g:你捍衛了自己的權利，但氣氛有些尷尬。','默默加班，不吭聲|st+6 hl-2 pf+4|b:你累積了疲勞，也讓主管覺得你「很可靠」。','轉職|quit st-2 nt-2|n:你遞出離職信，開始找新工作。'],()=>hasJob());
 cEv('JP','quake',3,95,3,'深夜發生震度 6 的地震，手機的緊急地震速報響起。',['照演練躲到桌下，之後前往避難所|st+4 h-2|n:餘震持續了好幾天，你和鄰居互相照應。','平常就備好防災包，從容應對|m-300 st+1 fin+1|g:有準備的人，比較不慌。','受驚嚇後，決定搬到耐震較新的住宅|m-2000 st+2|n:你花了一筆搬家費，但安心許多。']);
@@ -4107,7 +4112,7 @@ cEv('JP','obon',20,90,3,'八月盂蘭盆節（お盆）連假，全國大返鄉�
 cEv('JP','furusato',24,64,2,'你聽同事說「故鄉納稅」（ふるさと納税）：捐款給地方政府，可抵稅，還會收到特產。',['研究額度後，用到抵稅上限|m-2000 fin+2 h+2|g:收到螃蟹和水果，還省了稅。','隨便捐一點，換和牛|m-30000 h+3 fin+1|n:你吃了一頓豪華大餐。','覺得太麻煩，沒做|fin-1|n:你錯過了這項制度。'],()=>hasJob());
 cEv('JP','marry',27,45,2,'同事和長輩常問你什麼時候結婚、生小孩，日本的少子化與晚婚是熱門話題。',['笑笑帶過|h+0 sta+1|n:你學會了客氣地迴避。','認真想想自己的人生規劃|h+1 st+2|n:你重新整理了人生優先順序。','直接說這是隱私|st+1 agr-1|n:同事識相地不再問。']);
 /* ===== 韓國 ===== */
-cEv('KR','seol',3,17,3,'설날（農曆新年）到了，長輩會給晚輩세뱃돈（新年紅包）。',['拜年後領到紅包，存起來|m+300000 fin+1|g:你鞠躬說「새해 복 많이 받으세요」，收下紅包。','買了想要的東西|m+300000 h+3 fin-1|n:你很快就花完了。']);
+cEv('KR','seol',3,17,3,'설날（農曆新年）到了，長輩會給晚輩세뱃돈（新年紅包）。',['拜年後領到紅包，存起來|m+300000 fin+1|g:你鞠躬說「새해 복 많이 받으세요」，收下紅包。','買了想要的東西|h+3 fin-1|n:你很快就花完了。']);
 cEv('KR','seol2',22,90,3,'설날（農曆新年），你要準備세뱃돈給晚輩，也要去拜年。',['回家拜年，給晚輩包紅包|m-300000 h+3 fam+2|g:一家人圍著桌子吃年糕湯。','回台灣和家人視訊拜年|m-50000 fam+1|n:你用網路和家人過年。','趁連假出國旅行|m-1500000 h+4|g:你在連假避開塞車出國。']);
 cEv('KR','chuseok',10,90,3,'秋夕（中秋）連假，高速公路大塞車，全家聚在一起煎餅、做松片。',['陪家人煎餅、聊天|h+3 fam+2|g:你和家人分享近況。','搭高鐵避開塞車|m-100000 h+2|n:你省了一點時間。','趁連假去旅行|m-1200000 h+4 st-4|g:你到濟州島度假。']);
 cEv('KR','hagwon',8,18,3,'韓國的教育熱很強，大多數同學都上補習班（학원）。爸媽問你要不要再加一科。',['再加一科，晚上補到十點|sm+2 st+4 m-400000|n:你的成績進步了，但很累。','留一點時間給自己|h+3 st-2|n:你有時間玩，成績普通。','自己在家看書|sm+1 con+1|g:你找到適合自己的讀書節奏。']);
@@ -4243,7 +4248,7 @@ yearly=function(){
  const had=S.flags.retired;_y28();
  const s=siInit(),k=S.cn||'TW',a=S.age,c=siCalc();
  if(S.dead)return;
- S.money-=c.ded;s.cur={k,L:c.L,ded:c.ded};
+ ldset('勞健保等扣款');S.money-=c.ded;ldset(null);s.cur={k,L:c.L,ded:c.ded};
  if(k==='TW'){
   s.lt=s.lt*1.03+(c.acc||0);
   if(c.lab){s.lab++;s.lw.push(c.ins*12);if(s.lw.length>8)s.lw.shift()}
@@ -6307,7 +6312,7 @@ const _y40=yearly;yearly=function(){_y40();try{(S.netHist=S.netHist||[]).push([S
 const _lf40=lfHandle,_l40=lifeHTML,_m40=moreHTML;
 lfHandle=function(x,y,z,u){if(x==='sv'){if(y==='save')return slSave(z);if(y==='load')return slLoad(z);if(y==='del')return slDel(z);return null}if(x==='tl'||x==='ch')return null;return _lf40(x,y,z,u)};
 lifeHTML=function(){return view.lsub==='sv'?svHTML():view.lsub==='tl'?tlHTML():view.lsub==='ch'?chHTML():_l40()};
-moreHTML=function(){return _m40().replace('<button class="tile" data-a="lf:health">','<button class="tile" data-a="lf:stat"><b>能</b>能力總覽<small>能力值・技能・才藝・怎麼提升</small></button><button class="tile" data-a="lf:tl"><b>史</b>人生時間軸<small>重大時刻回顧</small></button><button class="tile" data-a="lf:ch"><b>線</b>走勢圖<small>房價・比特幣・世界事件・資產</small></button><button class="tile" data-a="lf:sv"><b>回</b>時光回溯點<small>手動留下人生的某一刻</small></button><button class="tile" data-a="lf:health">')};
+moreHTML=function(){return _m40().replace('<button class="tile" data-a="lf:health">','<button class="tile" data-a="lf:led"><b>支</b>年度收支<small>收入・支出・每位家人</small></button><button class="tile" data-a="lf:stat"><b>能</b>能力總覽<small>能力值・技能・才藝・怎麼提升</small></button><button class="tile" data-a="lf:tl"><b>史</b>人生時間軸<small>重大時刻回顧</small></button><button class="tile" data-a="lf:ch"><b>線</b>走勢圖<small>房價・比特幣・世界事件・資產</small></button><button class="tile" data-a="lf:sv"><b>回</b>時光回溯點<small>手動留下人生的某一刻</small></button><button class="tile" data-a="lf:health">')};
 /* 開始畫面：列出存檔欄位 */
 const _ss40=showStart;showStart=function(){_ss40();try{const o=slRead(),ks=Object.keys(o).filter(i=>o[i]&&o[i].d);if(ks.length){const b=$('startBody');b.insertAdjacentHTML('beforeend',ks.map(i=>`<button class="btn" data-sl="${i}">回到回溯點 ${i}：${esc(o[i].d.name)}（${o[i].d.age} 歲）</button>`).join(''));b.querySelectorAll('[data-sl]').forEach(x=>x.onclick=()=>{S=o[x.dataset.sl].d;busy=false;queue=[];try{mFix()}catch(e){}$('start').classList.remove('on');render()})}}catch(e){}};
 /* 介面：去除 emoji、搜尋功能磚 */
@@ -6507,7 +6512,7 @@ function sumBind(){
 const _endInfo43=endInfo;endInfo=function(){return _endInfo43()+sumHTML()};
 const _showEnd43=showEnd;showEnd=function(){_showEnd43();try{sumBind()}catch(e){}};
 /* ---- p44：介面分類、常用功能、新手教學、總結卡改為長按儲存 ---- */
-const MCAT=[['人生記錄',['lf:ach','lf:tree','lf:rev','lf:tl','lf:ch','lf:dx']],['生活與家庭',['lf:stat','open:act','open:rel','lf:pol','lf:art','lf:health','lf:eth','lf:rg','lf:skill']],['財務與職涯',['open:job','open:ast','open:eco','lf:hs','lf:si']],['世界',['lf:wd']],['系統',['lf:sv','lf:set','lf:help']]];
+const MCAT=[['人生記錄',['lf:ach','lf:tree','lf:rev','lf:tl','lf:ch','lf:dx']],['生活與家庭',['lf:stat','open:act','open:rel','lf:pol','lf:art','lf:health','lf:eth','lf:rg','lf:skill']],['財務與職涯',['lf:led','open:job','open:ast','open:eco','lf:hs','lf:si']],['世界',['lf:wd']],['系統',['lf:sv','lf:set','lf:help']]];
 const FQK='lifesim_tw_freq_v1';
 const _hd44=handle;handle=function(a){try{if(typeof a==='string'&&/^(lf:[a-z]+|open:[a-z]+)$/.test(a)){const f=lsGet(FQK,{});f[a]=(f[a]||0)+1;lsSet(FQK,f)}}catch(e){}return _hd44(a)};
 const _mh44=moreHTML;
@@ -7217,7 +7222,7 @@ function ptPay(){
  const j=ptJob(o.id);
  if(!j||S.jail||S.army||S.age>=70||(S.job&&!j.side)){if(j&&S.job&&!j.side)log(`你有正職了，辭掉兼職「${j.t}」。`);S.ptj=null;return}
  const rate=ptRate(o),pay=rate*o.h*ptWeeks();
- S.money+=pay;o.yrs++;
+ ldset('兼職收入');S.money+=pay;ldset(null);o.yrs++;
  log(`兼職「${j.t}」：時薪 ${money(rate)}、每週 ${o.h} 小時，全年收入 ${money(pay)}。`,'good');
  mFix();S.skl[j.sk]=Math.min(100,(S.skl[j.sk]||0)+(o.h>=15?2:1));
  S.stress=cl(S.stress+Math.round(o.h/6));if(o.h>=25)chg('happy',-3);
@@ -7457,7 +7462,7 @@ yearly=function(){
  try{
   if(S.tl){Object.keys(S.tl).forEach(k=>{if(S.tl[k]>12&&chance(.5))S.tl[k]--});S.runlv=Math.max(0,(S.runlv||0)-4);if(S.cfame>0&&chance(.5))S.cfame--}
   if(S.ent&&!S.dead){
-   if(S.school){const g=R(20000,100000);S.money+=g;log(`練習生通告與活動收入 ${money(g)}。`,'good');chg('health',-R(0,2))}
+   if(S.school){const g=R(20000,100000);ldset('練習生通告');S.money+=g;ldset(null);log(`練習生通告與活動收入 ${money(g)}。`,'good');chg('health',-R(0,2))}
    else if(S.age>=18&&!S.jail){const r=cpDebutNow(S.ent.jn,S.ent.co);log(r[0],r[1])}
   }
  }catch(e){}
@@ -7581,7 +7586,7 @@ yearly=function(){
   if(S.sgr>1){
    S.sloan=Math.round(S.sloan*1.013);
    const pay=Math.min(S.sloan,Math.max(60000,Math.round(S.sloan/8)));
-   S.money-=pay;S.sloan-=pay;
+   ldset('學貸還款');S.money-=pay;ldset(null);S.sloan-=pay;
    log(S.sloan>0?`償還就學貸款 ${money(pay)}，剩餘 ${money(S.sloan)}。`:`你還清了就學貸款（最後一期 ${money(pay)}）。`,S.sloan>0?'':'good');
    if(S.sloan<=0)S.sloan=0;
   }
@@ -7827,7 +7832,7 @@ wdCtry=function(k){
 const _y64=yearly;
 yearly=function(){
  _y64();
- try{if(S.ab&&S.ab.sch&&S.ab.visa==='study'&&S.cn!=='TW'&&!S.dead){const g=Math.round((S.ab.minor?.35:.6)*wTW(S.cn));S.money+=g;log(`獎學金生活津貼 ${money(g)}。`,'good')}}catch(e){}
+ try{if(S.ab&&S.ab.sch&&S.ab.visa==='study'&&S.cn!=='TW'&&!S.dead){const g=Math.round((S.ab.minor?.35:.6)*wTW(S.cn));ldset('獎學金生活津貼');S.money+=g;ldset(null);log(`獎學金生活津貼 ${money(g)}。`,'good')}}catch(e){}
 };
 /* 高中畢業時可選擇出國留學 */
 const _eu64=E_UNI.run;
@@ -7878,6 +7883,300 @@ qbUpdate=function(){
  _qb65();
  try{const q=document.getElementById('qbar');if(q&&S&&!S.dead&&!q.querySelector('[data-st]')){q.insertAdjacentHTML('afterbegin','<button data-st="1">能力</button>');const b=q.querySelector('[data-st]');b.onclick=e=>{e.stopPropagation();handle('lf:stat')}}}catch(e){}
 };
+/* ---- p66：加薪幅度上限、年度收支明細、父母遺產（配偶在世時依法分配） ---- */
+const _y66=yearly;
+yearly=function(){
+ const j=S.job,m0=S.money,sal0=j&&!j.founder&&!j.var?j.sal:0,lv0=j?j.lv:0,a0=S.age;
+ _y66();
+ try{
+  if(j&&S.job===j&&sal0>0){
+   const cap=sal0*(j.lv>lv0?1.16:1.08);
+   if(j.sal>cap){j.sal=Math.round(cap);j.s0=j.sal}
+  }
+ }catch(e){}
+};
+/* 父母遺產 */
+function pHouse(){
+ if(S.pH==null){
+  const w=wTW(S.cn||'TW')/761000,b={清寒:R(300,1200)*1000,小康:R(4,16)*1000000,富裕:R(40,200)*1000000}[S.fam]||R(2,8)*1000000;
+  S.pH=Math.round(b*w/10000)*10000;
+ }
+ return S.pH;
+}
+parentEstate=function(p){
+ cnInit();const k=S.cn||'TW',E=EST[k]||EST.TW,oth=p===S.mom?S.dad:S.mom,H=pHouse();
+ if(p.est==null)p.est=Math.round(H/2);
+ if(oth&&oth.est==null)oth.est=Math.round(H/2);
+ if(!p.est||p.est<=0)return;
+ const sib=S.friends.filter(f=>f.sib),n=1+sib.length,spAlive=!!(oth&&oth.alive),sf=spAlive?E.sp(n):0,E0=p.est;
+ const ctx={gross:E0,debts:0,spAmt:E0*sf,hasSp:spAlive,kids:Array.from({length:n},()=>({age:S.age,amt:E0*(1-sf)/n})),par:0,house:false,widow:!spAlive,twS:0};
+ const t=estTax(k,ctx).tax,fn=Math.round(1380000*wTW(k)/761000),net=Math.max(0,E0-t-fn),sp=Math.round(net*sf),mine=Math.round((net-sp)/n);
+ p.est=0;
+ if(net<=0){log(`${p.role}沒有留下足夠的遺產（遺產約 ${money(E0)}，喪葬費用約 ${money(fn)}）。`);return}
+ S.money+=mine;
+ if(spAlive)oth.est=(oth.est||0)+sp;
+ log(`你分得${p.role}留下的遺產 ${money(mine)}（遺產約 ${money(E0)}${spAlive?`；${oth.role}還在世，依法先分得約 ${money(sp)}，其餘由你與 ${n-1} 位手足均分`:`；由你與 ${n-1} 位手足均分`}${t?`，遺產稅 ${money(t)}`:''}，喪葬費約 ${money(fn)}）。`,'good');
+};
+/* ---- p67：銀行存款（活存／定存），利率隨年代與景氣變動；外幣存款見「移民與匯率」 ---- */
+/* 台灣一年期定存牌告利率的大致水準（%，遊戲簡化，非逐月官方值） */
+const BKR={2000:4.6,2001:3.2,2002:1.9,2003:1.5,2004:1.4,2005:1.8,2006:2.0,2007:2.5,2008:2.2,2009:.9,2010:1.0,2011:1.3,2012:1.4,2013:1.4,2014:1.4,2015:1.4,2016:1.1,2017:1.1,2018:1.1,2019:1.0,2020:.8,2021:.8,2022:1.2,2023:1.6,2024:1.7,2025:1.6,2026:1.6};
+function bkFd(){
+ const y=calYear();
+ if(y<2000)return 5;
+ if(y<=2026)return BKR[y];
+ return Math.max(.2,Math.round((1.6+((S.cpi==null?.02:S.cpi)-.02)*60+(S.econ||0)*10)*20)/20);
+}
+const bkDm=()=>Math.round(bkFd()*.27*100)/100;
+function bkInit(){if(!S.bk)S.bk={c:0,fd:[]};return S.bk}
+function bkTotal(){const b=S.bk;return b?Math.round(b.c+b.fd.reduce((a,x)=>a+x.amt,0)):0}
+function bkAll(){const b=S.bk;if(!b)return;const t=bkTotal();S.money+=t;b.c=0;b.fd=[]}
+function bkAmt(){bkInit();const c=[100000,500000,1000000,5000000];let a=view.bka||100000;return a}
+function bkDo(x,y,z){
+ const b=bkInit(),a=bkAmt();
+ if(x==='amt'){view.bka=+y;return null}
+ if(x==='dep'){if(S.money<a)return B('現金不足。');S.money-=a;b.c+=a;return G(`存入活存 ${money(a)}。`)}
+ if(x==='wd'){const v=Math.min(a,b.c);if(v<=0)return B('活存沒有餘額。');b.c-=v;S.money+=v;return N(`從活存提領 ${money(v)}。`)}
+ if(x==='wda'){const v=b.c;if(v<=0)return B('活存沒有餘額。');b.c=0;S.money+=v;return N(`提領全部活存 ${money(v)}。`)}
+ if(x==='fd'){const yrs=+y;if(S.money<a)return B('現金不足。');S.money-=a;const r=bkFd()+(yrs-1)*.05;b.fd.push({amt:a,yrs,left:yrs,r:Math.round(r*100)/100});return G(`開立 ${yrs} 年期定存 ${money(a)}，年利率 ${(Math.round(r*100)/100).toFixed(2)}%。`)}
+ if(x==='fdx'){const f=b.fd[+y];if(!f)return null;const el=f.yrs-f.left,v=Math.round(f.amt*Math.pow(1+bkDm()/100,el));b.fd.splice(+y,1);S.money+=v;return N(`提前解約定存，只按活存利率計息，取回 ${money(v)}。`)}
+ return null;
+}
+function bkHTML(){
+ const b=bkInit(),a=bkAmt();
+ let h=`<div class="sec">銀行存款</div><div class="item"><b>活期存款</b>　${money(b.c)}<div class="sub">活存年利率 ${bkDm().toFixed(2)}%・定存（1 年期）${bkFd().toFixed(2)}%（歷史為台灣一年期牌告的大致水準，未來依物價與景氣推估；未計利息所得稅）</div></div>`;
+ h+=`<div class="sub">現金 ${money(S.money)}・本次金額</div><div class="seg">${[100000,500000,1000000,5000000].map(v=>`<button class="${v===a?'on':''}" data-a="bk:amt:${v}">${v>=1000000?v/1000000+' 百萬':v/10000+' 萬'}</button>`).join('')}</div>`;
+ h+=`<button class="btn" data-a="bk:dep">存入活存<small>${money(a)}</small></button>`;
+ h+=[1,2,3].map(y=>`<button class="btn" data-a="bk:fd:${y}">開立 ${y} 年期定存<small>${money(a)}・年利率約 ${(bkFd()+(y-1)*.05).toFixed(2)}%・到期連本帶利轉入活存</small></button>`).join('');
+ h+=`<button class="btn" data-a="bk:wd">從活存提領<small>${money(Math.min(a,b.c))}</small></button><button class="btn" data-a="bk:wda" ${b.c>0?'':'disabled'}>提領全部活存</button>`;
+ if(b.fd.length)h+='<div class="sec">定存單</div>'+b.fd.map((f,i)=>`<div class="item row"><div style="flex:1"><b>${money(f.amt)}</b>・${f.yrs} 年期・利率 ${f.r.toFixed(2)}%<div class="sub">還有 ${f.left} 年到期</div></div><button class="mini" data-a="bk:fdx:${i}">提前解約</button></div>`).join('');
+ h+=`<button class="btn" data-a="open:cn">外幣存款與匯率<small>買進外幣存款，賺匯差與利差（匯率隨經濟變動）</small></button>`;
+ return h;
+}
+const _ah67=astHTML;
+astHTML=function(){const h=_ah67();if(S.age<18)return h;const i=h.indexOf('</h3>');return i<0?h+bkHTML():h.slice(0,i+5)+bkHTML()+h.slice(i+5)};
+const _hd67=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&a.startsWith('bk:')){const p=a.split(':'),r=bkDo(p[1],p[2],p[3]);view.msg=r;view.tab='ast';render();showSheet('ast');return}
+ return _hd67(a);
+};
+const _y67=yearly;
+yearly=function(){
+ _y67();
+ try{
+  const b=S.bk;if(!b||S.dead)return;
+  if(b.c>0){const i=Math.round(b.c*bkDm()/100);if(i>0){b.c+=i;ldAdd('存款利息（入活存，不計入現金）',null,i);log(`活存利息 ${money(i)}（年利率 ${bkDm().toFixed(2)}%）。`)}}
+  for(let k=b.fd.length-1;k>=0;k--){const f=b.fd[k];f.left--;if(f.left<=0){const v=Math.round(f.amt*Math.pow(1+f.r/100,f.yrs));b.fd.splice(k,1);b.c+=v;log(`${f.yrs} 年期定存到期，本利和 ${money(v)} 轉入活存（利息 ${money(v-f.amt)}）。`,'good')}}
+  if(S.money<0&&b.c>0){const v=Math.min(-S.money,b.c);b.c-=v;S.money+=v;log(`現金不足，自動從活存補 ${money(v)}。`)}
+ }catch(e){}
+};
+const _die67=die;
+die=function(c){try{bkAll()}catch(e){}return _die67(c)};
+/* ---- p68：年度收支帳本（每筆收入與支出分類、標示是哪位家人） ---- */
+let LDC=null,LDW=null,LDE=null;
+const LDH=new WeakSet();
+const LDX=new Set(['資產買賣與轉換','存款轉換','存款利息（入活存，不計入現金）']);
+function ldset(c,w){LDC=c||null;LDW=c?(w||null):null}
+function ldCur(){
+ if(!S)return null;
+ if(!S.ld)S.ld={cur:null,hist:[]};
+ if(!S.ld.cur)S.ld.cur={age:S.age,y:calYear(),m0:S.money,r:{}};
+ return S.ld.cur;
+}
+function ldPut(d,cat,who){
+ const L=ldCur();if(!L||!d)return;
+ const k=(d>0?'i':'e')+'|'+cat+'|'+(who||'你');
+ L.r[k]=(L.r[k]||0)+d;
+}
+function ldAdd(cat,who,d){ldPut(d,cat,who)}
+function ldRec(d){
+ const cat=LDC||(LDE?'事件｜'+LDE:'其他');
+ if(cat==='__skip')return;
+ ldPut(d,cat,LDW);
+}
+function ldHook(s){
+ if(!s||LDH.has(s)||typeof s.money!=='number')return;
+ let v=s.money;
+ try{Object.defineProperty(s,'money',{get(){return v},set(x){const d=x-v;v=x;if(d&&s===S){try{ldRec(d)}catch(e){}}},enumerable:true,configurable:true});LDH.add(s)}catch(e){}
+}
+function ldSum(c){
+ let i=0,e=0;
+ for(const k in c.r){const p=k.split('|');if(LDX.has(p[1]))continue;if(p[0]==='i')i+=c.r[k];else e+=c.r[k]}
+ return {i,e:-e};
+}
+function ldRoll(){
+ ldHook(S);const c=ldCur();if(!c)return;
+ if(c.age!==S.age||Object.keys(c.r).length){
+  if(c.age!==S.age){
+   c.m1=S.money;S.ld.hist.push(c);if(S.ld.hist.length>40)S.ld.hist.shift();
+   const t=ldSum(c);
+   if(c.age>=12&&(t.i||t.e))log(`${c.age} 歲這一年：收入 ${money(t.i)}、支出 ${money(t.e)}、現金變動 ${S.money-c.m0>=0?'+':'-'}${money(Math.abs(S.money-c.m0))}（明細見「年度收支」）。`);
+   S.ld.cur={age:S.age,y:calYear(),m0:S.money,r:{}};
+  }
+ }
+}
+const _y68=yearly;
+yearly=function(){try{LDE=null;LDC=null;LDW=null;ldRoll()}catch(e){}return _y68()};
+const _rd68=render;
+render=function(){try{if(S&&S.money!=null)ldHook(S)}catch(e){}return _rd68()};
+/* 事件選項產生的金錢變動，記在該事件名下 */
+const _ask68=ask;
+ask=function(text,labels,cb){return _ask68(text,labels,function(i){const o=LDE,t=String(text).replace(/\s+/g,'');LDE=t.slice(0,18)+(t.length>18?'…':'');try{return cb(i)}finally{LDE=o}})};
+/* 依功能標記類別 */
+function ldWrap(name,label,whoFn){
+ try{
+  const f=eval(name);if(typeof f!=='function')return;
+  eval(name+'=function(){const c=LDC,w=LDW;LDC=label;if(whoFn){try{LDW=whoFn.apply(null,arguments)}catch(e){}}try{return f.apply(this,arguments)}finally{LDC=c;LDW=w}}');
+ }catch(e){}
+}
+[['coRun','公司事業'],['coYear','公司事業'],['pfYear','投資收益'],['mortYear','房貸本息'],['disYear','疾病與意外'],['illYear','疾病與醫療'],['polYear','政府補助與政策'],['histCalamity','天災與時事'],['lifeStyle','生活型態'],['funeral','喪葬費用'],['parentEstate','遺產'],['dlYear','先前決定的後續影響'],['trYear','信託'],['hmYear','居住'],['mhYear','心理健康'],['cnYearEnd','海外生活稅費'],
+ ['buyHouse','資產買賣與轉換'],['sellHouse','資產買賣與轉換'],['buyCar','資產買賣與轉換'],['sellCar','資產買賣與轉換'],['buyFA','資產買賣與轉換'],['buyNew','資產買賣與轉換'],['sellNew','資產買賣與轉換'],['pfHandle','資產買賣與轉換'],['bkDo','存款轉換'],
+ ['cnHandle','外匯與移居'],['kidHandle','子女教育與贈與'],['lgHandle','傳承與贈與'],['interact','人際互動花費'],['romHandle','戀愛約會花費'],['kpDo','人際維繫花費'],['tfEvent','學費來源']].forEach(x=>ldWrap(x[0],x[1]));
+ldWrap('kidYear','子女養育費',k=>k&&k.n);
+ldWrap('pbRun','伴侶互動花費',()=>S.partner&&S.partner.n);
+const _hd68=handle;
+handle=function(a){
+ if(typeof a==='string'&&S){
+  const p=a.split(':')[0],m={act:'活動與比賽',job:'求職',buyH:'資產買賣與轉換',sellH:'資產買賣與轉換',buyC:'資產買賣與轉換',sellC:'資產買賣與轉換'}[p];
+  if(m){const c=LDC;LDC=m;try{return _hd68(a)}finally{LDC=c}}
+ }
+ return _hd68(a);
+};
+/* 頁面 */
+function ldRows(c,kind){
+ const o={};
+ for(const k in c.r){const p=k.split('|');if(p[0]!==kind)continue;const x=LDX.has(p[1]);if(x)continue;const cat=p[1]==='其他'?(kind==='i'?'其他收入':'其他支出'):p[1];(o[cat]=o[cat]||[]).push([p[2],c.r[k]])}
+ return Object.keys(o).map(cat=>({cat,tot:o[cat].reduce((a,x)=>a+x[1],0),who:o[cat]})).sort((a,b)=>Math.abs(b.tot)-Math.abs(a.tot));
+}
+function ldTable(rows){
+ if(!rows.length)return '<p class="sub">這一年沒有這類項目。</p>';
+ return '<table class="rt">'+rows.map(r=>{const w=r.who.length>1||r.who[0][0]!=='你'?r.who.map(x=>`${esc(x[0])} ${money(Math.abs(x[1]))}`).join('・'):'';return `<tr><td>${esc(r.cat)}${w?`<br><span class="sub">${w}</span>`:''}</td><td>${money(Math.abs(r.tot))}</td></tr>`}).join('')+'</table>';
+}
+function ledHTML(){
+ ldCur();const hist=S.ld.hist,all=hist.concat([S.ld.cur]);
+ let i=view.ly==null?all.length-1:Math.max(0,Math.min(all.length-1,view.ly));view.ly=i;
+ const c=all[i],cur=i===all.length-1,t=ldSum(c),end=cur?S.money:(c.m1!=null?c.m1:S.money);
+ let h=`<h3>年度收支</h3><div class="seg"><button data-a="lf:led:prev" ${i<=0?'disabled':''}>前一年</button><button class="on">${c.age} 歲${cur?'（今年）':''}</button><button data-a="lf:led:next" ${cur?'disabled':''}>後一年</button></div>`;
+ h+=`<div class="item"><b>${c.y} 年</b>　收入 ${money(t.i)}　支出 ${money(t.e)}<br>現金 ${money(c.m0)} → ${money(end)}（${end-c.m0>=0?'+':'-'}${money(Math.abs(end-c.m0))}）<div class="sub">另有資產買賣、存款轉換等不計入收支的項目，見最下方。</div></div>`;
+ h+='<div class="sec">收入</div>'+ldTable(ldRows(c,'i'));
+ h+='<div class="sec">支出</div>'+ldTable(ldRows(c,'e'));
+ const pw={};for(const k in c.r){const p=k.split('|');if(LDX.has(p[1]))continue;const w=p[2];pw[w]=pw[w]||{i:0,e:0};if(p[0]==='i')pw[w].i+=c.r[k];else pw[w].e-=c.r[k]}
+ const ws=Object.keys(pw);
+ if(ws.length>1||(ws[0]&&ws[0]!=='你'))h+='<div class="sec">每個人的收支</div><table class="rt">'+ws.map(w=>`<tr><td>${esc(w)}<br><span class="sub">收入 ${money(pw[w].i)}・支出 ${money(pw[w].e)}</span></td><td>${pw[w].i-pw[w].e>=0?'+':'-'}${money(Math.abs(pw[w].i-pw[w].e))}</td></tr>`).join('')+'</table>';
+ const ex={};for(const k in c.r){const p=k.split('|');if(LDX.has(p[1]))ex[p[1]]=(ex[p[1]]||0)+c.r[k]}
+ const eks=Object.keys(ex);
+ if(eks.length)h+='<div class="sec">不計入收支的項目</div><table class="rt">'+eks.map(k=>`<tr><td>${esc(k)}</td><td>${ex[k]>=0?'+':'-'}${money(Math.abs(ex[k]))}</td></tr>`).join('')+'</table>';
+ return h;
+}
+const _lf68=lifeHTML;
+lifeHTML=function(){return view.lsub==='led'?ledHTML():_lf68()};
+const _lh68=lfHandle;
+lfHandle=function(x,y,z,u){
+ if(x==='led'){if(y==='prev')view.ly=(view.ly==null?(S.ld?S.ld.hist.length:0):view.ly)-1;else if(y==='next')view.ly=(view.ly==null?0:view.ly)+1;else view.ly=null;return null}
+ return _lh68(x,y,z,u);
+};
+const _ah68=astHTML;
+astHTML=function(){const h=_ah68();if(S.age<12)return h;const i=h.indexOf('</h3>');const b='<button class="btn" data-a="lf:led">年度收支明細<small>每一筆收入與支出，包含每位家人</small></button>';return i<0?h+b:h.slice(0,i+5)+b+h.slice(i+5)};
+const _qb68=qbUpdate;
+qbUpdate=function(){
+ _qb68();
+ try{const q=document.getElementById('qbar');if(q&&S&&!S.dead&&S.age>=12&&!q.querySelector('[data-ld]')){q.insertAdjacentHTML('afterbegin','<button data-ld="1">收支</button>');q.querySelector('[data-ld]').onclick=e=>{e.stopPropagation();view.ly=null;handle('lf:led')}}}catch(e){}
+};
+/* ---- p69：海外以當地貨幣顯示；介面統一尺寸；每個按鈕附不重複圖示 ---- */
+/* 世界與匯率頁面刻意以台幣比較，顯示時固定用 NT$ */
+['cnHTML','wdHTML','fxHTML','pfHTML'].forEach(n=>{
+ try{const f=eval(n);if(typeof f!=='function')return;
+  eval(n+'=function(){const o=MNY_TW;MNY_TW=true;try{return f.apply(this,arguments)}finally{MNY_TW=o}}');
+ }catch(e){}
+});
+const _ah69=astHTML;
+astHTML=function(){
+ const h=_ah69();
+ if(!S||!S.cn||S.cn==='TW'||!CNS[S.cn])return h;
+ const c=CNS[S.cn],f=fxr(S.cn),i=h.indexOf('</h3>');
+ const card=`<div class="item"><b>目前以${c.sym}顯示金額</b><div class="sub">1 ${c.sym} ＝ NT$${f.toFixed(f<1?4:2)}（隨經濟與匯率變動）。你在台灣的房子、存款等資產以台幣計價，這裡依目前匯率換算顯示；在「移民與匯率」可買賣外幣。</div></div>`;
+ return i<0?card+h:h.slice(0,i+5)+card+h.slice(i+5);
+};
+/* ---- 圖示分配 ---- */
+const UIKW=[[/存款|活存|定存|銀行|利息/,'bank'],[/貸款|學貸|還款|負債/,'scale'],[/打工|兼職|工作|求職|應徵|職涯|職業/,'briefcase'],[/跑|運動|訓練|健身|登山|健行|打球/,'run'],[/游泳/,'wave'],[/單車|環島|機車|外送/,'moped'],[/瑜伽|冥想|放鬆|休息/,'lotus'],[/歌|唱|音樂|樂器|演唱|樂團/,'headphones'],[/舞|派對|聚會/,'ferris'],[/畫|設計|藝術|展覽|攝影/,'palette'],[/讀書|學習|補習|書|才藝/,'book'],[/學校|大學|留學|畢業|學費|獎學|升學|考試/,'cap'],[/醫|病|健康|診/,'stetho'],[/藥/,'pill'],[/旅行|旅遊|出國|機票|出遊/,'plane'],[/吃|餐|美食|宵夜|煮|廚/,'bowl'],[/咖啡|茶|飲/,'cup'],[/禮|送/,'gift'],[/告白|戀愛|約會|愛|情/,'heart'],[/結婚|婚|求婚/,'ring'],[/孩子|子女|寶寶|小孩|領養/,'baby'],[/家人|父母|家庭|家族/,'family'],[/朋友|同學|同事|人脈/,'friends'],[/聊|談|溝通|訊息|問候|信/,'chat'],[/吵|爭|憤/,'angry'],[/分手|離婚|斷絕/,'heartbreak'],[/和好|道歉|修復/,'dove'],[/買|房|屋|居住|搬/,'house'],[/股|投資|基金|匯|外幣/,'swap'],[/錢|金|費|薪|收入|獎金|財/,'coin'],[/賭|彩|抽/,'dice'],[/偷|搶|詐/,'mask'],[/捐|志工|公益/,'medal'],[/比賽|競賽|冠軍|選秀|大賽/,'trophy'],[/紀錄|成績|名聲|統計|走勢|收支/,'chartbar'],[/設定|選項/,'gear'],[/關閉|返回|取消|放棄|算了|拒絕|婉拒/,'door'],[/解約|辭職|辭掉/,'crossc'],[/申請|報名|提交/,'clip'],[/電影|追劇|看/,'play'],[/遊戲|電玩|桌遊/,'dice'],[/宗教|信仰|祈/,'lotus'],[/法|警|律師|犯/,'scale'],[/軍|兵/,'helmet'],[/睡|夢|夜/,'moon'],[/天氣|曬/,'sun']];
+const UIPOOL=['sparkle','star','flower','leaf','sprout','rainbow','rocket','wind','ticket','search','eye','dna','flask','news','pin','globe','tree','scissors','yarn','shades','hourglass','lock','refresh','inbox','chain','kid','person','elder','mug','image','building','factory','tie','cap','school','gift','cake','phone','mail','drop','moon','sun','menu','net','smile','meh','mask','question','nosmoke','headphones','play','check','checkc','crossc','square'];
+const UITILE={'lf:ach':'trophy','lf:tree':'tree','lf:rev':'chartup','lf:tl':'hourglass','lf:ch':'chartbar','lf:dx':'book','lf:stat':'star','lf:led':'coin','open:act':'target','open:rel':'family','lf:pol':'scale','lf:art':'palette','lf:health':'stetho','lf:eth':'globe','lf:rg':'lotus','lf:skill':'rocket','open:job':'briefcase','open:ast':'house','open:eco':'wave','lf:hs':'building','lf:si':'lock','lf:wd':'plane','lf:sv':'refresh','lf:set':'gear','lf:help':'question'};
+function uiLabel(el){let t='';el.childNodes.forEach(n=>{if(n.nodeType===3)t+=n.nodeValue;else if(n.nodeType===1&&!/^(SMALL|B|SVG)$/i.test(n.nodeName)&&!(n.classList&&n.classList.contains('ic')))t+=n.textContent});return t.replace(/\s+/g,'')}
+const UIALT={bank:['coin','inbox','chartup','lock'],run:['target','rocket','wind','hourglass','star'],coin:['bank','inbox','chartup'],briefcase:['tie','ptie','building','clip'],book:['clip','news','cap','school'],cap:['school','book','star'],heart:['sparkle','flower','gift'],chat:['mail','phone','inbox'],trophy:['medal','star','rocket'],chartbar:['chartup','news','clip'],headphones:['play','star','sparkle'],palette:['image','scissors','yarn'],plane:['globe','pin','sun'],gift:['cake','flower'],house:['building','door'],swap:['refresh','chartup','coin'],gear:['lock','menu'],door:['crossc','x']};
+function uiPick(label,used,pre){
+ if(pre&&!used.has(pre))return pre;
+ for(const [re,id] of UIKW)if(re.test(label)){if(!used.has(id))return id;for(const a of (UIALT[id]||[]))if(!used.has(a))return a}
+ for(const id of UIPOOL)if(!used.has(id))return id;
+ return 'dot';
+}
+function uiIcon(id){const s=mkIcon(id);s.classList.add('lead');return s}
+function uiDecorate(root){
+ try{
+  if(!root||!root.querySelectorAll)return;
+  if(typeof iconize==='function')iconize(root);
+  const used=new Set();
+  root.querySelectorAll('.btn,.tile').forEach(el=>{
+   const tile=el.classList.contains('tile');
+   let lead=null;
+   if(tile){const b=el.querySelector('b');lead=b&&b.querySelector('svg.ic')?b.querySelector('svg.ic'):null}
+   else{const f=el.firstElementChild;if(f&&f.nodeName.toLowerCase()==='svg'&&f.classList.contains('ic'))lead=f}
+   let id=null;if(lead){const m=(lead.getAttribute('class')||'').match(/ic-([a-z0-9]+)/);id=m?m[1]:null}
+   const label=uiLabel(el)||el.textContent;
+   const pre=tile?UITILE[el.dataset.a]:null;
+   let want=id;
+   if(pre&&!used.has(pre))want=pre;
+   else if(!id||used.has(id))want=uiPick(label,used,null);
+   used.add(want);
+   if(want!==id||!lead||!lead.classList.contains('lead')){
+    const ic=uiIcon(want);
+    if(tile){let b=el.querySelector('b');if(!b){b=document.createElement('b');el.insertBefore(b,el.firstChild)}b.textContent='';b.appendChild(ic)}
+    else{if(lead&&lead.parentNode===el)el.removeChild(lead);el.insertBefore(ic,el.firstChild)}
+   }
+   el.classList.add('hi');
+  });
+  const MS={'人生記錄':'book','生活與家庭':'family','財務與職涯':'coin','世界':'globe','系統':'gear','其他':'menu'};
+  root.querySelectorAll('.msec').forEach(b=>{if(b.querySelector('svg'))return;const t=(b.textContent||'').replace(/（.*$/,'');const sp=b.firstElementChild;if(sp)sp.insertBefore(mkIcon(MS[t]||'dot'),sp.firstChild)});
+ }catch(e){}
+}
+const _ss69=showSheet;
+showSheet=function(tab,sub){const r=_ss69(tab,sub);try{uiDecorate(document.getElementById('sheetBody'))}catch(e){}return r};
+const _ask69=ask;
+ask=function(text,labels,cb){const r=_ask69(text,labels,cb);try{uiDecorate(document.getElementById('modalBody'))}catch(e){}return r};
+/* 常駐捷徑列的圖示 */
+const UIQ={'運動':'run','比賽':'trophy','打工':'briefcase','才藝':'book','休閒':'cup'};
+const _qb69=qbUpdate;
+qbUpdate=function(){
+ _qb69();
+ try{const q=document.getElementById('qbar');if(!q)return;
+  q.querySelectorAll('button').forEach(b=>{if(b.querySelector('svg'))return;const k=b.dataset.q,id=b.dataset.st?'star':b.dataset.ld?'coin':UIQ[k]||'dot';b.insertBefore(mkIcon(id),b.firstChild)});
+ }catch(e){}
+};
+/* 活動分類標籤圖示 */
+const _ah69b=actHTML;
+actHTML=function(){return _ah69b().replace(/<button class="([^"]*)" data-a="ac:c:([^"]+)">/g,(m,c,k)=>`<button class="${c}" data-a="ac:c:${k}">${({'常用':'🎯','運動':'🏃','比賽':'🏆','才藝':'🎨','休閒':'☕','打工':'💼','冒險':'🎲'})[k]||''} `)};
+/* ---- 統一尺寸與樣式 ---- */
+(function(){try{
+ const st=document.createElement('style');
+ st.textContent=`
+.btn{min-height:62px;padding:12px 16px;font-size:15px;line-height:1.35;border-radius:16px;margin:8px 0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;text-align:left}
+.btn.hi{position:relative;padding-left:52px}
+.btn.hi>.ic.lead{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:24px;height:24px;margin:0}
+.btn small{font-size:12px;line-height:1.4;margin-top:2px}
+.btn.p{align-items:center;text-align:center}
+.tile{min-height:104px;padding:14px 8px;font-size:14.5px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tile b{display:flex;align-items:center;justify-content:center;width:36px;height:36px;margin-bottom:6px;font-size:0;filter:none}
+.tile b .ic{width:30px;height:30px;margin:0}
+.tile small{font-size:11.5px}
+.mini{min-height:40px;padding:8px 14px;font-size:14px;border-radius:12px}
+.seg button{min-height:44px;font-size:14.5px;border-radius:12px}
+.item{padding:12px 14px;border-radius:16px}
+.sec{font-size:13px}
+#qbar button,.acat button{min-height:36px;padding:6px 14px;font-size:13.5px;display:inline-flex;align-items:center;gap:6px}
+#qbar button .ic,.acat button .ic{width:16px;height:16px}
+.acat button.on .ic{color:#fff}
+button.msec .ic{width:18px;height:18px;margin-right:8px;vertical-align:-3px}
+`;
+ document.head.appendChild(st);
+}catch(e){}})();
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();

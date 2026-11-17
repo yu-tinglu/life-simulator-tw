@@ -137,7 +137,7 @@ function kidGrad(k){
 }
 function kidYear(k){
  kidFix(k);k.age++;
- if(k.age<18)S.money-=kidCost();
+ if(k.age<18){ldset('子女養育費',k.n);S.money-=kidCost();ldset(null)}
  if(k.sch)S.money-=k.tu;
  if(k.tutor&&k.sch&&k.age<22)S.money-=120000;
  if(k.train&&k.age<22)S.money-=60000;

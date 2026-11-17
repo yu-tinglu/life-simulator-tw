@@ -101,7 +101,7 @@ yearly=function(){
   if(S.sgr>1){
    S.sloan=Math.round(S.sloan*1.013);
    const pay=Math.min(S.sloan,Math.max(60000,Math.round(S.sloan/8)));
-   S.money-=pay;S.sloan-=pay;
+   ldset('學貸還款');S.money-=pay;ldset(null);S.sloan-=pay;
    log(S.sloan>0?`償還就學貸款 ${money(pay)}，剩餘 ${money(S.sloan)}。`:`你還清了就學貸款（最後一期 ${money(pay)}）。`,S.sloan>0?'':'good');
    if(S.sloan<=0)S.sloan=0;
   }

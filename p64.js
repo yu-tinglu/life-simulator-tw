@@ -47,7 +47,7 @@ wdCtry=function(k){
 const _y64=yearly;
 yearly=function(){
  _y64();
- try{if(S.ab&&S.ab.sch&&S.ab.visa==='study'&&S.cn!=='TW'&&!S.dead){const g=Math.round((S.ab.minor?.35:.6)*wTW(S.cn));S.money+=g;log(`獎學金生活津貼 ${money(g)}。`,'good')}}catch(e){}
+ try{if(S.ab&&S.ab.sch&&S.ab.visa==='study'&&S.cn!=='TW'&&!S.dead){const g=Math.round((S.ab.minor?.35:.6)*wTW(S.cn));ldset('獎學金生活津貼');S.money+=g;ldset(null);log(`獎學金生活津貼 ${money(g)}。`,'good')}}catch(e){}
 };
 /* 高中畢業時可選擇出國留學 */
 const _eu64=E_UNI.run;

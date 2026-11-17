@@ -1,5 +1,5 @@
 /* ---- p44：介面分類、常用功能、新手教學、總結卡改為長按儲存 ---- */
-const MCAT=[['人生記錄',['lf:ach','lf:tree','lf:rev','lf:tl','lf:ch','lf:dx']],['生活與家庭',['lf:stat','open:act','open:rel','lf:pol','lf:art','lf:health','lf:eth','lf:rg','lf:skill']],['財務與職涯',['open:job','open:ast','open:eco','lf:hs','lf:si']],['世界',['lf:wd']],['系統',['lf:sv','lf:set','lf:help']]];
+const MCAT=[['人生記錄',['lf:ach','lf:tree','lf:rev','lf:tl','lf:ch','lf:dx']],['生活與家庭',['lf:stat','open:act','open:rel','lf:pol','lf:art','lf:health','lf:eth','lf:rg','lf:skill']],['財務與職涯',['lf:led','open:job','open:ast','open:eco','lf:hs','lf:si']],['世界',['lf:wd']],['系統',['lf:sv','lf:set','lf:help']]];
 const FQK='lifesim_tw_freq_v1';
 const _hd44=handle;handle=function(a){try{if(typeof a==='string'&&/^(lf:[a-z]+|open:[a-z]+)$/.test(a)){const f=lsGet(FQK,{});f[a]=(f[a]||0)+1;lsSet(FQK,f)}}catch(e){}return _hd44(a)};
 const _mh44=moreHTML;

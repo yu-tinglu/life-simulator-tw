@@ -194,8 +194,8 @@ if(typeof E!=='undefined')E.push(
   ch('掛掉電話，打 165 反詐騙專線',()=>{S.karma=cl(S.karma+1);return G('你確認是詐騙，沒有損失。')}),
   ch('照指示操作',()=>{const l=Math.min(Math.max(0,S.money)*.5,R(100,800)*1000);S.money-=l;S.stress=cl(S.stress+10);chg('happy',-8);return B(`你被騙走 ${money(Math.round(l))}。`)})]})},
 {id:'moto',min:16,max:75,w:2,if:()=>S.age>=18,run:()=>({t:'你騎機車時被轉彎車擦撞倒地。',c:[
-  ch('報警、就醫、留下紀錄',()=>{const h=R(2,9);chg('health',-h);S.money-=R(10,60)*1000;return B(`你骨折住院，健康 −${h}，但依規定求償。`)}),
-  ch('私下和解',()=>{chg('health',-R(1,5));S.money-=R(5,30)*1000;return B('你和對方私下和解，自己吸收了不少醫藥費。')})]})}
+  ch('報警、就醫、留下紀錄',()=>{const h=R(2,9),c=R(10,50)*1000,g=R(30,120)*1000;chg('health',-h);S.money+=g-c;return G(`你骨折住院，健康 −${h}。先自付醫療與看護費 ${money(c)}，依法向對方與強制險求償取得 ${money(g)}，實際多得 ${money(g-c)}。`)}),
+  ch('私下和解',()=>{const c=R(5,30)*1000,g=R(0,15)*1000;chg('health',-R(1,5));S.money+=g-c;return B(`你和對方私下和解，對方賠 ${money(g)}，但你自付醫藥費 ${money(c)}，實際${g-c>=0?'多得':'少了'} ${money(Math.abs(g-c))}。`)})]})}
 );
 const COVS=[{id:'covid22',min:3,max:100,w:0,if:()=>S.year===2022&&!S.flags.cv22,run:()=>{S.flags.cv22=1;if(chance(.6)){chg('health',-R(0,4));S.stress=cl(S.stress+4);return [`2022 年本土疫情大流行，你確診居家隔離，休息幾天後康復。`,'bad']}return [`2022 年本土疫情大流行，你幸運沒有確診。`,'']}},
 {id:'covid21',min:3,max:100,w:0,if:()=>S.year===2021&&!S.flags.cv21,run:()=>{S.flags.cv21=1;S.stress=cl(S.stress+6);chg('happy',-3);const j=S.job&&/餐|服務|零售|旅|店|導遊|空服/.test(S.job.t);if(j){const l=Math.round(S.job.sal*.15);S.money-=l;return [`2021 年 5 月三級警戒，你的工作受影響，這年少賺約 ${money(l)}。`,'bad']}return [`2021 年 5 月三級警戒，學校與公司改為遠距，生活大亂。`,'bad']}}];

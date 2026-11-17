@@ -78,7 +78,7 @@ function ptPay(){
  const j=ptJob(o.id);
  if(!j||S.jail||S.army||S.age>=70||(S.job&&!j.side)){if(j&&S.job&&!j.side)log(`你有正職了，辭掉兼職「${j.t}」。`);S.ptj=null;return}
  const rate=ptRate(o),pay=rate*o.h*ptWeeks();
- S.money+=pay;o.yrs++;
+ ldset('兼職收入');S.money+=pay;ldset(null);o.yrs++;
  log(`兼職「${j.t}」：時薪 ${money(rate)}、每週 ${o.h} 小時，全年收入 ${money(pay)}。`,'good');
  mFix();S.skl[j.sk]=Math.min(100,(S.skl[j.sk]||0)+(o.h>=15?2:1));
  S.stress=cl(S.stress+Math.round(o.h/6));if(o.h>=25)chg('happy',-3);

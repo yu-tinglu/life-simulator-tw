@@ -21,6 +21,8 @@ async def main():
         await pg.evaluate("()=>{handle('close');showSheet('rel')}");await pg.wait_for_timeout(250);await pg.screenshot(path='shots/v_rel.png')
         await pg.evaluate("()=>{handle('close')}")
         await pg.evaluate("()=>handle('lf:stat')");await pg.wait_for_timeout(250);await pg.screenshot(path='shots/v_stat.png');await pg.evaluate("()=>handle('close')")
+        await pg.evaluate("()=>{S.job=hireJob(JOBS[40]);S.age=30;for(let i=0;i<3;i++)ageUp();view.ly=null;handle('lf:led')}");await pg.wait_for_timeout(300);await pg.screenshot(path='shots/v_led.png');await pg.evaluate("()=>handle('close')")
+        await pg.evaluate("()=>{S.cn='JP';S.fx.JP=.21;S.money=3000000;showSheet('ast')}");await pg.wait_for_timeout(300);await pg.screenshot(path='shots/v_ast.png');await pg.evaluate("()=>handle('close')")
         for t in ['more']:
             await pg.click(f'.tab[data-t={t}]');await pg.wait_for_timeout(250)
             await pg.screenshot(path=f'shots/u_{t}.png')

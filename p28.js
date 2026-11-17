@@ -74,7 +74,7 @@ yearly=function(){
  const had=S.flags.retired;_y28();
  const s=siInit(),k=S.cn||'TW',a=S.age,c=siCalc();
  if(S.dead)return;
- S.money-=c.ded;s.cur={k,L:c.L,ded:c.ded};
+ ldset('勞健保等扣款');S.money-=c.ded;ldset(null);s.cur={k,L:c.L,ded:c.ded};
  if(k==='TW'){
   s.lt=s.lt*1.03+(c.acc||0);
   if(c.lab){s.lab++;s.lw.push(c.ins*12);if(s.lw.length>8)s.lw.shift()}

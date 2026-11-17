@@ -125,7 +125,7 @@ function npcYear(){
  if(p&&(p.married||p.cohab)&&S.age>=18){pFix2(p);
   if(p.jl>0){p.jl--}
   const pa=S.age+(p.off||0),inc=(pa<65&&!p.jl)?Math.round(p.inc*.78):0,cost=kidCost();
-  S.money+=inc-cost;
+  ldset('配偶收入分擔',p.n);S.money+=inc;ldset('配偶份生活與家庭開支',p.n);S.money-=cost;ldset(null);
   if(!p.fl){p.fl=1;log(`${p.n}（${p.job}）與你共同生活：分擔收入約 ${money(inc)}、家庭支出增加約 ${money(cost)}／年（估算）。`)}}
 }
 const _lc=livingCost;

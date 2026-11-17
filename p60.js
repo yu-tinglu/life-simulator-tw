@@ -134,7 +134,7 @@ yearly=function(){
  try{
   if(S.tl){Object.keys(S.tl).forEach(k=>{if(S.tl[k]>12&&chance(.5))S.tl[k]--});S.runlv=Math.max(0,(S.runlv||0)-4);if(S.cfame>0&&chance(.5))S.cfame--}
   if(S.ent&&!S.dead){
-   if(S.school){const g=R(20000,100000);S.money+=g;log(`練習生通告與活動收入 ${money(g)}。`,'good');chg('health',-R(0,2))}
+   if(S.school){const g=R(20000,100000);ldset('練習生通告');S.money+=g;ldset(null);log(`練習生通告與活動收入 ${money(g)}。`,'good');chg('health',-R(0,2))}
    else if(S.age>=18&&!S.jail){const r=cpDebutNow(S.ent.jn,S.ent.co);log(r[0],r[1])}
   }
  }catch(e){}
