@@ -644,8 +644,8 @@ function interact(k,kind){
  }
  if(kind==='propose'){
   if(p.married||S.age<20)return B('現在還不能求婚。');
-  if(S.money<300000)return B('婚禮至少要 NT$300,000。');
-  if(chance(p.rel/100)){S.money-=300000;p.married=true;chg('happy',15);const m=`${p.n}答應了，你們結婚了！`;log(m,'good');return G(m)}
+  if(S.money<px(300000))return B('婚禮至少要 '+money(px(300000))+'。');
+  if(chance(p.rel/100)){S.money-=px(300000);p.married=true;chg('happy',15);const m=`${p.n}答應了，你們結婚了！`;log(m,'good');return G(m)}
   p.rel=cl(p.rel-20);chg('happy',-8);return B('對方拒絕了你的求婚。')
  }
  if(kind==='breakup'){const m=`你和${p.n}${p.married?'離婚':'分手'}了。`;if(p.married)S.money=Math.round(S.money/2);S.partner=null;chg('happy',-8);log(m,'bad');return B(m)}
@@ -2020,7 +2020,7 @@ const FACT={
  ask:(k,p)=>{const key='q'+k+'ask';if(S.acts[key])return B('今年已經拜託過了。');if(p.rel<55||p.tru<55)return B('交情還不夠深，開不了口。');
   S.acts[key]=1;p.rel=cl(p.rel-R(3,8));const pr=p.tr==='熱心'?.7:p.tr==='功利'?(p.rel>75?.55:.25):p.tr==='內向'?.35:.5;
   if(chance(Math.min(.9,pr+(S.bg?S.bg.conn/400:0)))){S.refer=1;return G(`${p.n}答應幫你牽線，今年求職的錄取機率大增。`)}return B(`${p.n}說他也幫不上忙。`)},
- party:(k,p)=>{const key='q'+k+'party';if(S.acts[key])return B('今年已經聚過了。');if(S.money<2500)return B('你的錢不夠。');S.acts[key]=1;S.money-=2500;p.rel=cl(p.rel+R(3,7));chg('happy',3);S.stress=cl(S.stress-3);
+ party:(k,p)=>{const key='q'+k+'party';if(S.acts[key])return B('今年已經聚過了。');if(S.money<px(2500))return B('你的錢不夠。');S.acts[key]=1;S.money-=px(2500);p.rel=cl(p.rel+R(3,7));chg('happy',3);S.stress=cl(S.stress-3);
   if(S.friends.length<14&&chance(.35)){const f=newFriend('朋友的朋友');S.friends.push(f);return G(`聚餐上認識了${f.n}，成為新朋友。`)}return G('大家聊得很開心。')},
  reconcile:(k,p)=>{const key='q'+k+'rec';if(S.acts[key])return B('今年已經試過了。');S.acts[key]=1;if(chance(.6)){p.rel=cl(p.rel+R(15,25));p.tru=cl(p.tru+8);return G('你們重新聊開了。')}p.rel=cl(p.rel-5);return B('對方還在氣頭上。')},
  cut:(k,p)=>{const i=+k.slice(1);const bad=p.tru<40||p.rel<35;S.friends.splice(i,1);if(bad){S.stress=cl(S.stress-4);return N(`你和${p.n}斷了聯絡，鬆了一口氣。`)}chg('happy',-4);return B(`你和${p.n}斷了聯絡，有些失落。`)}
@@ -2091,9 +2091,9 @@ function newCrush(src){
 }
 function mkPartner(c){S.flags.lovers=(S.flags.lovers||0)+1;S.partner={n:c.n,sx:c.sx,rel:Math.max(55,c.aff-5),married:false,off:R(-3,3),a:c.a,seen:{t:1,g:1,p:1,o:1},since:S.age,cohab:false,lastI:S.age,st:c.st||0,tru:c.tru==null?50:c.tru,jel:0};S.crush=S.crush.filter(x=>x!==c)}
 function meetNew(){
- if(S.age<13)return B('年紀還太小。');if(S.ap<1)return B('今年的行動點用完了。');if(S.money<1500)return B('你的錢不夠。');
+ if(S.age<13)return B('年紀還太小。');if(S.ap<1)return B('今年的行動點用完了。');if(S.money<px(1500))return B('你的錢不夠。');
  if(S.crush.length>=5)return B('心儀對象已經滿了，先處理手邊的關係吧。');
- S.ap--;S.money-=1500;const c=newCrush(S.school?'學校活動':S.job?'同事介紹':'交友活動');S.crush.push(c);const A=ARCH[c.a];
+ S.ap--;S.money-=px(1500);const c=newCrush(S.school?'學校活動':S.job?'同事介紹':'交友活動');S.crush.push(c);const A=ARCH[c.a];
  return G(`你在${c.src}認識了${c.n}（${A.em}${A.n}）。`)
 }
 function confess(c){
@@ -2119,13 +2119,13 @@ function actStart(t,isP,kind){
   if(un.length){const x=pick(un);t.seen[x]=1;m+=x==='t'?`對方似乎偏愛「${A2.tone}」的說話方式。`:x==='g'?`對方的目光常停在「${A2.gift}」上。`:`對方提過很想去「${A2.place}」。`}
   t.seen.o=1;m+=t.ok?'你隱約感覺對方對你並非無意。':'你有種預感，對方可能只把你當朋友。';return N(m)}
  if(kind==='chance'){S.ap--;const d=R(2,7);t.aff=cl(t.aff+d);t.last=S.age;return G(`你「剛好」出現在${t.n}常去的地方，聊了幾句（好感 +${d}）。`)}
- if(kind==='trip'){if(S.money<40000)return B('旅行至少要 NT$40,000。');S.ap--;S.money-=40000;t.lastI=S.age;const d=R(8,14);t.rel=cl(t.rel+d);chg('happy',6);S.stress=cl(S.stress-8);return G(`你們一起去旅行，感情更深了（好感 +${d}）。`)}
+ if(kind==='trip'){if(S.money<px(40000))return B('旅行至少要 '+money(px(40000))+'。');S.ap--;S.money-=px(40000);t.lastI=S.age;const d=R(8,14);t.rel=cl(t.rel+d);chg('happy',6);S.stress=cl(S.stress-8);return G(`你們一起去旅行，感情更深了（好感 +${d}）。`)}
  if(kind==='cohab'){if(t.cohab||t.married)return B('你們已經住在一起了。');t.cohab=true;t.lastI=S.age;t.rel=cl(t.rel+R(5,10));chg('happy',4);return G(`${t.n}搬進了你的住處，開始同居生活。`)}
  if(kind==='propose'){if(t.married)return B('你們已經結婚了。');if(!canMarry(t))return B(`${calYear()} 年的${CNS[S.cn||'TW'].n}尚未承認同性婚姻。可到「移民」頁移居到承認的國家，或維持同居。`);t.lastI=S.age;return _interact('partner','propose')}
  if(kind==='baby'){if(t.sx===S.sx)return B('同性伴侶可考慮人工生殖或領養。');return _interact('partner','baby')}
  if(kind==='art'){if(!t.married)return B('需要先結婚。');if(t.sx!==S.sx)return B('異性伴侶請使用「生小孩」。');
-  if(S.acts.art)return B('今年已經嘗試過了。');const tw=(S.cn||'TW')==='TW',cost=tw?2000000:600000;
-  if(S.money<cost)return B(`${tw?'台灣現行《人工生殖法》僅適用已婚異性夫妻，同性伴侶需赴海外人工生殖或代孕，費用高昂（遊戲估算約 NT$2,000,000）':'人工生殖約需 NT$600,000（遊戲估算）'}。`);
+  if(S.acts.art)return B('今年已經嘗試過了。');const tw=(S.cn||'TW')==='TW',cost=tw?px(2000000):px(600000);
+  if(S.money<cost)return B(`${tw?'台灣現行《人工生殖法》僅適用已婚異性夫妻，同性伴侶需赴海外人工生殖或代孕，費用高昂（遊戲估算約 '+money(px(2000000))+'）':'人工生殖約需 '+money(px(600000))+'（遊戲估算）'}。`);
   S.acts.art=1;S.money-=cost;
   if(chance(S.sx==='男'?.35:.45)){const sx=pick(['男','女']),n=S.name[0]+given(sx,calYear());S.kids.push(newKid(sx,n));chg('happy',12);birthSubsidy();return G(`你們迎接了新生兒${n}！`)}return N('這次沒有成功，但還有機會。')}
  if(kind==='adopt')return adopt(t);
@@ -2134,7 +2134,7 @@ function actStart(t,isP,kind){
 function adopt(p){
  if(S.age<25||S.age>55)return B('領養者需 25～55 歲（遊戲簡化）。');
  if(p&&p.married&&p.sx===S.sx&&(S.cn||'TW')==='TW'&&calYear()<2023)return B('台灣 2023 年以前，已婚同性伴侶只能做繼親收養，不能共同收養無血緣兒童。');
- if(S.money<50000)return B('收出養程序與安置相關費用（遊戲估算約 NT$50,000）不足。');if(S.acts.adopt)return B('今年已經領養過了。');S.acts.adopt=1;S.money-=50000;
+ if(S.money<px(50000))return B('收出養程序與安置相關費用（遊戲估算約 '+money(px(50000))+'）不足。');if(S.acts.adopt)return B('今年已經領養過了。');S.acts.adopt=1;S.money-=px(50000);
  const sx=pick(['男','女']),n=S.name[0]+given(sx,calYear()),k=newKid(sx,n);k.age=R(0,3);k.rel=R(55,85);k.adopt=1;S.kids.push(k);chg('happy',10);return G(`歷經審查與評估，你領養了${n}（${k.age} 歲），成為家人。`)
 }
 function sceneApply(t,isP,type,o){
@@ -2184,8 +2184,8 @@ function romHome(){
  if(S.partner){const p=S.partner;pFix(p);const A=ARCH[p.a];h+=`<div class="item row"><div style="flex:1"><b>${A.em} ${esc(p.n)}</b>・${p.married?'配偶':p.cohab?'同居伴侶':'伴侶'}・${A.n}${hbar(p.rel)}</div><button class="mini" data-a="rom:go:p">互動</button></div>`}
  else h+='<p class="sub">目前單身。</p>';
  h+='<div class="sec">心儀對象</div>'+(S.crush.length?S.crush.map((c,i)=>{const A=ARCH[c.a];return `<div class="item row"><div style="flex:1"><b>${A.em} ${esc(c.n)}</b>・${c.sx==='男'?'♂':'♀'}・${stg(c.aff)}・${A.n}${hbar(c.aff)}</div><button class="mini" data-a="rom:c:${i}">攻略</button></div>`}).join(''):'<p class="sub">還沒有心儀的人。多出門、換環境、參加活動都能遇到新對象。</p>');
- h+=`<button class="btn" data-a="rom:meet">🔍 主動認識新對象<small>1 點行動・NT$1,500</small></button>`;
- h+=`<button class="btn" data-a="rom:adopt">🍼 領養孩子<small>25～55 歲・約 NT$50,000（估算）・單身或已婚皆可</small></button>`;
+ h+=`<button class="btn" data-a="rom:meet">🔍 主動認識新對象<small>1 點行動・${money(px(1500))}</small></button>`;
+ h+=`<button class="btn" data-a="rom:adopt">🍼 領養孩子<small>25～55 歲・約 ${money(px(50000))}（估算）・單身或已婚皆可</small></button>`;
  return h+`<button class="btn" data-a="open:rel">← 返回家庭</button>`;
 }
 function crushPage(i){
@@ -2207,12 +2207,12 @@ function partnerPage(){
  h+=romBubble();
  if(view.scene&&view.scene.k==='p')return h+sceneHTML(p,'p');
  const b=(a,t,s,dis)=>`<button class="btn" data-a="rom:act:p:${a}" ${dis?'disabled':''}>${t}${s?`<small>${s}</small>`:''}</button>`;
- h+=b('talk','💬 深聊','選擇語氣・1 點')+b('date','📍 約會','1 點')+b('gift','🎁 送禮','1 點')+b('trip','✈️ 一起旅行','NT$40,000・1 點');
+ h+=b('talk','💬 深聊','選擇語氣・1 點')+b('date','📍 約會','1 點')+b('gift','🎁 送禮','1 點')+b('trip','✈️ 一起旅行',money(px(40000))+'・1 點');
  if(!p.married&&!p.cohab)h+=b('cohab','🏠 同居');
- if(!p.married)h+=b('propose','💍 求婚','婚禮 NT$300,000');
+ if(!p.married)h+=b('propose','💍 求婚','婚禮 '+money(px(300000)));
  if(p.married&&p.sx!==S.sx)h+=b('baby','👶 生小孩');
- if(p.married&&p.sx===S.sx)h+=b('art','🧬 人工生殖／代孕',(S.cn||'TW')==='TW'?'台灣須赴海外・約 NT$2,000,000（估算）':'約 NT$600,000（估算）');
- if(p.married)h+=b('adopt','🍼 領養','25～55 歲・約 NT$50,000（估算）');
+ if(p.married&&p.sx===S.sx)h+=b('art','🧬 人工生殖／代孕',(S.cn||'TW')==='TW'?'台灣須赴海外・約 '+money(px(2000000))+'（估算）':'約 '+money(px(600000))+'（估算）');
+ if(p.married)h+=b('adopt','🍼 領養','25～55 歲・約 '+money(px(50000))+'（估算）');
  h+=b('break',p.married?'💔 離婚':'💔 分手');
  return h+`<button class="btn" data-a="rom:go:h">← 返回</button>`;
 }
@@ -2220,7 +2220,7 @@ function friendExtra(k){
  const p=getP(k);fFix(p);
  let h=`<div class="sub">${p.kind}・個性：${p.tr}・信任 ${p.tru}${p.loan?`・借款未還 ${money(p.loan)}`:''}</div>${pbar(p.tru)}`;
  const b=(a,t,s)=>`<button class="btn" data-a="do:${k}:${a}">${t}${s?`<small>${s}</small>`:''}</button>`;
- h+=b('talk','💬 聊天')+b('gift','🎁 送禮','NT$2,000')+b('party','🍻 聚餐','NT$2,500・可能認識新朋友')+b('help','🤝 借錢給他','約年薪的 12%')+b('ask','📨 請他引薦工作','需好感與信任 55 以上');
+ h+=b('talk','💬 聊天')+b('gift','🎁 送禮',money(px(2000)))+b('party','🍻 聚餐',money(px(2500))+'・可能認識新朋友')+b('help','🤝 借錢給他','約年薪的 12%')+b('ask','📨 請他引薦工作','需好感與信任 55 以上');
  if(p.rel<45)h+=b('reconcile','🕊️ 試著和好');
  h+=b('fight','😠 吵架')+b('cut','✂️ 斷絕往來');
  return h;
@@ -2256,14 +2256,14 @@ E.push(
   ch('婉拒',()=>{c.aff=cl(c.aff-30);chg('happy',-3);return N('你婉拒了對方，氣氛有些尷尬。')})]}}},
 {id:'rrival',min:16,max:55,w:2,if:()=>!S.partner&&S.crush.some(c=>c.aff>=40),run:()=>{const c=topCrush();return {t:`你發現也有人在追${c.n}，對方看起來條件不錯。`,c:[
   ch('公平競爭',()=>{if(chance(.5)){c.aff=cl(c.aff+5);return G(`${c.n}還是比較在意你。`)}c.aff=cl(c.aff-15);chg('happy',-4);return B(`${c.n}似乎被對方吸引了。`)}),
-  ch('砸錢送大禮（NT$20,000）',()=>{if(S.money<20000)return B('你的錢不夠。');S.money-=20000;if(chance(.7)){c.aff=cl(c.aff+10);return G('大禮讓對方印象深刻。')}return N('對方收下了禮物，但沒有特別反應。')}),
+  ch('砸錢送大禮（'+money(px(20000))+'）',()=>{if(S.money<px(20000))return B('你的錢不夠。');S.money-=px(20000);if(chance(.7)){c.aff=cl(c.aff+10);return G('大禮讓對方印象深刻。')}return N('對方收下了禮物，但沒有特別反應。')}),
   ch('退出競爭',()=>{S.crush=S.crush.filter(x=>x!==c);S.stress=cl(S.stress-3);return N('你選擇祝福對方。')})]}}},
 {id:'rfest',min:16,max:70,w:2,if:()=>!!S.partner||S.crush.some(c=>c.aff>=55),run:()=>{const isP=!!S.partner,t=isP?S.partner:topCrush(),f=d=>{if(isP)t.rel=cl(t.rel+d);else t.aff=cl(t.aff+d)};return {t:`${pick(['情人節','七夕','聖誕節','紀念日'])}到了，你要為${t.n}準備什麼？`,c:[
-  ch('精心安排（NT$8,000）',()=>{if(S.money<8000)return B('你的錢不夠。');S.money-=8000;f(R(8,14));chg('happy',4);return G('對方感動極了。')}),
-  ch('簡單的心意（NT$1,500）',()=>{if(S.money<1500)return B('你的錢不夠。');S.money-=1500;f(R(2,6));return N('平淡但溫馨。')}),
+  ch('精心安排（'+money(px(8000))+'）',()=>{if(S.money<px(8000))return B('你的錢不夠。');S.money-=px(8000);f(R(8,14));chg('happy',4);return G('對方感動極了。')}),
+  ch('簡單的心意（'+money(px(1500))+'）',()=>{if(S.money<px(1500))return B('你的錢不夠。');S.money-=px(1500);f(R(2,6));return N('平淡但溫馨。')}),
   ch('沒特別準備',()=>{f(-R(3,8));return B('對方有點失望。')})]}}},
 {id:'rpush',min:27,max:42,w:2.5,if:()=>!S.partner,run:()=>{mFix();const s=S.bg.sty,hard=s==='嚴格'||s==='虎媽';const c=[
-  ch('去相親（NT$3,000）',()=>{if(S.money<3000)return B('你的錢不夠。');if(S.crush.length>=5)return N('你心儀對象已經夠多了。');S.money-=3000;const c=newCrush('相親');c.aff=R(10,25);S.crush.push(c);return N(`你在相親場合認識了${c.n}。`)}),
+  ch('去相親（'+money(px(3000))+'）',()=>{if(S.money<px(3000))return B('你的錢不夠。');if(S.crush.length>=5)return N('你心儀對象已經夠多了。');S.money-=px(3000);const c=newCrush('相親');c.aff=R(10,25);S.crush.push(c);return N(`你在相親場合認識了${c.n}。`)}),
   ch('直接拒絕',()=>{S.mom.rel=cl(S.mom.rel-(hard?10:4));S.dad.rel=cl(S.dad.rel-(hard?8:3));chg('happy',hard?-3:1);return N('你表明目前不想被安排。')}),
   ch('敷衍帶過',()=>{S.stress=cl(S.stress+(hard?4:2));return N('你笑著說再看看。')})];
  if(S.ori!=='異性戀'&&!S.flags.out)c.push(ch('藉機說明自己的性向',()=>comingOut()));
@@ -2280,7 +2280,7 @@ E.push(
   ch('答應',()=>{S.job.perf=cl(S.job.perf+R(3,8));S.stress=cl(S.stress+R(4,8));chg('health',-R(0,2));return N('你犧牲週末，績效更好看。')}),
   ch('婉拒',()=>{S.job.perf=cl(S.job.perf-R(2,6));chg('happy',3);S.stress=cl(S.stress-3);return N('主管有點不高興，但你有了完整的週末。')})]})},
 {id:'ocol',min:22,max:62,w:2.5,if:()=>S.job&&!S.job.founder,run:()=>({t:'同事邀你下班後一起吃飯聊聊。',c:[
-  ch('參加（NT$1,500）',()=>{if(S.money<1500)return B('你的錢不夠。');S.money-=1500;chg('happy',3);if(S.friends.length<14&&chance(.45)){const f=newFriend('同事');S.friends.push(f);return G(`你和${f.n}成了朋友。`)}return N('氣氛不錯。')}),
+  ch('參加（'+money(px(1500))+'）',()=>{if(S.money<px(1500))return B('你的錢不夠。');S.money-=px(1500);chg('happy',3);if(S.friends.length<14&&chance(.45)){const f=newFriend('同事');S.friends.push(f);return G(`你和${f.n}成了朋友。`)}return N('氣氛不錯。')}),
   ch('幫同事頂班',()=>{S.karma=cl(S.karma+3);S.job.perf=cl(S.job.perf-2);later(R(2,5),'favor','同事');return N('同事很感激你。')}),
   ch('婉拒',()=>N('你直接下班回家。'))]})},
 {id:'oblame',min:22,max:62,w:1.5,if:()=>S.job&&!S.job.founder,run:()=>({t:'同事把專案失誤的責任推到你身上。',c:[
@@ -7383,6 +7383,9 @@ function rnRun(n,km){
 const CPS=[
  /* id,名稱,最小,最大,階段,獎金[冠,亞,季],報名成本,需求函式,類型,出道職業 */
  ['sch_sing','校內歌唱比賽',8,22,['初賽','決賽'],[3000,2000,1000],0,()=>S.tl.sing*.55+S.skl.cre*.15+S.skl.comm*.1+S.looks*.2,'sing'],
+ ['kara','社區卡拉OK歌唱賽',16,85,['海選','決賽'],[30000,15000,8000],500,()=>S.tl.sing*.5+S.skl.comm*.15+S.looks*.1+8,'sing'],
+ ['adult_sing','成人組歌唱大賽',25,60,['初賽','複賽','決賽'],[150000,60000,25000],1500,()=>S.tl.sing*.65+S.skl.cre*.1+S.skl.comm*.1+S.looks*.1-4,'sing'],
+ ['senior','銀髮才藝大賽',55,90,['區賽','決賽'],[20000,10000,5000],0,()=>Math.max(S.tl.sing,S.tl.dance,S.tl.music,S.tl.paint)*.6+S.skl.comm*.15+10,'talent'],
  ['nat_sing','全國歌唱大賽',14,35,['縣市初賽','區域複賽','全國決賽'],[100000,50000,20000],1500,()=>S.tl.sing*.65+S.skl.cre*.1+S.skl.comm*.1+S.looks*.15-6,'sing','演員／歌手'],
  ['idol','電視選秀節目（唱跳）',15,30,['海選','淘汰賽','晉級賽','總決賽'],[1000000,300000,100000],0,()=>(S.tl.sing*.3+S.tl.dance*.3)+S.skl.cre*.1+S.skl.comm*.1+S.looks*.2-8,'idol','演員／歌手'],
  ['sch_dance','校內舞蹈比賽',8,22,['初賽','決賽'],[3000,2000,1000],0,()=>S.tl.dance*.55+S.skl.fit*.2+S.looks*.15+S.skl.cre*.1,'dance'],
@@ -7636,7 +7639,7 @@ function kpDo(kind){
  const ps=kpPeople();if(!ps.length)return B('身邊沒有可以聯絡的人。');
  const key=kind==='a'?'kpA':'kpB';
  if(S.acts[key])return B('今年已經做過了。');
- const cost=kind==='b'?1000*ps.length:0;
+ const cost=kind==='b'?px(1000)*ps.length:0;
  if(S.money<cost)return B('你的錢不夠。');
  S.acts[key]=1;S.money-=cost;
  ps.forEach(p=>{const d=kind==='a'?(p===S.partner?R(2,4):R(1,3)):(p===S.partner?R(4,7):R(3,6));p.rel=cl(p.rel+d)});
@@ -7648,7 +7651,7 @@ const _rh62=relHTML;
 relHTML=function(){
  const h=_rh62(),ps=kpPeople(),n=ps.length,dis=S.jail||S.dead;
  if(!n)return h;
- const blk=`<button class="btn p" data-a="kp:a" ${dis||S.acts.kpA?'disabled':''}>一鍵問候全部（${n} 人）<small>免費・全員好感小幅提升・每年 1 次${S.acts.kpA?'（今年已做）':''}</small></button><button class="btn" data-a="kp:b" ${dis||S.acts.kpB||S.money<1000*n?'disabled':''}>一鍵請客送禮<small>費用 ${money(1000*n)}（每人 NT$1,000）・全員好感明顯提升・每年 1 次${S.acts.kpB?'（今年已做）':''}</small></button>`;
+ const blk=`<button class="btn p" data-a="kp:a" ${dis||S.acts.kpA?'disabled':''}>一鍵問候全部（${n} 人）<small>免費・全員好感小幅提升・每年 1 次${S.acts.kpA?'（今年已做）':''}</small></button><button class="btn" data-a="kp:b" ${dis||S.acts.kpB||S.money<px(1000)*n?'disabled':''}>一鍵請客送禮<small>費用 ${money(px(1000)*n)}（每人 ${money(px(1000))}）・全員好感明顯提升・每年 1 次${S.acts.kpB?'（今年已做）':''}</small></button>`;
  return h.replace('</h3>','</h3>'+blk);
 };
 const _hd62=handle;
@@ -8407,11 +8410,11 @@ function onDo(k){
  return N('');
 }
 function onHTML(){
- if(S.age<14||S.dead)return '';
- let h='<div class="sec">網路交友</div>';
- const o=S.on;
- if(!o)return h+`<div class="item"><div class="sub">認識來自世界各地的網友。先選想認識的性別，成為朋友或戀人由你們相處後決定。每次 1 點行動點數。</div></div><button class="btn" data-a="on:new">認識新網友<small>選擇性別・1 點行動點</small></button>`;
- return h+`<div class="item row"><div style="flex:1"><b>${esc(o.n)}</b>・${esc(CNAME[o.cn])}<div class="sub">${ONST[Math.min(2,o.st)]}・好感 ${o.rel}</div></div><button class="mini" data-a="ot:open:o">互動</button></div>`;
+ if(S.age<13||S.dead)return '';
+ let h='<div class="sec">認識新朋友</div>';
+ h+=`<button class="btn" data-a="mt:new">主動認識新對象<small>學校、公司、聚會・1 點行動點・約 ${money(px(1500))}</small></button>`;
+ if(S.age>=14)h+=S.on?`<div class="item"><div class="sub">你目前有固定往來的網友：${esc(S.on.n)}（見上方「伴侶・戀愛」）。</div></div>`:`<button class="btn" data-a="on:new">網路交友<small>選擇性別・1 點行動點・由相處決定朋友或戀人</small></button>`;
+ return h;
 }
 const _rh70=relHTML;relHTML=function(){return _rh70()+onHTML()};
 const _hd70=handle;
@@ -8494,7 +8497,7 @@ relHTML=function(){
  const h=_rh70b();
  if(S.age<25||S.age>55||S.dead)return h;
  const n=S.kids.filter(k=>k.adopt).length;
- return h+`<div class="sec">領養</div><button class="btn" data-a="ad:go">領養孩子<small>25～55 歲・約 ${money(50000)}（估算）・單身或已婚皆可${n?`・已領養 ${n} 位`:''}</small></button>`;
+ return h+`<div class="sec">領養</div><button class="btn" data-a="ad:go">領養孩子<small>25～55 歲・約 ${money(px(50000))}（估算）・單身或已婚皆可${n?`・已領養 ${n} 位`:''}</small></button>`;
 };
 const _hd70b=handle;
 handle=function(a){
@@ -8602,24 +8605,30 @@ function otAct(id,k){
  if(o.cost&&S.money<o.cost)return B('你的錢不夠。');
  if(o.min&&otAff(t,k)<o.min)return B(`好感還不夠（需要 ${o.min}）。`);
  if(o.max&&otAff(t,k)>=o.max)return N('目前感情穩定，不需要特別和解。');
- const r=o.run(t,k,A);if(r[1]!=='bad'||/尷尬|沒能|不太對|安靜/.test(r[0])){}
+ if(o.pOnly&&otDist(t,k))return N('你們還沒有住在一起，目前是遠距離，見家長要等見面之後。');
+ const r=o.run(t,k,A);if(otDist(t,k)){r[0]=r[0].replace('你們一起看了電影，散場後聊了很久。','你們各自在家同步看了電影，邊看邊傳訊息聊。').replace('你們一起念書','你們視訊一起念書').replace('你們一起運動','你們視訊連線一起運動').replace('驚喜成功了！','遠距驚喜（外送或快遞）成功了！').replace('時機不太對，驚喜變成了小小的尷尬。','快遞延誤了，驚喜晚了好幾天才到。')}
  if(r&&(r[1]==='good'||/好感 -/.test(r[0]))){if(o.ap)S.ap--;if(o.cost)S.money-=o.cost}
  return r;
 }
 function otDone(k){view.tab='rel';render();showSheet('rel',view.rsub)}
 /* ===== 在對象頁加入「專屬章節與互動」區塊 ===== */
-function otBlock(t,k){
+var otBlock=function(t,k){
  const A=ARCH[t.a],c=otChapter(t,k),ch=t.ch||0;
  let h='<div class="sec">專屬章節與互動</div>';
+ h+=otProfHTML(t,k);
  h+=`<div class="item"><b>專屬章節 ${ch}／4${t.route?'・真結局路線':''}</b><div class="bar"><i style="width:${ch*25}%;background:#ec4899"></i></div><div class="sub">${c?`第 ${c.i+1} 章「${OTSTORY[t.a][c.i][0]}」已開放`:ch>=4?'這位對象的章節已全部走完':`下一章需要好感 ${OTREQ[ch]}（目前 ${otAff(t,k)}）`}</div></div>`;
  if(c)h+=`<button class="btn p" data-a="ot:story:${k}">進入章節：第 ${c.i+1} 章「${esc(OTSTORY[t.a][c.i][0])}」<small>1 點行動點・選項會影響好感與結局</small></button>`;
- OTA.forEach(o=>{if(o.pOnly&&k!=='p')return;h+=`<button class="btn" data-a="ot:act:${k}:${o.id}">${o.l}<small>${o.s}</small></button>`});
+ OTA.forEach(o=>{if(o.pOnly&&(k!=='p'||otDist(t,k)))return;const lbl=otDist(t,k)?({movie:'線上一起看電影',study:'視訊一起念書／運動',surp:'遠距驚喜（外送／快遞）'}[o.id]||o.l):o.l;h+=`<button class="btn" data-a="ot:act:${k}:${o.id}">${lbl}<small>${o.cost?o.s.replace(/NT\$[\d,]+/,money(o.cost)):o.s}</small></button>`});
  return h;
 }
+const _rr71=romRow;
+function onRow(){if(!S.on)return '';onFix(S.on);const o=S.on,A=ARCH[o.a];return `<div class="item row"><div style="flex:1"><b>${A.em} ${esc(o.n)}</b>・網友・${esc(CNAME[o.cn])}・${ONST[Math.min(2,o.st)]}${hbar(o.aff)}</div><button class="mini" data-a="ot:open:o">互動</button></div>`}
+romRow=function(){const h=_rr71(),m='<button class="btn" data-a="rom:go:h">',j=h.indexOf(m);const r=onRow();return j>=0?h.slice(0,j)+r+h.slice(j):h+r};
 const _rm71=romHTML;
 romHTML=function(k){
  if(k==='Ro'){if(!S.on){view.rsub=null;return romHome()}return onPage()}
  let h=_rm71(k);
+ if(k==='R'||!k){h=h.replace(/<button class="btn" data-a="rom:meet">[\s\S]*?<\/button>/,'');const m='<div class="sec">心儀對象</div>',j=h.indexOf(m);if(j>=0&&S.on)h=h.slice(0,j)+'<div class="sec">網友</div>'+onRow()+h.slice(j);h=h.replace(/(<button class="btn" data-a="open:rel">)/,'<div class="sub">想認識新對象或網友，請回「關係」頁的「認識新朋友」。</div>$1')}
  try{
   let t=null,kk=null;
   if(k==='Rp'&&S.partner){t=S.partner;kk='p'}else if(k&&k.startsWith('Rc')){const i=+k.slice(2);if(S.crush[i]){t=S.crush[i];kk=String(i)}}
@@ -8629,6 +8638,7 @@ romHTML=function(k){
 };
 const _hd71=handle;
 handle=function(a){
+ if(a==='mt:new'&&S){const r=meetNew();view.msg=r;view.tab='rel';view.rsub=null;render();showSheet('rel');return}
  if(typeof a==='string'&&S&&a.startsWith('ot:')){
   const p=a.split(':'),x=p[1];let r=null;
   if(x==='story'){r=otStory(p[2]);if(r){view.rmsg={q:r[1]==='bad'?'b':'n',t:r[0]};otDone(p[2])}return}
@@ -8664,13 +8674,15 @@ romHandle=function(x,y,z){
  return _rhd71(x,y,z);
 };
 /* ===== 隨機乙女事件 ===== */
-function otTargets(kind){
+function otDist(t,k){return k==='o'||(k==='p'&&!!t.ld&&!t.cohab&&!t.married)}
+function otTargets(kind,phys){
  const L=[];
  if(S.partner&&S.partner.a!=null&&S.age>=16)L.push({t:S.partner,k:'p'});
  S.crush.forEach((c,i)=>{if(c.aff>=(kind==='c'?25:20))L.push({t:c,k:String(i)})});
  if(S.on&&S.on.st>=1){onFix(S.on);L.push({t:S.on,k:'o'})}
- return L.filter(x=>kind==='p'?x.k==='p':kind==='c'?x.k!=='p':true);
+ return L.filter(x=>(kind==='p'?x.k==='p':kind==='c'?x.k!=='p'&&x.k!=='o':kind==='d'?otDist(x.t,x.k):true)&&!(phys&&otDist(x.t,x.k)));
 }
+const OTPHYS=new Set(['rain','fire','teased','night','family','lost','hurt','low','sick','newyear']);
 const OTE=[
  ['rival','c','情敵出現','另一個人也在追{N}，還送了花。',[['大方公平競爭，照常相處',6,'你沒有慌亂，{N}反而覺得你很穩重。'],['趁早告白搶先一步',0,'__confess'],['默默退後，覺得算了',-8,'你退縮了，{N}有些不解。']]],
  ['mis','a','誤會','朋友說看到{N}和別人很親密，你心裡很不舒服。',[['當面問清楚',8,'原來是誤會，{N}笑著解釋，你們的距離更近了。'],['等對方自己解釋',-2,'沉默讓氣氛有點微妙。'],['賭氣不理對方',-10,'{N}不知道哪裡惹你生氣，難過了好幾天。']]],
@@ -8690,12 +8702,19 @@ const OTE=[
  ['newyear','a','跨年','跨年夜，{N}問你有沒有空一起倒數。',[['答應並一起倒數（NT$800）',8,'倒數的那一刻，{N}輕聲說：「新年快樂。」',800],['各自跨年，只傳訊息',-1,'{N}回覆：「也好，新年快樂。」'],['約元旦再見',3,'{N}說：「那就元旦見。」']]],
  ['hurt','a','受傷','{N}運動受傷，需要人陪著去醫院。',[['立刻陪著去，全程照顧',11,'{N}靠在你肩上：「還好有你在。」'],['傳訊息關心並匯款（NT$1,000）',3,'{N}說：「你人真好。」',1000],['說自己有事走不開',-7,'{N}笑著說沒關係，聲音卻很輕。']]]
 ];
+OTE.push(
+ ['miss','d','想念','你很想念{N}，隔著螢幕總覺得不夠。',[['訂機票去見面（NT$20,000）',12,'見面時{N}紅了眼眶：「你真的來了。」',20000],['視訊聊到天亮',7,'你們聊到窗外天亮，捨不得掛電話。'],['說最近太忙，下次再說',-6,'{N}回了一個勉強的笑臉。']]],
+ ['tz','d','時差','你和{N}有時差，這個月常常錯過彼此的訊息。',[['約定固定的通話時間',8,'你們固定每週通話，生活有了儀式感。'],['各自等對方先聯絡',-5,'訊息越來越少，彼此都有點失落。'],['調整作息配合對方',6,'你熬夜陪聊，{N}很感動，只是你有點累。']]],
+ ['rsick','d','遠端關心','{N}說身體不舒服，人在遠方的你有點著急。',[['視訊關心並叫外送／寄藥（NT$1,500）',9,'{N}說：「雖然你不在，但我覺得被照顧到了。」',1500],['傳訊息叮嚀多休息',3,'{N}回覆：「謝謝，我會好好休息。」'],['沒注意到，隔天才知道',-8,'{N}沒有責怪你，但有些失落。']]],
+ ['rbday','d','遠距生日','{N}的生日到了，你們卻在不同的地方。',[['寄禮物並視訊唱生日歌（NT$3,000）',10,'{N}一邊拆禮物一邊笑，眼眶卻紅了。',3000],['只傳訊息祝福',2,'{N}回了好幾個笑臉。'],['忘記了',-12,'{N}隔天才說：「沒關係。」語氣卻很輕。']]],
+ ['trial','d','遠距考驗','有人對{N}示好，{N}坦白告訴了你。',[['感謝坦白並表達信任',8,'{N}說：「我只想和你在一起。」'],['要求對方減少和他聯絡',-8,'{N}沉默了一下：「我需要你信任我。」'],['半開玩笑要對方小心',2,'氣氛輕鬆了些，但你心裡其實有點在意。']]]
+);
 OTE.forEach((d,i)=>{
- const [id,kind,ttl,txt,opts]=d;
- E.push({id:'ote_'+id,min:15,max:75,w:2,if:()=>otTargets(kind).length>0&&!S.jail,run:()=>{
-  const tg=pick(otTargets(kind)),t=tg.t,k=tg.k,nm=t.n,f=s=>s.replace(/\{N\}/g,nm);
-  return {t:f(txt)+`（${ttl}）`,c:opts.map(o=>ch(f(o[0]),()=>{
-   if(o[3]){if(S.money<o[3])return B('你的錢不夠。');S.money-=o[3]}
+ const [id,kind,ttl,txt,opts]=d,ph=OTPHYS.has(id);
+ E.push({id:'ote_'+id,min:15,max:75,w:2,if:()=>otTargets(kind,ph).length>0&&!S.jail,run:()=>{
+  const tg=pick(otTargets(kind,ph)),t=tg.t,k=tg.k,nm=t.n,f=s=>s.replace(/\{N\}/g,nm);
+  return {t:f(txt)+`（${ttl}）`,c:opts.map(o=>ch(f(o[0]).replace(/NT\$[\d,]+/,o[3]?money(px(o[3])):'$&'),()=>{
+   if(o[3]){const cc=px(o[3]);if(S.money<cc)return B('你的錢不夠。');S.money-=cc}
    if(o[2]==='__confess'){if(k==='p'||k==='o'||t.aff<40){otAdd(t,k,3);return N(`你鼓起勇氣表達心意，${nm}說需要一點時間。（好感 +3）`)}const r=confess(t);return r}
    const d=k==='p'?Math.round(o[1]*.8):o[1];otAdd(t,k,d);chg('happy',d>=6?3:d<0?-3:0);
    const m=f(o[2])+`（好感 ${d>=0?'+':''}${d}）`;log(`${nm}：${ttl}，好感 ${d>=0?'+':''}${d}。`,otTone(d));return d<0?B(m):d>=6?G(m):N(m)
@@ -8713,8 +8732,129 @@ function cgHTML(){
   const c=[0,1,2,3].filter(k=>got[a+'_'+k]).length;
   h+=`<div class="sec">${A.em} ${A.n}（${c}／4）</div>`+[0,1,2,3].map(k=>{const x=got[a+'_'+k];return `<div class="item"><b>${x?esc(OTSTORY[a][k][0]):'？？？'}${x&&x.q===0?'　★':''}</b><div class="sub">${x?`與 ${esc(x.n)} 的回憶・${x.y} 年`:'尚未解鎖'}</div></div>`}).join('');
  });
+ h+=`<div class="sec">婚後篇（${[0,1,2,3].filter(k=>got['m_'+k]).length}／4）</div>`+[0,1,2,3].map(k=>{const x=got['m_'+k];return `<div class="item"><b>${x?esc(OTM[k][0]):'？？？'}${x&&x.q===0?'　★':''}</b><div class="sub">${x?`與 ${esc(x.n)} 的回憶・${x.y} 年`:'尚未解鎖'}</div></div>`}).join('');
  return h+'<button class="btn" data-a="back">← 返回</button>';
 }
+
+/* ===== 對象背景（職業、興趣、祕密）===== */
+const OTJ=['護理師','設計師','工程師','老師','咖啡師','攝影師','律師','廚師','記者','研究員','健身教練','插畫家','音樂人','建築師','社工','業務','醫師','翻譯','花藝師','消防員'];
+const OTH=['爬山','烘焙','攝影','看展','打籃球','彈吉他','閱讀','旅行','養貓','桌遊','衝浪','電影','手作','跑步'];
+const OTS=['其實一直想辭掉現在的工作，去環遊世界','小時候曾經因為轉學而很孤單，所以特別珍惜朋友','偷偷寫了很多沒有寄出的信','很怕被人看穿自己的脆弱','曾經為了夢想放棄過一段感情','最大的夢想是開一間自己的小店','其實有點怕黑，卻從不告訴別人'];
+function otProf(t){if(!t.pj){t.pj=pick(OTJ);t.hb=pick(OTH);t.sec=pick(OTS)}return t}
+function otProfHTML(t,k){
+ otProf(t);const a=otAff(t,k);
+ return `<div class="item"><b>${esc(t.n)} 的背景</b><div class="sub">職業：${t.pj}・興趣：${t.hb}</div><div class="sub">${a>=60?'祕密：'+t.sec:'再熟一點（好感 60）就會告訴你心裡的祕密。'}</div></div>`;
+}
+/* ===== 三角關係 ===== */
+E[E.length]={id:'ote_tri',min:16,max:60,w:2,if:()=>otTargets('x',true).filter(x=>otAff(x.t,x.k)>=40).length>=2&&!S.jail,run:()=>{
+ const L=otTargets('x',true).filter(x=>otAff(x.t,x.k)>=40).sort(()=>Math.random()-.5),A=L[0],B2=L[1];
+ return {t:`${A.t.n}和${B2.t.n}幾乎同時對你表達了好感，你必須面對自己的心。`,c:[
+  ch(`選擇${A.t.n}`,()=>{otAdd(A.t,A.k,10);otAdd(B2.t,B2.k,-12);return N(`你坦率地告訴${B2.t.n}，你的心意在${A.t.n}那邊。（${A.t.n} +10，${B2.t.n} -12）`)}),
+  ch(`選擇${B2.t.n}`,()=>{otAdd(B2.t,B2.k,10);otAdd(A.t,A.k,-12);return N(`你坦率地告訴${A.t.n}，你的心意在${B2.t.n}那邊。（${B2.t.n} +10，${A.t.n} -12）`)}),
+  ch('兩個人都先當朋友，慢慢想',()=>{otAdd(A.t,A.k,-3);otAdd(B2.t,B2.k,-3);return B('你誰也沒選，兩個人都隱約感覺到你的猶豫。（雙方 -3）')}),
+  ch('腳踏兩條船，維持曖昧',()=>{if(chance(.5)){otAdd(A.t,A.k,-20);otAdd(B2.t,B2.k,-20);S.karma=cl(S.karma-8);return B('事情曝光了，兩個人都對你失望透頂。（雙方 -20）')}otAdd(A.t,A.k,4);otAdd(B2.t,B2.k,4);return N('你僥倖沒被發現，但心裡七上八下。（雙方 +4）')})]}}};
+/* ===== 婚後篇：結婚後的 4 個章節，走到最後有「白頭偕老」結局 ===== */
+const OTM=[
+ ['第一個家','你們搬進新家，{N}看著空蕩蕩的客廳笑著說：「接下來要一起把它填滿。」',['一起慢慢挑家具，也把預算談清楚','你們為一張沙發討論了一整個週末，卻覺得很幸福。'],['全部交給對方決定','{N}雖然笑著答應，卻有點希望你多參與。'],['說這些小事你不在意','{N}沉默了一會，客廳顯得更空了。']],
+ ['柴米油鹽','日子變得平淡，{N}在廚房裡嘆了口氣：「最近我們好像只剩下家務了。」',['安排一個只屬於兩人的週末','你們放下手機，像剛認識時一樣散步聊天。'],['答應會多幫忙','{N}點點頭，眼神柔和了些。'],['說大家都這樣啊','{N}沒有再說話，轉身去洗碗。']],
+ ['人生的低谷','你們同時遇上工作與家庭的壓力，{N}深夜獨自坐在客廳。',['坐到身邊，說我們一起面對','{N}靠在你肩上，終於哭了出來。'],['遞上一杯熱茶','{N}說了聲謝謝，心情稍微平復。'],['說你太累了先睡','{N}望著你的背影，輕輕嘆了口氣。']],
+ ['白頭偕老','多年過去，{N}牽起你的手：「這些年，謝謝你一直在。」',['說：該說謝謝的是我','你們相視而笑，時間彷彿停在這一刻。'],['笑著說我們還要一起老','{N}眼角有了皺紋，笑容依然溫柔。'],['不好意思地轉移話題','{N}笑笑，把這句話收進了心裡。']]
+];
+function otMChapter(p){const i=p.mch||0;if(i>=4||!p.married)return null;if(S.age-(p.since||S.age)<2*(i+1))return null;if(S.acts['mch'+i])return null;return {i,d:OTM[i]}}
+function otMStory(){
+ const p=S.partner;if(!p||!p.married)return N('需要先結婚。');const c=otMChapter(p);if(!c)return N('目前沒有可進行的婚後章節。');
+ if(S.ap<1)return B('今年的行動點用完了。');const d=c.d,fill=s=>s.replace(/\{N\}/g,p.n),order=[0,1,2].sort(()=>Math.random()-.5);
+ ask(`婚後篇 第 ${c.i+1} 章「${d[0]}」\n${fill(d[1])}`,order.map(i=>d[2+i][0]),pi=>{
+  const oi=order[pi],op=d[2+oi];S.acts['mch'+c.i]=1;S.ap--;
+  let dl=oi===0?R(8,14):oi===1?R(2,5):-R(3,8);otAdd(p,'p',dl);p.mch=(p.mch||0)+1;if(oi===0)p.mbc=(p.mbc||0)+1;chg('happy',oi===0?4:oi===1?1:-2);
+  cgAdd({a:'m',k:c.i,q:oi,n:p.n,y:calYear()});
+  let m=`你選了「${op[0]}」。\n${fill(op[1])}（好感 ${dl>=0?'+':''}${dl}）`;
+  if(p.mch>=4){if((p.mbc||0)>=3){m+='\n\n你們攜手走過了所有的日子——這是「白頭偕老」結局。';chg('happy',10);p.rel=cl(p.rel+10);log(`你和${p.n}的婚後篇走到了「白頭偕老」結局。`,'good')}else m+='\n\n婚後篇告一段落，你們的故事仍在繼續。'}
+  log(`婚後篇「${d[0]}」：好感 ${dl>=0?'+':''}${dl}。`,otTone(dl));
+  view.rmsg={q:dl<0?'b':oi===0?'g':'n',t:m};view.rsub='Rp';otDone('p');
+ });
+ return null;
+}
+const _ob71=otBlock;
+otBlock=function(t,k){
+ let h=_ob71(t,k);
+ if(k==='p'&&t.married){const c=otMChapter(t),n=t.mch||0;h+=`<div class="item"><b>婚後篇 ${n}／4</b><div class="bar"><i style="width:${n*25}%;background:#ec4899"></i></div><div class="sub">${c?`第 ${c.i+1} 章「${OTM[c.i][0]}」已開放`:n>=4?'婚後篇已全部走完':`下一章需要再相處 ${Math.max(0,2*(n+1)-(S.age-(t.since||S.age)))} 年`}</div></div>`;if(c)h+=`<button class="btn p" data-a="ot:mstory">進入婚後篇：第 ${c.i+1} 章「${esc(OTM[c.i][0])}」<small>1 點行動點・選項影響好感與結局</small></button>`}
+ return h;
+};
+const _hd71b=handle;
+handle=function(a){if(a==='ot:mstory'&&S){const r=otMStory();if(r){view.rmsg={q:'n',t:r[0]};view.rsub='Rp';otDone('p')}return}return _hd71b(a)};
+/* ---- p72：固定金額（活動、禮物、約會、旅行、婚禮、領養…）隨物價（薪資指數）縮放 ---- */
+const PXW=[600,800,1000,1200,1500,2000,2500,3000,4000,5000,6000,8000,12000,20000,24000,40000,50000,300000,600000,2000000];
+function PXF(){try{return Math.max(.4,typeof WI==='function'?WI():1)}catch(e){return 1}}
+function px(n){const f=PXF();let v=Math.round(n*f/10)*10;if(f!==1&&PXW.includes(v))v+=10;return v}
+function pxCost(o,k){
+ const d=Object.getOwnPropertyDescriptor(o,k);if(!d)return;
+ if(d.get){const g=d.get;Object.defineProperty(o,k,{get(){const v=g.call(this);return v?px(v):v},enumerable:true,configurable:true})}
+ else if(typeof d.value==='number'&&d.value>0){const b=d.value;Object.defineProperty(o,k,{get(){return px(b)},enumerable:true,configurable:true})}
+}
+ACTS.forEach(o=>pxCost(o,'cost'));GIFTS.forEach(o=>pxCost(o,'c'));PLACES.forEach(o=>pxCost(o,'c'));OTA.forEach(o=>pxCost(o,'cost'));
+/* 活動頁文字：費用／學費／票價／報名 */
+function pxText(t){return typeof t!=='string'?t:t.replace(/((?:費用|學費|票價|報名|入場)[^N\d]{0,6})NT\$([\d,]+)/g,(m,a,n)=>{const v=parseInt(n.replace(/,/g,''),10);return PXW.includes(v)?a+money(px(v)):m})}
+const _ah72=actHTML;actHTML=function(){return pxText(_ah72())};
+/* ---- 失業給付、社會救助、父母接濟（保底，不讓無收入者無限負債）---- */
+const _y72=yearly;
+yearly=function(){
+ const hadJob=!!(S&&S.job&&!S.job.founder),sal0=hadJob?S.job.sal:0;
+ _y72();
+ try{
+  if(!S||S.dead||S.age<18)return;
+  if(sal0>0)S.lastSal=sal0;
+  const tw=(S.cn||'TW')==='TW',work=S.age>=22&&S.age<65&&!S.school&&!S.army&&!S.jail&&!S.flags.retired&&!(S.job&&S.job.founder);
+  if(hadJob&&S.job)S.ueN=0;
+  if(tw&&work&&!S.job&&!S.ptj){
+   if(S.lastSal>0&&(S.ueN||0)<1){S.ueN=1;const b=Math.round(S.lastSal*.6*.5);ldset('失業給付');S.money+=b;ldset(null);log(`你失業了，領到失業給付約 ${money(b)}（約投保薪資 60%、最長 6 個月；遊戲簡化為一次發放）。`,'good')}
+   const lv=livingCost();
+   if(S.money<-lv){const a=Math.round(lv*.6);ldset('社會救助');S.money+=a;ldset(null);log(`你的經濟陷入困境，申請到社會救助／急難紓困 ${money(a)}。`,'good')}
+   const par=[S.mom,S.dad].filter(x=>x&&x.alive&&x.rel>=40);
+   if(S.money<-lv*2&&par.length&&S.age<45){const a=Math.round(lv*.5);ldset('父母接濟',par[0].n);S.money+=a;ldset(null);par[0].rel=cl(par[0].rel-3);log(`${par[0].role}看你過得辛苦，塞給你 ${money(a)}。`,'good')}
+  }
+ }catch(e){}
+};
+/* ---- 事件冷卻與權重：同主題一年最多一個、乙女事件拉開間隔、依個性微調權重 ---- */
+function evTheme(id){return /^ote_/.test(id)?'ote':/^(pmed|psup|sibloan|care|careev|pcare)$/.test(id)?'fam':/^x(net|vid|visit|conf|fade)$/.test(id)?'net':id.replace(/\d+$/,'')}
+randEvents=function(){
+ const ext=(S.pt&&S.pt.ext!=null)?S.pt.ext:50;
+ const pool=E.filter(e=>{
+  if(!(S.age>=e.min&&S.age<=e.max&&(!e.if||e.if())))return false;
+  const cd=/^ote_/.test(e.id)?6:3;if(S.seen[e.id]>=S.age-cd)return false;
+  if(/^ote_/.test(e.id)&&S.lastOte!=null&&S.age-S.lastOte<2)return false;
+  return true;
+ });
+ const out=[],th={},n=chance(.85)?(chance(.3)?2:1):0;
+ for(let i=0;i<n&&pool.length;i++){
+  const wt=e=>e.w*(/^ote_/.test(e.id)?(.7+ext/100):1);
+  let r=Math.random()*pool.reduce((s,e)=>s+wt(e),0),k=0;
+  for(;k<pool.length-1;k++){r-=wt(pool[k]);if(r<=0)break}
+  const e=pool.splice(k,1)[0],t=evTheme(e.id);
+  if(th[t]){i--;continue}
+  th[t]=1;S.seen[e.id]=S.age;if(/^ote_/.test(e.id))S.lastOte=S.age;out.push(e);
+ }
+ return out;
+};
+/* ---- 存檔備份提醒：每 5 歲檢查，超過 3 天沒備份就提醒；同時顯示最近備份時間 ---- */
+const BKK='lifesim_lastbk';
+function bkNudge(){
+ try{
+  const last=+(localStorage.getItem(BKK)||0),now=Date.now();
+  if(!S||S.dead||S.age<10||S.age%5!==0)return;
+  if(now-last<3*864e5)return;
+  if(typeof busy!=='undefined'&&busy){setTimeout(bkNudge,2500);return}
+  const md=document.getElementById('modal');if(md&&md.classList.contains('on')){setTimeout(bkNudge,2500);return}
+  localStorage.setItem(BKK,String(now-2*864e5));/* 先延後，避免連續跳出 */
+  ask('已經好幾天沒有備份存檔了。瀏覽器的存檔只存在這個裝置，建議現在複製存檔文字，貼到備忘錄保存。',['現在複製備份','之後再說'],c=>{
+   if(c===0){try{navigator.clipboard.writeText(expAll()).then(()=>{localStorage.setItem(BKK,String(Date.now()));log('已複製存檔文字，請貼到安全的地方保存。','good');render()}).catch(()=>{log('瀏覽器不允許自動複製，請到「更多→設定」手動複製存檔。','bad');render()})}catch(e){}}
+  });
+ }catch(e){}
+}
+const _au72=ageUp;
+ageUp=function(){const r=_au72.apply(this,arguments);try{setTimeout(bkNudge,900)}catch(e){}return r};
+const _lh72=lfHandle;
+lfHandle=function(x,y,z,u){const r=_lh72(x,y,z,u);try{if(x==='set'&&y==='copy')localStorage.setItem(BKK,String(Date.now()))}catch(e){}return r};
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();

@@ -225,11 +225,11 @@ function onDo(k){
  return N('');
 }
 function onHTML(){
- if(S.age<14||S.dead)return '';
- let h='<div class="sec">網路交友</div>';
- const o=S.on;
- if(!o)return h+`<div class="item"><div class="sub">認識來自世界各地的網友。先選想認識的性別，成為朋友或戀人由你們相處後決定。每次 1 點行動點數。</div></div><button class="btn" data-a="on:new">認識新網友<small>選擇性別・1 點行動點</small></button>`;
- return h+`<div class="item row"><div style="flex:1"><b>${esc(o.n)}</b>・${esc(CNAME[o.cn])}<div class="sub">${ONST[Math.min(2,o.st)]}・好感 ${o.rel}</div></div><button class="mini" data-a="ot:open:o">互動</button></div>`;
+ if(S.age<13||S.dead)return '';
+ let h='<div class="sec">認識新朋友</div>';
+ h+=`<button class="btn" data-a="mt:new">主動認識新對象<small>學校、公司、聚會・1 點行動點・約 ${money(px(1500))}</small></button>`;
+ if(S.age>=14)h+=S.on?`<div class="item"><div class="sub">你目前有固定往來的網友：${esc(S.on.n)}（見上方「伴侶・戀愛」）。</div></div>`:`<button class="btn" data-a="on:new">網路交友<small>選擇性別・1 點行動點・由相處決定朋友或戀人</small></button>`;
+ return h;
 }
 const _rh70=relHTML;relHTML=function(){return _rh70()+onHTML()};
 const _hd70=handle;
@@ -312,7 +312,7 @@ relHTML=function(){
  const h=_rh70b();
  if(S.age<25||S.age>55||S.dead)return h;
  const n=S.kids.filter(k=>k.adopt).length;
- return h+`<div class="sec">領養</div><button class="btn" data-a="ad:go">領養孩子<small>25～55 歲・約 ${money(50000)}（估算）・單身或已婚皆可${n?`・已領養 ${n} 位`:''}</small></button>`;
+ return h+`<div class="sec">領養</div><button class="btn" data-a="ad:go">領養孩子<small>25～55 歲・約 ${money(px(50000))}（估算）・單身或已婚皆可${n?`・已領養 ${n} 位`:''}</small></button>`;
 };
 const _hd70b=handle;
 handle=function(a){

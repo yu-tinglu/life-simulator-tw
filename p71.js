@@ -99,24 +99,30 @@ function otAct(id,k){
  if(o.cost&&S.money<o.cost)return B('你的錢不夠。');
  if(o.min&&otAff(t,k)<o.min)return B(`好感還不夠（需要 ${o.min}）。`);
  if(o.max&&otAff(t,k)>=o.max)return N('目前感情穩定，不需要特別和解。');
- const r=o.run(t,k,A);if(r[1]!=='bad'||/尷尬|沒能|不太對|安靜/.test(r[0])){}
+ if(o.pOnly&&otDist(t,k))return N('你們還沒有住在一起，目前是遠距離，見家長要等見面之後。');
+ const r=o.run(t,k,A);if(otDist(t,k)){r[0]=r[0].replace('你們一起看了電影，散場後聊了很久。','你們各自在家同步看了電影，邊看邊傳訊息聊。').replace('你們一起念書','你們視訊一起念書').replace('你們一起運動','你們視訊連線一起運動').replace('驚喜成功了！','遠距驚喜（外送或快遞）成功了！').replace('時機不太對，驚喜變成了小小的尷尬。','快遞延誤了，驚喜晚了好幾天才到。')}
  if(r&&(r[1]==='good'||/好感 -/.test(r[0]))){if(o.ap)S.ap--;if(o.cost)S.money-=o.cost}
  return r;
 }
 function otDone(k){view.tab='rel';render();showSheet('rel',view.rsub)}
 /* ===== 在對象頁加入「專屬章節與互動」區塊 ===== */
-function otBlock(t,k){
+var otBlock=function(t,k){
  const A=ARCH[t.a],c=otChapter(t,k),ch=t.ch||0;
  let h='<div class="sec">專屬章節與互動</div>';
+ h+=otProfHTML(t,k);
  h+=`<div class="item"><b>專屬章節 ${ch}／4${t.route?'・真結局路線':''}</b><div class="bar"><i style="width:${ch*25}%;background:#ec4899"></i></div><div class="sub">${c?`第 ${c.i+1} 章「${OTSTORY[t.a][c.i][0]}」已開放`:ch>=4?'這位對象的章節已全部走完':`下一章需要好感 ${OTREQ[ch]}（目前 ${otAff(t,k)}）`}</div></div>`;
  if(c)h+=`<button class="btn p" data-a="ot:story:${k}">進入章節：第 ${c.i+1} 章「${esc(OTSTORY[t.a][c.i][0])}」<small>1 點行動點・選項會影響好感與結局</small></button>`;
- OTA.forEach(o=>{if(o.pOnly&&k!=='p')return;h+=`<button class="btn" data-a="ot:act:${k}:${o.id}">${o.l}<small>${o.s}</small></button>`});
+ OTA.forEach(o=>{if(o.pOnly&&(k!=='p'||otDist(t,k)))return;const lbl=otDist(t,k)?({movie:'線上一起看電影',study:'視訊一起念書／運動',surp:'遠距驚喜（外送／快遞）'}[o.id]||o.l):o.l;h+=`<button class="btn" data-a="ot:act:${k}:${o.id}">${lbl}<small>${o.cost?o.s.replace(/NT\$[\d,]+/,money(o.cost)):o.s}</small></button>`});
  return h;
 }
+const _rr71=romRow;
+function onRow(){if(!S.on)return '';onFix(S.on);const o=S.on,A=ARCH[o.a];return `<div class="item row"><div style="flex:1"><b>${A.em} ${esc(o.n)}</b>・網友・${esc(CNAME[o.cn])}・${ONST[Math.min(2,o.st)]}${hbar(o.aff)}</div><button class="mini" data-a="ot:open:o">互動</button></div>`}
+romRow=function(){const h=_rr71(),m='<button class="btn" data-a="rom:go:h">',j=h.indexOf(m);const r=onRow();return j>=0?h.slice(0,j)+r+h.slice(j):h+r};
 const _rm71=romHTML;
 romHTML=function(k){
  if(k==='Ro'){if(!S.on){view.rsub=null;return romHome()}return onPage()}
  let h=_rm71(k);
+ if(k==='R'||!k){h=h.replace(/<button class="btn" data-a="rom:meet">[\s\S]*?<\/button>/,'');const m='<div class="sec">心儀對象</div>',j=h.indexOf(m);if(j>=0&&S.on)h=h.slice(0,j)+'<div class="sec">網友</div>'+onRow()+h.slice(j);h=h.replace(/(<button class="btn" data-a="open:rel">)/,'<div class="sub">想認識新對象或網友，請回「關係」頁的「認識新朋友」。</div>$1')}
  try{
   let t=null,kk=null;
   if(k==='Rp'&&S.partner){t=S.partner;kk='p'}else if(k&&k.startsWith('Rc')){const i=+k.slice(2);if(S.crush[i]){t=S.crush[i];kk=String(i)}}
@@ -126,6 +132,7 @@ romHTML=function(k){
 };
 const _hd71=handle;
 handle=function(a){
+ if(a==='mt:new'&&S){const r=meetNew();view.msg=r;view.tab='rel';view.rsub=null;render();showSheet('rel');return}
  if(typeof a==='string'&&S&&a.startsWith('ot:')){
   const p=a.split(':'),x=p[1];let r=null;
   if(x==='story'){r=otStory(p[2]);if(r){view.rmsg={q:r[1]==='bad'?'b':'n',t:r[0]};otDone(p[2])}return}
@@ -161,13 +168,15 @@ romHandle=function(x,y,z){
  return _rhd71(x,y,z);
 };
 /* ===== 隨機乙女事件 ===== */
-function otTargets(kind){
+function otDist(t,k){return k==='o'||(k==='p'&&!!t.ld&&!t.cohab&&!t.married)}
+function otTargets(kind,phys){
  const L=[];
  if(S.partner&&S.partner.a!=null&&S.age>=16)L.push({t:S.partner,k:'p'});
  S.crush.forEach((c,i)=>{if(c.aff>=(kind==='c'?25:20))L.push({t:c,k:String(i)})});
  if(S.on&&S.on.st>=1){onFix(S.on);L.push({t:S.on,k:'o'})}
- return L.filter(x=>kind==='p'?x.k==='p':kind==='c'?x.k!=='p':true);
+ return L.filter(x=>(kind==='p'?x.k==='p':kind==='c'?x.k!=='p'&&x.k!=='o':kind==='d'?otDist(x.t,x.k):true)&&!(phys&&otDist(x.t,x.k)));
 }
+const OTPHYS=new Set(['rain','fire','teased','night','family','lost','hurt','low','sick','newyear']);
 const OTE=[
  ['rival','c','情敵出現','另一個人也在追{N}，還送了花。',[['大方公平競爭，照常相處',6,'你沒有慌亂，{N}反而覺得你很穩重。'],['趁早告白搶先一步',0,'__confess'],['默默退後，覺得算了',-8,'你退縮了，{N}有些不解。']]],
  ['mis','a','誤會','朋友說看到{N}和別人很親密，你心裡很不舒服。',[['當面問清楚',8,'原來是誤會，{N}笑著解釋，你們的距離更近了。'],['等對方自己解釋',-2,'沉默讓氣氛有點微妙。'],['賭氣不理對方',-10,'{N}不知道哪裡惹你生氣，難過了好幾天。']]],
@@ -187,12 +196,19 @@ const OTE=[
  ['newyear','a','跨年','跨年夜，{N}問你有沒有空一起倒數。',[['答應並一起倒數（NT$800）',8,'倒數的那一刻，{N}輕聲說：「新年快樂。」',800],['各自跨年，只傳訊息',-1,'{N}回覆：「也好，新年快樂。」'],['約元旦再見',3,'{N}說：「那就元旦見。」']]],
  ['hurt','a','受傷','{N}運動受傷，需要人陪著去醫院。',[['立刻陪著去，全程照顧',11,'{N}靠在你肩上：「還好有你在。」'],['傳訊息關心並匯款（NT$1,000）',3,'{N}說：「你人真好。」',1000],['說自己有事走不開',-7,'{N}笑著說沒關係，聲音卻很輕。']]]
 ];
+OTE.push(
+ ['miss','d','想念','你很想念{N}，隔著螢幕總覺得不夠。',[['訂機票去見面（NT$20,000）',12,'見面時{N}紅了眼眶：「你真的來了。」',20000],['視訊聊到天亮',7,'你們聊到窗外天亮，捨不得掛電話。'],['說最近太忙，下次再說',-6,'{N}回了一個勉強的笑臉。']]],
+ ['tz','d','時差','你和{N}有時差，這個月常常錯過彼此的訊息。',[['約定固定的通話時間',8,'你們固定每週通話，生活有了儀式感。'],['各自等對方先聯絡',-5,'訊息越來越少，彼此都有點失落。'],['調整作息配合對方',6,'你熬夜陪聊，{N}很感動，只是你有點累。']]],
+ ['rsick','d','遠端關心','{N}說身體不舒服，人在遠方的你有點著急。',[['視訊關心並叫外送／寄藥（NT$1,500）',9,'{N}說：「雖然你不在，但我覺得被照顧到了。」',1500],['傳訊息叮嚀多休息',3,'{N}回覆：「謝謝，我會好好休息。」'],['沒注意到，隔天才知道',-8,'{N}沒有責怪你，但有些失落。']]],
+ ['rbday','d','遠距生日','{N}的生日到了，你們卻在不同的地方。',[['寄禮物並視訊唱生日歌（NT$3,000）',10,'{N}一邊拆禮物一邊笑，眼眶卻紅了。',3000],['只傳訊息祝福',2,'{N}回了好幾個笑臉。'],['忘記了',-12,'{N}隔天才說：「沒關係。」語氣卻很輕。']]],
+ ['trial','d','遠距考驗','有人對{N}示好，{N}坦白告訴了你。',[['感謝坦白並表達信任',8,'{N}說：「我只想和你在一起。」'],['要求對方減少和他聯絡',-8,'{N}沉默了一下：「我需要你信任我。」'],['半開玩笑要對方小心',2,'氣氛輕鬆了些，但你心裡其實有點在意。']]]
+);
 OTE.forEach((d,i)=>{
- const [id,kind,ttl,txt,opts]=d;
- E.push({id:'ote_'+id,min:15,max:75,w:2,if:()=>otTargets(kind).length>0&&!S.jail,run:()=>{
-  const tg=pick(otTargets(kind)),t=tg.t,k=tg.k,nm=t.n,f=s=>s.replace(/\{N\}/g,nm);
-  return {t:f(txt)+`（${ttl}）`,c:opts.map(o=>ch(f(o[0]),()=>{
-   if(o[3]){if(S.money<o[3])return B('你的錢不夠。');S.money-=o[3]}
+ const [id,kind,ttl,txt,opts]=d,ph=OTPHYS.has(id);
+ E.push({id:'ote_'+id,min:15,max:75,w:2,if:()=>otTargets(kind,ph).length>0&&!S.jail,run:()=>{
+  const tg=pick(otTargets(kind,ph)),t=tg.t,k=tg.k,nm=t.n,f=s=>s.replace(/\{N\}/g,nm);
+  return {t:f(txt)+`（${ttl}）`,c:opts.map(o=>ch(f(o[0]).replace(/NT\$[\d,]+/,o[3]?money(px(o[3])):'$&'),()=>{
+   if(o[3]){const cc=px(o[3]);if(S.money<cc)return B('你的錢不夠。');S.money-=cc}
    if(o[2]==='__confess'){if(k==='p'||k==='o'||t.aff<40){otAdd(t,k,3);return N(`你鼓起勇氣表達心意，${nm}說需要一點時間。（好感 +3）`)}const r=confess(t);return r}
    const d=k==='p'?Math.round(o[1]*.8):o[1];otAdd(t,k,d);chg('happy',d>=6?3:d<0?-3:0);
    const m=f(o[2])+`（好感 ${d>=0?'+':''}${d}）`;log(`${nm}：${ttl}，好感 ${d>=0?'+':''}${d}。`,otTone(d));return d<0?B(m):d>=6?G(m):N(m)
@@ -210,5 +226,54 @@ function cgHTML(){
   const c=[0,1,2,3].filter(k=>got[a+'_'+k]).length;
   h+=`<div class="sec">${A.em} ${A.n}（${c}／4）</div>`+[0,1,2,3].map(k=>{const x=got[a+'_'+k];return `<div class="item"><b>${x?esc(OTSTORY[a][k][0]):'？？？'}${x&&x.q===0?'　★':''}</b><div class="sub">${x?`與 ${esc(x.n)} 的回憶・${x.y} 年`:'尚未解鎖'}</div></div>`}).join('');
  });
+ h+=`<div class="sec">婚後篇（${[0,1,2,3].filter(k=>got['m_'+k]).length}／4）</div>`+[0,1,2,3].map(k=>{const x=got['m_'+k];return `<div class="item"><b>${x?esc(OTM[k][0]):'？？？'}${x&&x.q===0?'　★':''}</b><div class="sub">${x?`與 ${esc(x.n)} 的回憶・${x.y} 年`:'尚未解鎖'}</div></div>`}).join('');
  return h+'<button class="btn" data-a="back">← 返回</button>';
 }
+
+/* ===== 對象背景（職業、興趣、祕密）===== */
+const OTJ=['護理師','設計師','工程師','老師','咖啡師','攝影師','律師','廚師','記者','研究員','健身教練','插畫家','音樂人','建築師','社工','業務','醫師','翻譯','花藝師','消防員'];
+const OTH=['爬山','烘焙','攝影','看展','打籃球','彈吉他','閱讀','旅行','養貓','桌遊','衝浪','電影','手作','跑步'];
+const OTS=['其實一直想辭掉現在的工作，去環遊世界','小時候曾經因為轉學而很孤單，所以特別珍惜朋友','偷偷寫了很多沒有寄出的信','很怕被人看穿自己的脆弱','曾經為了夢想放棄過一段感情','最大的夢想是開一間自己的小店','其實有點怕黑，卻從不告訴別人'];
+function otProf(t){if(!t.pj){t.pj=pick(OTJ);t.hb=pick(OTH);t.sec=pick(OTS)}return t}
+function otProfHTML(t,k){
+ otProf(t);const a=otAff(t,k);
+ return `<div class="item"><b>${esc(t.n)} 的背景</b><div class="sub">職業：${t.pj}・興趣：${t.hb}</div><div class="sub">${a>=60?'祕密：'+t.sec:'再熟一點（好感 60）就會告訴你心裡的祕密。'}</div></div>`;
+}
+/* ===== 三角關係 ===== */
+E[E.length]={id:'ote_tri',min:16,max:60,w:2,if:()=>otTargets('x',true).filter(x=>otAff(x.t,x.k)>=40).length>=2&&!S.jail,run:()=>{
+ const L=otTargets('x',true).filter(x=>otAff(x.t,x.k)>=40).sort(()=>Math.random()-.5),A=L[0],B2=L[1];
+ return {t:`${A.t.n}和${B2.t.n}幾乎同時對你表達了好感，你必須面對自己的心。`,c:[
+  ch(`選擇${A.t.n}`,()=>{otAdd(A.t,A.k,10);otAdd(B2.t,B2.k,-12);return N(`你坦率地告訴${B2.t.n}，你的心意在${A.t.n}那邊。（${A.t.n} +10，${B2.t.n} -12）`)}),
+  ch(`選擇${B2.t.n}`,()=>{otAdd(B2.t,B2.k,10);otAdd(A.t,A.k,-12);return N(`你坦率地告訴${A.t.n}，你的心意在${B2.t.n}那邊。（${B2.t.n} +10，${A.t.n} -12）`)}),
+  ch('兩個人都先當朋友，慢慢想',()=>{otAdd(A.t,A.k,-3);otAdd(B2.t,B2.k,-3);return B('你誰也沒選，兩個人都隱約感覺到你的猶豫。（雙方 -3）')}),
+  ch('腳踏兩條船，維持曖昧',()=>{if(chance(.5)){otAdd(A.t,A.k,-20);otAdd(B2.t,B2.k,-20);S.karma=cl(S.karma-8);return B('事情曝光了，兩個人都對你失望透頂。（雙方 -20）')}otAdd(A.t,A.k,4);otAdd(B2.t,B2.k,4);return N('你僥倖沒被發現，但心裡七上八下。（雙方 +4）')})]}}};
+/* ===== 婚後篇：結婚後的 4 個章節，走到最後有「白頭偕老」結局 ===== */
+const OTM=[
+ ['第一個家','你們搬進新家，{N}看著空蕩蕩的客廳笑著說：「接下來要一起把它填滿。」',['一起慢慢挑家具，也把預算談清楚','你們為一張沙發討論了一整個週末，卻覺得很幸福。'],['全部交給對方決定','{N}雖然笑著答應，卻有點希望你多參與。'],['說這些小事你不在意','{N}沉默了一會，客廳顯得更空了。']],
+ ['柴米油鹽','日子變得平淡，{N}在廚房裡嘆了口氣：「最近我們好像只剩下家務了。」',['安排一個只屬於兩人的週末','你們放下手機，像剛認識時一樣散步聊天。'],['答應會多幫忙','{N}點點頭，眼神柔和了些。'],['說大家都這樣啊','{N}沒有再說話，轉身去洗碗。']],
+ ['人生的低谷','你們同時遇上工作與家庭的壓力，{N}深夜獨自坐在客廳。',['坐到身邊，說我們一起面對','{N}靠在你肩上，終於哭了出來。'],['遞上一杯熱茶','{N}說了聲謝謝，心情稍微平復。'],['說你太累了先睡','{N}望著你的背影，輕輕嘆了口氣。']],
+ ['白頭偕老','多年過去，{N}牽起你的手：「這些年，謝謝你一直在。」',['說：該說謝謝的是我','你們相視而笑，時間彷彿停在這一刻。'],['笑著說我們還要一起老','{N}眼角有了皺紋，笑容依然溫柔。'],['不好意思地轉移話題','{N}笑笑，把這句話收進了心裡。']]
+];
+function otMChapter(p){const i=p.mch||0;if(i>=4||!p.married)return null;if(S.age-(p.since||S.age)<2*(i+1))return null;if(S.acts['mch'+i])return null;return {i,d:OTM[i]}}
+function otMStory(){
+ const p=S.partner;if(!p||!p.married)return N('需要先結婚。');const c=otMChapter(p);if(!c)return N('目前沒有可進行的婚後章節。');
+ if(S.ap<1)return B('今年的行動點用完了。');const d=c.d,fill=s=>s.replace(/\{N\}/g,p.n),order=[0,1,2].sort(()=>Math.random()-.5);
+ ask(`婚後篇 第 ${c.i+1} 章「${d[0]}」\n${fill(d[1])}`,order.map(i=>d[2+i][0]),pi=>{
+  const oi=order[pi],op=d[2+oi];S.acts['mch'+c.i]=1;S.ap--;
+  let dl=oi===0?R(8,14):oi===1?R(2,5):-R(3,8);otAdd(p,'p',dl);p.mch=(p.mch||0)+1;if(oi===0)p.mbc=(p.mbc||0)+1;chg('happy',oi===0?4:oi===1?1:-2);
+  cgAdd({a:'m',k:c.i,q:oi,n:p.n,y:calYear()});
+  let m=`你選了「${op[0]}」。\n${fill(op[1])}（好感 ${dl>=0?'+':''}${dl}）`;
+  if(p.mch>=4){if((p.mbc||0)>=3){m+='\n\n你們攜手走過了所有的日子——這是「白頭偕老」結局。';chg('happy',10);p.rel=cl(p.rel+10);log(`你和${p.n}的婚後篇走到了「白頭偕老」結局。`,'good')}else m+='\n\n婚後篇告一段落，你們的故事仍在繼續。'}
+  log(`婚後篇「${d[0]}」：好感 ${dl>=0?'+':''}${dl}。`,otTone(dl));
+  view.rmsg={q:dl<0?'b':oi===0?'g':'n',t:m};view.rsub='Rp';otDone('p');
+ });
+ return null;
+}
+const _ob71=otBlock;
+otBlock=function(t,k){
+ let h=_ob71(t,k);
+ if(k==='p'&&t.married){const c=otMChapter(t),n=t.mch||0;h+=`<div class="item"><b>婚後篇 ${n}／4</b><div class="bar"><i style="width:${n*25}%;background:#ec4899"></i></div><div class="sub">${c?`第 ${c.i+1} 章「${OTM[c.i][0]}」已開放`:n>=4?'婚後篇已全部走完':`下一章需要再相處 ${Math.max(0,2*(n+1)-(S.age-(t.since||S.age)))} 年`}</div></div>`;if(c)h+=`<button class="btn p" data-a="ot:mstory">進入婚後篇：第 ${c.i+1} 章「${esc(OTM[c.i][0])}」<small>1 點行動點・選項影響好感與結局</small></button>`}
+ return h;
+};
+const _hd71b=handle;
+handle=function(a){if(a==='ot:mstory'&&S){const r=otMStory();if(r){view.rmsg={q:'n',t:r[0]};view.rsub='Rp';otDone('p')}return}return _hd71b(a)};

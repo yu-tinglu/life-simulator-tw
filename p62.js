@@ -38,7 +38,7 @@ function kpDo(kind){
  const ps=kpPeople();if(!ps.length)return B('身邊沒有可以聯絡的人。');
  const key=kind==='a'?'kpA':'kpB';
  if(S.acts[key])return B('今年已經做過了。');
- const cost=kind==='b'?1000*ps.length:0;
+ const cost=kind==='b'?px(1000)*ps.length:0;
  if(S.money<cost)return B('你的錢不夠。');
  S.acts[key]=1;S.money-=cost;
  ps.forEach(p=>{const d=kind==='a'?(p===S.partner?R(2,4):R(1,3)):(p===S.partner?R(4,7):R(3,6));p.rel=cl(p.rel+d)});
@@ -50,7 +50,7 @@ const _rh62=relHTML;
 relHTML=function(){
  const h=_rh62(),ps=kpPeople(),n=ps.length,dis=S.jail||S.dead;
  if(!n)return h;
- const blk=`<button class="btn p" data-a="kp:a" ${dis||S.acts.kpA?'disabled':''}>一鍵問候全部（${n} 人）<small>免費・全員好感小幅提升・每年 1 次${S.acts.kpA?'（今年已做）':''}</small></button><button class="btn" data-a="kp:b" ${dis||S.acts.kpB||S.money<1000*n?'disabled':''}>一鍵請客送禮<small>費用 ${money(1000*n)}（每人 NT$1,000）・全員好感明顯提升・每年 1 次${S.acts.kpB?'（今年已做）':''}</small></button>`;
+ const blk=`<button class="btn p" data-a="kp:a" ${dis||S.acts.kpA?'disabled':''}>一鍵問候全部（${n} 人）<small>免費・全員好感小幅提升・每年 1 次${S.acts.kpA?'（今年已做）':''}</small></button><button class="btn" data-a="kp:b" ${dis||S.acts.kpB||S.money<px(1000)*n?'disabled':''}>一鍵請客送禮<small>費用 ${money(px(1000)*n)}（每人 ${money(px(1000))}）・全員好感明顯提升・每年 1 次${S.acts.kpB?'（今年已做）':''}</small></button>`;
  return h.replace('</h3>','</h3>'+blk);
 };
 const _hd62=handle;

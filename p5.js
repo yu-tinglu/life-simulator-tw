@@ -38,8 +38,8 @@ function interact(k,kind){
  }
  if(kind==='propose'){
   if(p.married||S.age<20)return B('現在還不能求婚。');
-  if(S.money<300000)return B('婚禮至少要 NT$300,000。');
-  if(chance(p.rel/100)){S.money-=300000;p.married=true;chg('happy',15);const m=`${p.n}答應了，你們結婚了！`;log(m,'good');return G(m)}
+  if(S.money<px(300000))return B('婚禮至少要 '+money(px(300000))+'。');
+  if(chance(p.rel/100)){S.money-=px(300000);p.married=true;chg('happy',15);const m=`${p.n}答應了，你們結婚了！`;log(m,'good');return G(m)}
   p.rel=cl(p.rel-20);chg('happy',-8);return B('對方拒絕了你的求婚。')
  }
  if(kind==='breakup'){const m=`你和${p.n}${p.married?'離婚':'分手'}了。`;if(p.married)S.money=Math.round(S.money/2);S.partner=null;chg('happy',-8);log(m,'bad');return B(m)}

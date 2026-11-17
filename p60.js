@@ -53,6 +53,9 @@ function rnRun(n,km){
 const CPS=[
  /* id,名稱,最小,最大,階段,獎金[冠,亞,季],報名成本,需求函式,類型,出道職業 */
  ['sch_sing','校內歌唱比賽',8,22,['初賽','決賽'],[3000,2000,1000],0,()=>S.tl.sing*.55+S.skl.cre*.15+S.skl.comm*.1+S.looks*.2,'sing'],
+ ['kara','社區卡拉OK歌唱賽',16,85,['海選','決賽'],[30000,15000,8000],500,()=>S.tl.sing*.5+S.skl.comm*.15+S.looks*.1+8,'sing'],
+ ['adult_sing','成人組歌唱大賽',25,60,['初賽','複賽','決賽'],[150000,60000,25000],1500,()=>S.tl.sing*.65+S.skl.cre*.1+S.skl.comm*.1+S.looks*.1-4,'sing'],
+ ['senior','銀髮才藝大賽',55,90,['區賽','決賽'],[20000,10000,5000],0,()=>Math.max(S.tl.sing,S.tl.dance,S.tl.music,S.tl.paint)*.6+S.skl.comm*.15+10,'talent'],
  ['nat_sing','全國歌唱大賽',14,35,['縣市初賽','區域複賽','全國決賽'],[100000,50000,20000],1500,()=>S.tl.sing*.65+S.skl.cre*.1+S.skl.comm*.1+S.looks*.15-6,'sing','演員／歌手'],
  ['idol','電視選秀節目（唱跳）',15,30,['海選','淘汰賽','晉級賽','總決賽'],[1000000,300000,100000],0,()=>(S.tl.sing*.3+S.tl.dance*.3)+S.skl.cre*.1+S.skl.comm*.1+S.looks*.2-8,'idol','演員／歌手'],
  ['sch_dance','校內舞蹈比賽',8,22,['初賽','決賽'],[3000,2000,1000],0,()=>S.tl.dance*.55+S.skl.fit*.2+S.looks*.15+S.skl.cre*.1,'dance'],
