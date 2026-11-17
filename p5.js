@@ -7,7 +7,7 @@ const ACTS=[
 {id:'food',l:'🧋 逛夜市吃美食',min:3,get cost(){return S.age<18?0:600},run:()=>{chg('happy',R(2,6));chg('health',-1);return G('雞排配珍奶，心情大好。')}},
 {id:'pt',l:'🛵 兼職打工',min:15,if:()=>!S.job&&!S.jail,run:()=>{const g=R(60000,120000);S.money+=g;chg('happy',-3);return N(`你打工賺了 ${money(g)}。`)}},
 {id:'beauty',l:'💆 護膚醫美',min:18,cost:80000,run:()=>{const d=R(-3,10);chg('looks',d);return d>=0?G(`外貌提升了 ${d}。`):B('效果不如預期。')}},
-{id:'trip',l:'✈️ 出國旅行',min:18,cost:60000,run:()=>{chg('happy',R(8,20));return G(`你去${pick(['日本','韓國','泰國','歐洲','美國'])}玩，超開心。`)}},
+{id:'trip',l:'✈️ 出國旅行',min:18,cost:30000,sub:'依目的地約 NT$3–12 萬（機票＋約一週花費）',run:()=>{const D=[['越南',30000],['泰國',35000],['韓國',38000],['日本',45000],['新加坡',50000],['澳洲',90000],['歐洲',110000],['美國',120000]].filter(d=>d[1]<=S.money*(S.money>2e6?1:.9)||d[1]<=30000),d=pick(D);const ex=d[1]-30000;if(ex>0)S.money-=ex;chg('happy',R(8,20));return G(`你去${d[0]}玩了約一週，花了 ${money(d[1])}，超開心。`)}},
 {id:'lotto',l:'🎫 買大樂透',min:18,cost:500,run:()=>{const r=Math.random();if(r<.0005){S.money+=20000000;chg('happy',30);return G('頭獎！你中了 NT$20,000,000！')}if(r<.05){S.money+=R(2000,50000);return G('你中了小獎。')}return N('沒中獎。')}},
 {id:'bet',l:'🎰 賭一把',sub:'下注 NT$10,000',min:18,cost:10000,run:()=>{if(chance(.45)){S.money+=20000;chg('happy',5);return G('你贏了，拿回 NT$20,000。')}chg('happy',-4);return B('你輸光了。')}},
 {id:'donate',l:'🎗️ 捐款做公益',min:18,cost:10000,run:()=>{S.karma=cl(S.karma+10);chg('happy',4);return G('做好事讓你心情很好。')}},

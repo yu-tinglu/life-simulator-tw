@@ -613,7 +613,7 @@ const ACTS=[
 {id:'food',l:'🧋 逛夜市吃美食',min:3,get cost(){return S.age<18?0:600},run:()=>{chg('happy',R(2,6));chg('health',-1);return G('雞排配珍奶，心情大好。')}},
 {id:'pt',l:'🛵 兼職打工',min:15,if:()=>!S.job&&!S.jail,run:()=>{const g=R(60000,120000);S.money+=g;chg('happy',-3);return N(`你打工賺了 ${money(g)}。`)}},
 {id:'beauty',l:'💆 護膚醫美',min:18,cost:80000,run:()=>{const d=R(-3,10);chg('looks',d);return d>=0?G(`外貌提升了 ${d}。`):B('效果不如預期。')}},
-{id:'trip',l:'✈️ 出國旅行',min:18,cost:60000,run:()=>{chg('happy',R(8,20));return G(`你去${pick(['日本','韓國','泰國','歐洲','美國'])}玩，超開心。`)}},
+{id:'trip',l:'✈️ 出國旅行',min:18,cost:30000,sub:'依目的地約 NT$3–12 萬（機票＋約一週花費）',run:()=>{const D=[['越南',30000],['泰國',35000],['韓國',38000],['日本',45000],['新加坡',50000],['澳洲',90000],['歐洲',110000],['美國',120000]].filter(d=>d[1]<=S.money*(S.money>2e6?1:.9)||d[1]<=30000),d=pick(D);const ex=d[1]-30000;if(ex>0)S.money-=ex;chg('happy',R(8,20));return G(`你去${d[0]}玩了約一週，花了 ${money(d[1])}，超開心。`)}},
 {id:'lotto',l:'🎫 買大樂透',min:18,cost:500,run:()=>{const r=Math.random();if(r<.0005){S.money+=20000000;chg('happy',30);return G('頭獎！你中了 NT$20,000,000！')}if(r<.05){S.money+=R(2000,50000);return G('你中了小獎。')}return N('沒中獎。')}},
 {id:'bet',l:'🎰 賭一把',sub:'下注 NT$10,000',min:18,cost:10000,run:()=>{if(chance(.45)){S.money+=20000;chg('happy',5);return G('你贏了，拿回 NT$20,000。')}chg('happy',-4);return B('你輸光了。')}},
 {id:'donate',l:'🎗️ 捐款做公益',min:18,cost:10000,run:()=>{S.karma=cl(S.karma+10);chg('happy',4);return G('做好事讓你心情很好。')}},
@@ -9890,7 +9890,7 @@ kidHTML=function(i){
 };
 // 版權、資料來源、法規（設定 > 關於）
 const LGL={
- cp:['© 2026 人生模擬器　版權所有。','程式、介面設計、文字與原創內容受著作權法保護，未經許可請勿重製、散布或商業使用。','本作品為虛構的模擬遊戲：人物、公司、學校、事件皆為虛構，如有雷同純屬巧合。','遊戲中提到的國家、地名、品牌、學校、機構名稱，其商標與權利屬原所有人，僅作描述之用，不代表與其有任何關係或背書。','遊戲內的法規、稅制、利率與統計數字是為了遊玩而簡化的模型，不構成法律、稅務、投資、醫療或移民建議；實際情形請洽主管機關或專業人士。2026 年之後的物價、利率、房價與市場為模型模擬，不是預測。'],
+ cp:['© 2026 yu-tinglu　人生模擬器　版權所有。','未經授權，請勿轉載、改作或作商業使用。程式、介面設計、文字與原創內容受著作權法保護。','本作品為虛構的模擬遊戲：人物、公司、學校、事件皆為虛構，如有雷同純屬巧合。','遊戲中提到的國家、地名、品牌、學校、機構名稱，其商標與權利屬原所有人，僅作描述之用，不代表與其有任何關係或背書。','遊戲內的法規、稅制、利率與統計數字是為了遊玩而簡化的模型，不構成法律、稅務、投資、醫療或移民建議；實際情形請洽主管機關或專業人士。2026 年之後的物價、利率、房價與市場為模型模擬，不是預測。'],
  src:[
   ['台灣政府統計與公告',['內政部：簡易生命表、住宅價格指數、實價登錄、宗教統計、原住民族人口','衛生福利部：國人十大死因、食品藥物管理署','勞動部：歷年基本工資、職業薪資、特休與假別規定','行政院主計總處：薪資、物價與家庭收支統計','中央銀行：存款與放款利率、匯率','財政部：稅制與歷次振興措施','教育部：各級學校學費級距（遊戲採約略值）','信義房屋企研室引述內政部統計（房價走勢參考）']],
   ['各國官方統計機關',['日本：總務省統計局','韓國：統計廳（KOSTAT）','英國：國家統計局（ONS）','新加坡：統計局（SingStat）','美國：勞工統計局、聯邦準備系統、社會安全局、國稅局（IRS）','其他國家：各國統計機關近年公布值的概略值，遊戲內標示為約略數字']],
@@ -9921,6 +9921,87 @@ lfHandle=function(x,y,z,u){
  if(x==='set'&&y==='legal'){view.lsub='legal';return null}
  if(x==='set'&&y==='legalx'){view.lsub='set';return null}
  return _lf88(x,y,z,u);
+};
+
+const _ss88=showStart;
+showStart=function(){_ss88();try{$('startBody').insertAdjacentHTML('beforeend','<div class="sub" style="margin-top:14px;text-align:center;opacity:.7;font-size:11px">© 2026 yu-tinglu　人生模擬器　版權所有<br>未經授權，請勿轉載、改作或作商業使用</div>')}catch(e){}};
+// 富豪專案：大型投資與事業（太空、電動車、AI、媒體、基金會等）
+const PJ={
+ space:{n:'太空運輸與衛星',min:2e8,mu:.02,sd:.22,jp:[.05,2.5,5],cr:[.09,.35],up:0,hp:1,d:'火箭、衛星網路。長期燒錢，偶爾發射失敗，成功時價值大幅跳升。'},
+ ev:{n:'電動車與電池',min:1e8,mu:.04,sd:.18,jp:[.04,2,3.5],cr:[.06,.3],up:0,hp:1,d:'量產、電池與充電網。中高風險，景氣與競爭影響大。'},
+ ai:{n:'人工智慧研究院',min:1e8,mu:.05,sd:.28,jp:[.06,2,6],cr:[.08,.4],up:0,hp:1,d:'訓練模型、算力與人才。報酬波動極大。'},
+ fus:{n:'核融合與新能源',min:2e8,mu:0,sd:.28,jp:[.03,5,10],cr:[.1,.4],up:0,hp:1,d:'技術尚未成熟，多數年份沒有進展，成功則回報極高。'},
+ media:{n:'媒體與社群平台',min:5e7,mu:-.02,sd:.14,jp:[.02,1.8,2.5],cr:[.05,.25],up:0,hp:2,st:1,d:'買下平台或媒體，影響力大，但常虧損且爭議多。'},
+ vc:{n:'創投基金',min:3e7,mu:.07,sd:.17,jp:[.04,1.8,3],cr:[.04,.2],up:.005,hp:0,d:'分散投資新創，每年管理費約 0.5%。'},
+ art:{n:'藝術與收藏',min:1e7,mu:.04,sd:.07,jp:[.02,1.4,1.8],cr:[.02,.12],up:.006,hp:1,d:'畫作、古董與名錶，保管保險約每年 0.6%。'},
+ team:{n:'職業球隊',min:2e8,mu:.05,sd:.06,jp:[.02,1.3,1.6],cr:[.02,.1],up:.01,hp:2,d:'球隊估值穩定上升，維運每年約 1%，球迷與成績讓人開心。'},
+ isle:{n:'私人島嶼與度假村',min:3e7,mu:.02,sd:.05,jp:[0,1,1],cr:[.02,.1],up:.02,hp:2,d:'維護費高（約 2%），但生活品質與心情加分。'},
+ fnd:{n:'慈善基金會',min:1e7,mu:0,sd:0,jp:[0,1,1],cr:[0,0],up:0,hp:2,give:.05,d:'每年捐出基金約 5%，不求回報，心情與名聲提升。'}
+};
+const PJK=Object.keys(PJ);
+function pjGet(){if(!S.pj)S.pj={};return S.pj}
+function pjTotal(){return S.pj?Object.values(S.pj).reduce((a,x)=>a+x.val,0):0}
+const _ca90=cnAssets;
+cnAssets=function(){return _ca90()+pjTotal()};
+function pjYear(){
+ if(!S||S.dead||!S.pj)return;
+ for(const k of PJK){const p=S.pj[k];if(!p||p.val<=0)continue;const c=PJ[k];
+  let r=c.mu+(Math.random()+Math.random()+Math.random()-1.5)*2*c.sd/1.2;
+  let note='';
+  if(c.jp[0]&&Math.random()<c.jp[0]){const m=c.jp[1]+Math.random()*(c.jp[2]-c.jp[1]);r=m-1;note=`${c.n}傳出重大突破，估值大幅上升。`}
+  else if(c.cr[0]&&Math.random()<c.cr[0]){r=-c.cr[1];note=`${c.n}遇到重大挫折，估值下修。`}
+  const g=c.give?-c.give:r-c.up;
+  const ov=Math.round(p.val*g);p.val=Math.max(0,p.val+ov);
+  if(c.hp&&p.val>0)chg('happy',c.hp);if(c.st)S.stress=cl(S.stress+3);
+  if(note)log(note+`（${ov>=0?'+':''}${money(ov)}）`,ov>=0?'good':'bad');
+  if(c.give&&p.val>0&&S.money>-1e9)S.flags=S.flags||{},S.flags.donor=(S.flags.donor||0)+1;
+ }
+}
+const _y90=yearly;
+yearly=function(){_y90.apply(this,arguments);try{pjYear()}catch(e){}};
+const _ec90=estateCalc;
+estateCalc=function(dry){
+ const v=Math.round(pjTotal()*.7);
+ if(!v)return _ec90(dry);
+ S.money+=v;
+ if(dry){try{return _ec90(dry)}finally{S.money-=v}}
+ S.pj={};return _ec90(dry);
+};
+function pjHTML(){
+ const P=pjGet();let h=`<h3>大型投資與事業</h3><div class="sub">現金 ${money(S.money)}・專案合計 ${money(pjTotal())}（已計入淨資產）。專案估值每年波動，賣出時約打 85 折；去世時以 7 折變現後繼承。</div>`;
+ const held=PJK.filter(k=>P[k]&&P[k].val>0);
+ if(held.length)h+='<div class="sec">持有中</div>'+held.map(k=>`<div class="item row"><div style="flex:1"><b>${PJ[k].n}</b>・${money(P[k].val)}<div class="sub">累計投入 ${money(P[k].inv)}・${P[k].val>=P[k].inv?'帳面獲利 '+money(P[k].val-P[k].inv):'帳面虧損 '+money(P[k].inv-P[k].val)}</div></div><button class="mini" data-a="pj:sell:${k}">賣出</button></div>`).join('');
+ h+='<div class="sec">新增或加碼</div><div class="sub">'+PJK.map(k=>`<b>${PJ[k].n}</b>（${money(PJ[k].min)} 起）：${PJ[k].d}`).join('<br>')+'</div>';
+ h+=frmHTML('pj',{sl:'項目',opts:PJK.map(k=>[k,`${PJ[k].n}・最低 ${money(PJ[k].min)}`]),def:'100000000',al:'投入金額（新台幣，可輸入 5億、2億）',chips:[1e7,5e7,1e8,5e8,1e9],btns:[['go','投入','p']]});
+ return h+`<button class="btn" data-a="pj:x">← 返回</button>`;
+}
+const _ah90=astHTML;
+astHTML=function(){
+ if(view.pjOn)return pjHTML();
+ const h=_ah90();if(S.age<18||(typeof netWorth==='function'&&netWorth()<1e7&&!pjTotal()))return h;
+ const b=`<button class="btn" data-a="pj:o">大型投資與事業<small>太空、電動車、AI、媒體、球隊、基金會等・資產 1,000 萬以上開放</small></button>`;
+ const i=h.indexOf('</h3>');return i<0?h+b:h.slice(0,i+5)+b+h.slice(i+5);
+};
+const _hd90=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&(a.startsWith('pj:')||a==='frmgo:pj:go')){
+  const rf=()=>{render();try{showSheet('ast')}catch(e){}};
+  if(a==='pj:o'){view.pjOn=1;rf();return}
+  if(a==='pj:x'){view.pjOn=0;rf();return}
+  if(a.startsWith('pj:sell:')){const k=a.split(':')[2],p=S.pj&&S.pj[k];if(p&&p.val>0){const v=Math.round(p.val*.85);S.money+=v;log(`你賣出${PJ[k].n}，實拿 ${money(v)}。`,v>=p.inv?'good':'bad');delete S.pj[k]}rf();return}
+  if(a==='frmgo:pj:go'){
+   const g=frmGet('pj'),c=PJ[g.s];
+   const bad=m=>{view.msg=B(m);rf()};
+   if(!c)return;
+   if(!(g.a>0))return bad('請輸入金額，例如 1億 或 100000000。');
+   const P=pjGet(),has=P[g.s]&&P[g.s].val>0;
+   if(!has&&g.a<c.min)return bad(`${c.n}最低投入 ${money(c.min)}。`);
+   if(g.a>S.money)return bad(`現金不足：要投入 ${money(g.a)}，目前現金 ${money(S.money)}。`);
+   S.money-=g.a;P[g.s]=P[g.s]||{val:0,inv:0};P[g.s].val+=g.a;P[g.s].inv+=g.a;
+   log(`你投入 ${money(g.a)} 到${c.n}。`,'good');view.msg=G(`已投入 ${money(g.a)}。`);try{delete frmState('pj').a}catch(e){}rf();return;
+  }
+ }
+ return _hd90(a);
 };
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
