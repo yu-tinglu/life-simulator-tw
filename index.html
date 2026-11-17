@@ -250,7 +250,7 @@ let S=null,queue=[],busy=false;
 const log=(t,c)=>S.log[S.log.length-1].lines.push({t:typeof logV==='function'?logV(t):t,c:c||''});
 const chg=(k,d)=>{S[k]=cl(S[k]+d)};
 const ch=(l,f)=>({l,f}),G=t=>[t,'good'],B=t=>[t,'bad'],N=t=>[t,''];
-const netWorth=()=>S.money+(S.house?S.house.value:0)-(S.mort?S.mort.left:0)+(S.car?S.car.value:0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0)+(typeof stake==="function"?stake(S.co):0)+(typeof cnAssets==="function"?cnAssets():0);
+const netWorth=()=>S.money-(S.sloan||0)+(S.house?S.house.value:0)-(S.mort?S.mort.left:0)+(S.car?S.car.value:0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0)+(typeof stake==="function"?stake(S.co):0)+(typeof cnAssets==="function"?cnAssets():0);
 const JOBSRAW=`便利商店店員,42,2,0;餐廳服務生,39,2,0;外送員,60,2,0;工廠作業員,56,2,10;清潔人員,40,2,0;社區警衛,42,2,0;搬運工,50,2,0;洗車員,38,2,0;農場工人,40,2,0;遠洋漁工,45,2,0;水泥工,60,2,0;油漆工,60,2,0;水電工,65,2,15;板模工,68,2,0;鋼筋工,70,2,0;計程車司機,55,2,0;貨車司機,62,2,0;遊覽車司機,58,2,0;倉儲理貨員,48,2,0;市場攤商,50,2,0,0,1;洗碗工,36,2,0;美髮助理,36,2,0;停車場管理員,38,2,0;資源回收員,42,2,0;
 行政助理,52,3,30;廚師,58,3,25;業務專員,65,3,35,40;約僱公務員,70,3,55;美髮設計師,55,3,20,40;美甲師,48,3,10,45;汽車技師,60,3,25;機車技師,50,3,20;電機技術員,66,3,35;機械操作員,62,3,25;銀行櫃員,68,3,40,40;客服專員,48,3,20;百貨專櫃人員,52,3,10,45;咖啡師,45,3,10;麵包師傅,54,3,20;消防員,80,3,40;警察,85,3,45;職業軍人,75,3,35;空服員,80,3,35,60;地勤人員,60,3,30,40;保母,48,3,10;導遊,50,3,25;領隊,55,3,30;房仲業務,60,3,30,35,1;保險業務員,60,3,30,35,1;直銷商,40,3,0,0,1;網拍賣家,45,3,20,0,1;電競選手,60,3,40,0,1;實況主,50,3,10,50,1;健身教練,56,3,20,45;瑜伽老師,50,3,15,45;按摩師,45,3,10;刺青師,60,3,20,0,1;花藝師,45,3,10;攝影師,56,3,25,40;影片剪輯師,55,3,35;婚禮企劃,55,3,30,40;調酒師,55,3,20,40;茶藝師,50,3,15;郵務士,62,3,20;捷運站務員,68,3,30;
 護理師,72,4,55;老師,78,4,55;會計師,85,4,60;軟體工程師,120,4,65;律師,150,4,75;高考公務員,90,4,60;建築師,110,4,65;土木工程師,90,4,60;電機工程師,105,4,60;機械工程師,90,4,55;化學工程師,95,4,60;半導體製程工程師,160,4,65;IC設計工程師,190,4,75;韌體工程師,120,4,65;前端工程師,100,4,60;後端工程師,115,4,65;資料科學家,130,4,70;AI工程師,180,4,75;資安工程師,125,4,70;系統管理員,85,4,55;產品經理,130,4,65;UI設計師,80,4,45;平面設計師,55,4,35;行銷企劃,65,4,40;公關人員,70,4,40,40;記者,60,4,50;編輯,55,4,50;自由作家,50,4,55,0,1;翻譯,60,4,55;藥師,100,4,65;物理治療師,75,4,55;職能治療師,72,4,55;營養師,60,4,50;獸醫師,85,4,65;中醫師,120,4,65;社工師,55,4,45;人資專員,65,4,45;財務分析師,95,4,65;銀行理專,90,4,50;證券營業員,80,4,55,0,1;精算師,140,4,80;內部稽核,80,4,60;稅務人員,80,4,55;海關關員,85,4,55;外交官,100,4,70;記帳士,70,4,50;地政士,75,4,50;不動產估價師,90,4,60;機師,250,4,65;船長,180,4,60;航管員,120,4,70;
@@ -507,7 +507,7 @@ function yearly(){
  if(a>=28)chg('looks',-R(0,a>50?2:1));
  if(a>60)chg('smarts',-R(0,2));
  if(S.flags.smoker)chg('health',-R(0,2));
- if(a>=6&&a<18)S.money+={清寒:2000,小康:8000,富裕:30000}[S.fam];
+ if(a>=6&&a<18){const pm={清寒:2000,小康:8000,富裕:30000}[S.fam];S.money+=pm;log(`${a===6?'爸媽開始固定給你零用錢（遊戲設定：依家境每年 清寒 NT$2,000／小康 NT$8,000／富裕 NT$30,000，非官方統計）。':'零用錢'}今年收到 ${money(pm)}。`)}
  if(a===6)enroll('小學',6,0);
  if(S.school){
   S.grade=cl(S.grade+R(-3,3)+(S.smarts-50)/12);chg('smarts',R(0,2));
@@ -3548,13 +3548,13 @@ if(typeof E!=='undefined')E.push(
   ch('算了',()=>N('你把這個念頭放下了。'))]}}},
 {id:'cmoney',min:6,max:22,w:2,if:()=>(S.mom&&S.mom.alive||S.dad&&S.dad.alive)&&!S.job,run:()=>({t:'你的零用錢花光了，想跟爸媽多要一點。',c:[
  ch('開口要零用錢',()=>{const g={清寒:R(500,1500),小康:R(2000,6000),富裕:R(5000,20000)}[S.fam]*(S.age>=15?2:1);if(chance(parentOK(g,'x')+.1)){S.money+=g;return G(`爸媽給了你 ${money(g)}。`)}return B('爸媽說「自己要學會規劃」，沒有給。')}),
- ch('找機會打工賺',()=>{if(S.age<15)return N('你還太小，沒有人要請你。');const g=R(8000,30000);S.money+=g;chg('happy',-1);return N(`你假日打工賺了 ${money(g)}。`)}),ch('省著用',()=>{chg('happy',-1);return N('你決定忍一忍。')})]})},
+ ch('找機會打工賺',()=>ptSummer()),ch('省著用',()=>{chg('happy',-1);return N('你決定忍一忍。')})]})},
 {id:'cvac',min:6,max:22,w:3,if:()=>!!S.school,run:()=>{
  const rich=S.fam==='富裕',a=S.age;
  const l=[ch('去補習班衝刺',()=>{S.grade=cl(S.grade+R(3,8));chg('smarts',R(1,3));S.stress=cl(S.stress+6);chg('happy',-3);return N('整個假期都在補習，成績進步了，也很累。')}),
   ch('參加營隊',()=>{chg('happy',R(5,9));S.net=cl((S.net||0)+R(1,3));return G('你在營隊認識了不少新朋友。')}),
   ch('在家耍廢',()=>{chg('happy',R(5,9));chg('health',-1);S.grade=cl(S.grade-R(0,3));return N('你睡到中午、打電動、看漫畫，爽翻了。')})];
- if(a>=15)l.push(ch('找打工',()=>{const g=R(30000,80000);S.money+=g;S.stress=cl(S.stress+3);return N(`你打工賺了 ${money(g)}，也學到不少社會經驗。`)}));
+ if(a>=15)l.push(ch('找打工',()=>ptSummer()));
  if(rich&&a>=12)l.push(ch('出國遊學',()=>{chg('smarts',R(2,5));chg('happy',R(6,10));return G('你去國外遊學一個月，眼界大開。')}));
  return {t:`寒暑假到了，你想怎麼過？`,c:l}}},
 {id:'chw',min:6,max:18,w:3,if:()=>!!S.school&&(S.mom&&S.mom.alive||S.dad&&S.dad.alive),run:()=>{
@@ -6307,7 +6307,7 @@ const _y40=yearly;yearly=function(){_y40();try{(S.netHist=S.netHist||[]).push([S
 const _lf40=lfHandle,_l40=lifeHTML,_m40=moreHTML;
 lfHandle=function(x,y,z,u){if(x==='sv'){if(y==='save')return slSave(z);if(y==='load')return slLoad(z);if(y==='del')return slDel(z);return null}if(x==='tl'||x==='ch')return null;return _lf40(x,y,z,u)};
 lifeHTML=function(){return view.lsub==='sv'?svHTML():view.lsub==='tl'?tlHTML():view.lsub==='ch'?chHTML():_l40()};
-moreHTML=function(){return _m40().replace('<button class="tile" data-a="lf:health">','<button class="tile" data-a="lf:tl"><b>史</b>人生時間軸<small>重大時刻回顧</small></button><button class="tile" data-a="lf:ch"><b>線</b>走勢圖<small>房價・比特幣・世界事件・資產</small></button><button class="tile" data-a="lf:sv"><b>回</b>時光回溯點<small>手動留下人生的某一刻</small></button><button class="tile" data-a="lf:health">')};
+moreHTML=function(){return _m40().replace('<button class="tile" data-a="lf:health">','<button class="tile" data-a="lf:stat"><b>能</b>能力總覽<small>能力值・技能・才藝・怎麼提升</small></button><button class="tile" data-a="lf:tl"><b>史</b>人生時間軸<small>重大時刻回顧</small></button><button class="tile" data-a="lf:ch"><b>線</b>走勢圖<small>房價・比特幣・世界事件・資產</small></button><button class="tile" data-a="lf:sv"><b>回</b>時光回溯點<small>手動留下人生的某一刻</small></button><button class="tile" data-a="lf:health">')};
 /* 開始畫面：列出存檔欄位 */
 const _ss40=showStart;showStart=function(){_ss40();try{const o=slRead(),ks=Object.keys(o).filter(i=>o[i]&&o[i].d);if(ks.length){const b=$('startBody');b.insertAdjacentHTML('beforeend',ks.map(i=>`<button class="btn" data-sl="${i}">回到回溯點 ${i}：${esc(o[i].d.name)}（${o[i].d.age} 歲）</button>`).join(''));b.querySelectorAll('[data-sl]').forEach(x=>x.onclick=()=>{S=o[x.dataset.sl].d;busy=false;queue=[];try{mFix()}catch(e){}$('start').classList.remove('on');render()})}}catch(e){}};
 /* 介面：去除 emoji、搜尋功能磚 */
@@ -6507,7 +6507,7 @@ function sumBind(){
 const _endInfo43=endInfo;endInfo=function(){return _endInfo43()+sumHTML()};
 const _showEnd43=showEnd;showEnd=function(){_showEnd43();try{sumBind()}catch(e){}};
 /* ---- p44：介面分類、常用功能、新手教學、總結卡改為長按儲存 ---- */
-const MCAT=[['人生記錄',['lf:ach','lf:tree','lf:rev','lf:tl','lf:ch','lf:dx']],['生活與家庭',['open:act','open:rel','lf:pol','lf:art','lf:health','lf:eth','lf:rg','lf:skill']],['財務與職涯',['open:job','open:ast','open:eco','lf:hs','lf:si']],['世界',['lf:wd']],['系統',['lf:sv','lf:set','lf:help']]];
+const MCAT=[['人生記錄',['lf:ach','lf:tree','lf:rev','lf:tl','lf:ch','lf:dx']],['生活與家庭',['lf:stat','open:act','open:rel','lf:pol','lf:art','lf:health','lf:eth','lf:rg','lf:skill']],['財務與職涯',['open:job','open:ast','open:eco','lf:hs','lf:si']],['世界',['lf:wd']],['系統',['lf:sv','lf:set','lf:help']]];
 const FQK='lifesim_tw_freq_v1';
 const _hd44=handle;handle=function(a){try{if(typeof a==='string'&&/^(lf:[a-z]+|open:[a-z]+)$/.test(a)){const f=lsGet(FQK,{});f[a]=(f[a]||0)+1;lsSet(FQK,f)}}catch(e){}return _hd44(a)};
 const _mh44=moreHTML;
@@ -7137,6 +7137,747 @@ nmAdd('afr',{s:'Adeyemi,Osei,Boateng,Mutua,Otieno,Kamau,Ndlovu,Dlamini,Khumalo,T
 nmAdd('slv',{s:'Kowalski,Wiśniewski,Wójcik,Kamiński,Lewandowski,Zieliński,Dvořák,Svoboda,Černý,Procházka,Jovanović,Nikolić,Marković,Horváth,Ivanov,Georgiev,Shevchenko,Bondarenko,Kovalenko,Tkachenko',M:'Tomasz,Paweł,Michał,Marek,Jakub,Lukáš,Ondřej,Nikola,Stefan,Dragan,Bogdan,Taras,Oleksandr,Dmytro,Zoran,Ivo',F:'Katarzyna,Agnieszka,Magdalena,Barbora,Tereza,Jelena,Milica,Ana,Nataliya,Oksana,Svitlana,Dragana,Zuzana,Petra,Mirela,Yuliya'});
 nmAdd('nor',{s:'Larsen,Olsen,Pedersen,Kristiansen,Eriksson,Karlsson,Lindberg,Nilsson,Lehtonen,Korhonen,Mäkinen,Laine,Berg,Haugen,Holm,Svensson,Persson,Gustafsson,Mattsson,Mets',M:'Magnus,Oskar,William,Emil,Mathias,Jens,Henrik,Olaf,Mikko,Juha,Matti,Anders,Kasper,Rasmus,Gustav,Sven,Tarmo',F:'Ida,Astrid,Linnea,Maja,Emma,Sofie,Hanna,Aino,Helmi,Kirsi,Liisa,Marit,Signe,Karin,Saga,Sigrid,Kadri'});
 nmAdd('eur',{s:'Kovács,Szabó,Tóth,Varga,Popa,Constantin,Dumitrescu,Jansen,Bakker,Visser,Smit,Mulder,Dimitriou,Nikolaidis,Vasiliou,Kowalczyk,Peeters,Janssens,Maes,Jacobs,Ivanov,Horváth,Marinescu,Stan',M:'Bence,Gábor,Zoltán,Mihai,Alexandru,Daan,Sem,Thijs,Giannis,Dimitris,Kostas,Stefan,Jan,Lars,Mathijs,Emil',F:'Zsófia,Anna,Réka,Elena,Andreea,Emma,Sanne,Femke,Eleni,Sofia,Katerina,Julia,Lotte,Noor,Mirela,Dora'});
+/* ---- p59：活動分類頁、快捷列、兼職打工系統、自動存檔提示、更多頁收合 ---- */
+/* 基本工資（時薪，台灣勞動部公告，各年 1 月起適用值）；2016 年以前為推估 */
+const PTH={2007:95,2008:95,2009:95,2010:95,2011:98,2012:103,2013:109,2014:115,2015:120,2016:120,2017:133,2018:140,2019:150,2020:158,2021:160,2022:168,2023:176,2024:183,2025:190,2026:196};
+function ptBase(){
+ const y=calYear();let b=y>2026?196*(typeof WI==='function'?WI():1):(PTH[y]||66);
+ const k=S.cn||'TW';
+ if(k!=='TW'&&CNS[k]&&CNS.TW&&CNS[k].w&&CNS.TW.w)b*=Math.max(.15,Math.min(3,CNS[k].w/CNS.TW.w));
+ return b;
+}
+const ptLic=()=>S.school==='大學'||S.school==='碩士'||S.school==='博士'||S.edu>=4;
+/* 兼職清單：m=相對基本工資的倍數（遊戲設定，依常見時薪行情估算，非官方職缺資料） */
+const PTJOBS=[
+ {id:'brk',t:'早餐店助手',min:15,m:1.00,d:'假日與寒暑假早班',sk:'comm'},
+ {id:'sup',t:'超市理貨員',min:15,m:1.00,d:'補貨、整理貨架',sk:'fit'},
+ {id:'wash',t:'餐廳洗碗工',min:15,m:1.02,d:'日間班，不碰危險機具',sk:'fit'},
+ {id:'flyer',t:'發傳單',min:15,m:1.08,d:'街頭發傳單、試吃活動',sk:'comm'},
+ {id:'bub',t:'手搖飲店員',min:16,m:1.05,d:'備料、調飲、收銀',sk:'comm'},
+ {id:'fast',t:'速食店員',min:16,m:1.05,d:'櫃檯與廚房輪替',sk:'comm'},
+ {id:'cafe',t:'咖啡店店員',min:16,m:1.10,d:'沖煮與接待',sk:'comm'},
+ {id:'cine',t:'電影院票務',min:16,m:1.05,d:'售票、驗票、整理場地',sk:'comm'},
+ {id:'cvs',t:'便利商店店員',min:16,m:1.05,d:'日間班',sk:'comm'},
+ {id:'promo',t:'賣場促銷員',min:16,m:1.20,d:'假日促銷、站櫃',sk:'comm',lk:55},
+ {id:'cvsn',t:'超商夜班店員',min:18,m:1.30,d:'夜間班有加給',sk:'comm'},
+ {id:'hotel',t:'飯店房務員',min:18,m:1.10,d:'整理客房',sk:'fit'},
+ {id:'data',t:'客服／資料輸入',min:18,m:1.15,d:'電話與線上客服、資料建檔',sk:'comm'},
+ {id:'site',t:'工地臨時工',min:18,m:1.35,d:'日薪制換算，體力活',sk:'fit',h:1},
+ {id:'event',t:'活動場佈／接待',min:18,m:1.25,d:'展覽、婚宴、演唱會場務',sk:'comm',side:1},
+ {id:'deliv',t:'外送員',min:18,m:1.50,d:'自備機車，時薪為尖峰平均估算',sk:'fit',side:1},
+ {id:'tutor',t:'家教老師',min:18,m:3.00,d:'需大學以上學歷或在學',sk:'tech',side:1,need:()=>ptLic()?'':'需大學以上'},
+ {id:'asst',t:'補習班助教',min:18,m:1.45,d:'批改作業、課後輔導',sk:'tech',need:()=>ptLic()?'':'需大學以上'},
+ {id:'model',t:'平面模特兒',min:18,m:1.80,d:'接案拍攝，案量不穩',sk:'cre',lk:65,side:1}
+];
+function ptJob(id){return PTJOBS.find(j=>j.id===id)}
+function ptRate(o){const j=ptJob(o.id);return Math.round(ptBase()*j.m*(1+.03*Math.min(o.yrs||0,5)))+(o.up||0)}
+function ptOpts(side){
+ if(S.age<18)return [6,10,15];
+ if(side)return [6,10];
+ if(S.school)return [8,15,25];
+ return [20,30,40];
+}
+function ptWeeks(){return S.school?42:48}
+function ptBlock(j){
+ if(S.age<j.min)return `${j.min} 歲以上`;
+ if(j.lk&&S.looks<j.lk)return `外貌 ${j.lk}+`;
+ if(j.need){const r=j.need();if(r)return r}
+ if(S.job&&!j.side)return '有正職時只能做兼差型工作';
+ return '';
+}
+function ptHTML(){
+ let h='<div class="sub">時薪依當年基本工資（台灣勞動部公告；2015 年以前為近似值，2007 年以前以約 NT$66 推估）乘上各職缺倍率，倍率為遊戲設定、非官方職缺資料；國外時薪依當地平均薪資比例換算。</div>';
+ if(S.age<15)return h+'<p class="sub">滿 15 歲才能打工。</p>';
+ if(S.age<18)h+='<div class="sub">未滿 18 歲：視為取得家長同意，每週最多 15 小時，且只能做日間輕鬆工作。</div>';
+ const o=S.ptj;
+ if(o){
+  const j=ptJob(o.id),rate=ptRate(o),yr=rate*o.h*ptWeeks();
+  h+=`<div class="item"><b>目前兼職：${j.t}</b><br>時薪 ${money(rate)} ・ 每週 ${o.h} 小時 ・ 年資 ${o.yrs} 年<br>預估全年收入約 ${money(yr)}（每年按 ${ptWeeks()} 週計）</div><div class="sec">每週工時</div><div class="seg">${ptOpts(j.side).map(x=>`<button class="${x===o.h?'on':''}" data-a="ac:ph:${x}">${x} 小時</button>`).join('')}</div>`;
+  if(S.school&&o.h>=15)h+='<div class="sub">在學期間工時過長，會拖累成績與壓力。</div>';
+  h+='<button class="btn" data-a="ac:pq">辭掉兼職</button>';
+ }
+ h+='<div class="sec">徵才（今年每個職缺只能應徵一次）</div>';
+ h+=PTJOBS.map(j=>{const b=ptBlock(j),done=S.acts['pj'+j.id],rate=Math.round(ptBase()*j.m);
+  return `<button class="btn" data-a="ac:pj:${j.id}" ${b||done||(o&&o.id===j.id)||S.jail?'disabled':''}>${j.t}<small>時薪 ${money(rate)} ・ ${j.min} 歲以上 ・ ${j.d}${b?' ・ '+b:''}${done?'（今年已應徵）':''}</small></button>`}).join('');
+ return h;
+}
+function ptApply(id){
+ const j=ptJob(id);if(!j)return null;const b=ptBlock(j);if(b)return B('條件不符：'+b);
+ if(S.acts['pj'+id])return B('今年已經應徵過了。');
+ S.acts['pj'+id]=1;mFix();
+ const p=Math.max(.3,Math.min(.92,.55+(S.skl.comm-10)/150+(S.looks-50)/400+(S.age<18?-.08:0)+(S.record?-.15:0)));
+ if(chance(p)){
+  const h0=ptOpts(j.side)[0];S.ptj={id,h:h0,yrs:0,up:0};
+  const m=`你錄取了兼職「${j.t}」，時薪 ${money(Math.round(ptBase()*j.m))}，每週 ${h0} 小時。`;log(m,'good');return G(m);
+ }
+ chg('happy',-2);const m=`你應徵兼職「${j.t}」沒被錄取。`;log(m,'bad');return B(m);
+}
+function ptPay(){
+ const o=S.ptj;if(!o)return;
+ const j=ptJob(o.id);
+ if(!j||S.jail||S.army||S.age>=70||(S.job&&!j.side)){if(j&&S.job&&!j.side)log(`你有正職了，辭掉兼職「${j.t}」。`);S.ptj=null;return}
+ const rate=ptRate(o),pay=rate*o.h*ptWeeks();
+ S.money+=pay;o.yrs++;
+ log(`兼職「${j.t}」：時薪 ${money(rate)}、每週 ${o.h} 小時，全年收入 ${money(pay)}。`,'good');
+ mFix();S.skl[j.sk]=Math.min(100,(S.skl[j.sk]||0)+(o.h>=15?2:1));
+ S.stress=cl(S.stress+Math.round(o.h/6));if(o.h>=25)chg('happy',-3);
+ if(S.school){if(o.h>=15){S.grade=cl(S.grade-R(2,5));log('兼職工時太長，成績掉了一些。','bad')}else if(o.h>=10)S.grade=cl(S.grade-R(0,2))}
+ if(j.h)chg('health',-R(0,2));
+ if(chance(.15)){const u=R(3,8);o.up=(o.up||0)+u;log(`店長覺得你表現不錯，時薪加了 NT$${u}。`,'good')}
+ if(chance(.06)){log(`兼職「${j.t}」因為人力調整，你被資遣了。`,'bad');S.ptj=null}
+}
+/* 寒暑假工讀（供事件使用）：時數與時薪明列 */
+function ptSummer(){
+ if(S.age<15)return N('你還太小，沒有人要請你。');
+ const hr=Math.round(ptBase()*1.0),hours=R(120,280),pay=hr*hours;
+ S.money+=pay;S.stress=cl(S.stress+3);chg('happy',-1);mFix();S.skl.comm=Math.min(100,S.skl.comm+1);
+ return N(`你利用假期打工 ${hours} 小時，時薪 ${money(hr)}（基本工資），共賺 ${money(pay)}。`);
+}
+const _y59=yearly;
+yearly=function(){
+ _y59();
+ try{ptPay()}catch(e){}
+ if(S.flags&&S.flags.retired&&S.pension>0&&!S.dead)log(`今年領到退休金／年金 ${money(S.pension)}。`,'good');
+};
+/* 舊的「兼職打工」活動與事件改走新系統 */
+(function(){const o=ACTS.find(a=>a.id==='pt');if(o)o.if=()=>false})();
+
+/* ---- 活動頁：分類 ---- */
+const ACATS=['常用','運動','比賽','才藝','休閒','打工','冒險'];
+const ACMAP={gym:'運動',study:'才藝',doc:'休閒',med:'休閒',food:'休閒',beauty:'休閒',trip:'休閒',donate:'休閒',lotto:'冒險',bet:'冒險',steal:'冒險',rob:'冒險',fraud:'冒險'};
+function acCat(a){return a.cat||ACMAP[a.id]||'休閒'}
+function acBtn(a){
+ const used=S.acts[a.id],poor=a.cost&&S.money<a.cost;
+ return `<button class="btn" data-a="act:${a.id}" ${S.jail||used||poor||S.dead?'disabled':''}>${a.l}<small>${a.sub||(a.cost?'費用 '+money(a.cost):'免費')}${used?'（今年已做）':''}</small></button>`;
+}
+const _ah59=actHTML;
+actHTML=function(){
+ if(view.acat==='紀錄'&&typeof cpRecHTML==='function')return `<h3>活動</h3><div class="acat"><button data-a="ac:c:比賽">返回比賽</button></div>`+cpRecHTML();
+ const vis=ACTS.filter(a=>S.age>=a.min&&(!a.max||S.age<=a.max)&&(!a.if||a.if()));
+ const rc=(S.rcnt||[]).map(id=>vis.find(a=>a.id===id)).filter(Boolean);
+ const cats=ACATS.filter(c=>c==='常用'?rc.length>0:c==='打工'?S.age>=15:c==='比賽'?vis.some(a=>acCat(a)==='比賽'):true);
+ let cur=view.acat;if(!cats.includes(cur))cur=cats[0];
+ let h=`<h3>活動</h3><div class="acat">${cats.map(c=>`<button class="${c===cur?'on':''}" data-a="ac:c:${c}">${c}</button>`).join('')}</div>`;
+ if(cur==='打工')return h+ptHTML();
+ if(cur==='常用')return h+'<div class="sub">最近做過的活動</div>'+rc.map(acBtn).join('');
+ h+=`<div class="sub">每項活動每年限一次${cur==='比賽'?'・比賽結果見「比賽紀錄」':''}</div>`;
+ if(cur==='比賽')h+='<button class="btn" data-a="ac:cr">比賽紀錄與名聲<small>歷年成績、獎金、出道邀約</small></button>';
+ return h+vis.filter(a=>acCat(a)===cur).map(acBtn).join('');
+};
+const _hd59=handle;
+handle=function(a){
+ if(typeof a==='string'&&S){
+  const p=a.split(':');
+  if(p[0]==='act'){try{const id=p[1],r=S.rcnt||(S.rcnt=[]);const i=r.indexOf(id);if(i>=0)r.splice(i,1);r.unshift(id);if(r.length>6)r.length=6}catch(e){}}
+  if(p[0]==='ac'){
+   let r=null;
+   if(p[1]==='c'){view.acat=p[2]}
+   else if(p[1]==='cr'){view.acat='紀錄'}
+   else if(p[1]==='go'){view.acat=p[2]}
+   else if(p[1]==='pj'){r=ptApply(p[2])}
+   else if(p[1]==='ph'){if(S.ptj){const j=ptJob(S.ptj.id);if(ptOpts(j.side).includes(+p[2]))S.ptj.h=+p[2]}}
+   else if(p[1]==='pq'){if(S.ptj){log(`你辭掉了兼職「${ptJob(S.ptj.id).t}」。`);S.ptj=null;r=N('你辭掉了兼職。')}}
+   view.msg=r;view.tab='act';render();showSheet('act');return;
+  }
+  if(p[0]==='mc'){view.mco=view.mco||{};view.mco[p[1]]=!view.mco[p[1]];showSheet('more');return}
+ }
+ return _hd59(a);
+};
+/* ---- 快捷列與自動存檔提示 ---- */
+let QSAVE='';
+const _sv59=save;
+save=function(){_sv59();try{const d=new Date();QSAVE=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);qbUpdate()}catch(e){}};
+function qbUpdate(){
+ try{
+  let q=document.getElementById('qbar');
+  if(!q){const f=document.getElementById('feed');if(!f||!f.parentNode)return;q=document.createElement('div');q.id='qbar';f.parentNode.insertBefore(q,f);
+   q.onclick=e=>{const b=e.target.closest('[data-q]');if(b)handle('ac:go:'+b.dataset.q)}}
+  if(!S||S.dead){q.style.display='none';return}
+  q.style.display='';
+  const c=[['運動','運動'],['比賽','比賽']];if(S.age>=15)c.push(['打工','打工']);c.push(['才藝','學習']);c.push(['休閒','休閒']);
+  q.innerHTML=c.map(x=>`<button data-q="${x[0]}">${x[1]}</button>`).join('')+`<span class="qs">${QSAVE?'已存檔 '+QSAVE:'自動存檔'}</span>`;
+ }catch(e){}
+}
+const _rd59=render;
+render=function(){_rd59();qbUpdate()};
+(function(){try{
+ const st=document.createElement('style');
+ st.textContent='#qbar{display:flex;gap:6px;align-items:center;padding:6px 12px;overflow-x:auto;white-space:nowrap;border-bottom:1px solid var(--line)}#qbar button{flex:none;border:1px solid var(--line);background:#fff;border-radius:14px;padding:5px 12px;font-size:13px;color:var(--ink)}#qbar .qs{flex:none;margin-left:auto;font-size:11px;color:var(--mute);padding-left:6px}.acat{display:flex;gap:6px;overflow-x:auto;margin:6px 0 10px;padding-bottom:2px}.acat button{flex:none;border:1px solid var(--line);background:#fff;border-radius:14px;padding:6px 14px;font-size:14px;color:var(--ink)}.acat button.on{background:var(--accent,#c0553a);color:#fff;border-color:transparent}button.msec{display:flex;justify-content:space-between;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 2px;margin:6px 0 0;font-size:14px;font-weight:700;color:var(--ink);text-align:left}';
+ document.head.appendChild(st);
+}catch(e){}})();
+/* ---- 更多頁：分組收合（常用展開、其餘點開） ---- */
+function tqf(el){
+ const q=el.value.trim();
+ document.querySelectorAll('.tile').forEach(t=>{t.style.display=!q||t.textContent.indexOf(q)>=0?'':'none'});
+ document.querySelectorAll('.grid[data-cl]').forEach(g=>{g.style.display=q?'':(g.dataset.cl==='1'?'none':'')});
+}
+const _mh59=moreHTML;
+moreHTML=function(){
+ let h=_mh59();view.mco=view.mco||{};let i=0;
+ h=h.replace(/oninput="[^"]*"/,'oninput="tqf(this)"');
+ return h.replace(/<div class="sec">([^<]*)<\/div><div class="grid">((?:(?!<\/div>)[\s\S])*)<\/div>/g,(m,n,body)=>{
+  const k=i++,n2=(body.match(/class="tile"/g)||[]).length;
+  const open=n==='常用'||view.mco[k];
+  return `<button class="msec" data-a="mc:${k}"><span>${n}（${n2}）</span><span>${open?'收合':'展開'}</span></button><div class="grid" data-cl="${open?0:1}" style="${open?'':'display:none'}">${body}</div>`;
+ });
+};
+/* ---- p60：更多活動（運動／才藝／休閒）、路跑、各種比賽與出道機會 ---- */
+const TLN={sing:'歌唱',dance:'舞蹈',music:'樂器',paint:'繪畫',debate:'口才',code:'程式'};
+function tlInit(){
+ mFix();
+ if(!S.tl){S.tl={};const ks=Object.keys(TLN);ks.forEach(k=>S.tl[k]=R(0,10));S.tl[pick(ks)]+=R(8,16)}
+ if(S.cfame==null)S.cfame=0;if(!S.cpr)S.cpr=[];if(!S.rpb)S.rpb={};if(S.runlv==null)S.runlv=0;
+}
+function tlUp(k,d){tlInit();S.tl[k]=Math.min(100,S.tl[k]+d)}
+const cpErf=x=>{const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x))};
+const cpPhi=z=>.5*(1+cpErf(z/Math.SQRT2));
+function cpFmt(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),c=s%60;return (h?h+':'+('0'+m).slice(-2):m)+':'+('0'+c).slice(-2)}
+
+/* ---- 一般活動 ---- */
+const NEWACTS=[
+ {id:'runtrain',l:'跑步訓練',cat:'運動',min:8,sub:'提高路跑成績（免費）',run:()=>{tlInit();const d=R(4,8);S.runlv=Math.min(100,S.runlv+d);mFix();S.skl.fit=Math.min(100,S.skl.fit+R(1,3));chg('health',R(1,4));chg('happy',2);return G(`你規律慢跑訓練，跑力提升到 ${S.runlv}。`)}},
+ {id:'swim',l:'游泳',cat:'運動',min:6,cost:1500,sub:'費用 NT$1,500（泳池入場）',run:()=>{mFix();S.skl.fit=Math.min(100,S.skl.fit+R(1,3));chg('health',R(2,5));chg('happy',2);return G('在水裡游了整個夏天，體力變好。')}},
+ {id:'hike',l:'登山健行',cat:'運動',min:8,run:()=>{mFix();S.skl.fit=Math.min(100,S.skl.fit+R(1,2));chg('health',R(2,4));chg('happy',R(3,6));S.stress=cl(S.stress-R(2,5));return G(`你去爬了${pick(['合歡山','陽明山','玉山主峰','抹茶山','七星山','雪山'])}，景色讓人忘了煩惱。`)}},
+ {id:'bike',l:'單車環島',cat:'運動',min:14,cost:12000,sub:'費用 NT$12,000（住宿與裝備，遊戲設定）',run:()=>{mFix();S.skl.fit=Math.min(100,S.skl.fit+R(2,4));chg('health',R(2,5));chg('happy',R(8,15));S.net=cl((S.net||0)+R(0,2));return G('你花了十天騎單車環島，累但很難忘。')}},
+ {id:'yoga',l:'瑜伽課',cat:'運動',min:15,cost:6000,sub:'費用 NT$6,000（課程，遊戲設定）',run:()=>{chg('health',R(1,3));S.stress=cl(S.stress-R(4,9));chg('happy',3);return G('身心都放鬆了不少。')}},
+ {id:'ball',l:'約朋友打球',cat:'運動',min:8,run:()=>{mFix();S.skl.fit=Math.min(100,S.skl.fit+R(1,2));chg('health',R(1,3));S.net=cl((S.net||0)+R(1,2));chg('happy',R(2,5));return G('和朋友打球流了一身汗，也更熟了。')}},
+ {id:'lsing',l:'練唱歌',cat:'才藝',min:8,get cost(){return S.age<18?0:6000},sub:'歌唱等級提升（成年後學費 NT$6,000）',run:()=>{tlUp('sing',R(6,12));chg('happy',2);return G('你上課練習發聲與歌曲，歌喉進步了。')}},
+ {id:'ldance',l:'練舞蹈',cat:'才藝',min:8,get cost(){return S.age<18?0:6000},sub:'舞蹈等級提升（成年後學費 NT$6,000）',run:()=>{tlUp('dance',R(6,12));mFix();S.skl.fit=Math.min(100,S.skl.fit+1);chg('happy',2);return G('你認真練舞，身體協調多了。')}},
+ {id:'lmusic',l:'學樂器',cat:'才藝',min:6,get cost(){return S.age<18?0:6000},sub:'樂器等級提升（成年後學費 NT$6,000）',run:()=>{tlUp('music',R(6,12));chg('smarts',1);return G(`你學了${pick(['鋼琴','吉他','小提琴','烏克麗麗','爵士鼓'])}。`)}},
+ {id:'lpaint',l:'畫畫與設計',cat:'才藝',min:6,run:()=>{tlUp('paint',R(6,12));mFix();S.skl.cre=Math.min(100,S.skl.cre+1);chg('happy',2);return G('你每週畫畫，筆觸越來越穩。')}},
+ {id:'ldebate',l:'口才訓練（辯論／演講社）',cat:'才藝',min:10,run:()=>{tlUp('debate',R(6,12));mFix();S.skl.comm=Math.min(100,S.skl.comm+2);return G('你練習組織論點、上台表達。')}},
+ {id:'lcode',l:'自學程式',cat:'才藝',min:10,run:()=>{tlUp('code',R(6,12));mFix();S.skl.tech=Math.min(100,S.skl.tech+2);chg('smarts',1);return G('你寫了幾個小專案。')}},
+ {id:'volun',l:'志工服務',cat:'休閒',min:12,run:()=>{S.karma=cl(S.karma+R(4,8));chg('happy',R(2,5));S.net=cl((S.net||0)+R(1,2));return G(`你去${pick(['育幼院','動物收容所','社區長照據點','淨灘活動'])}當志工，很有成就感。`)}},
+ {id:'concert',l:'看演唱會',cat:'休閒',min:12,cost:4000,sub:'費用 NT$4,000（票價，遊戲設定）',run:()=>{chg('happy',R(6,12));return G('現場的氣氛讓你起雞皮疙瘩。')}},
+ /* 路跑 */
+ ...[['5K',5,8,500],['10K',10,12,800],['半程馬拉松',21.0975,16,1200],['全程馬拉松',42.195,18,1800]].map(([n,km,min,cost])=>({id:'race'+Math.round(km),l:'路跑：'+n,cat:'比賽',min,cost,sub:`報名費 NT$${cost.toLocaleString('en-US')}（遊戲設定）・成績依跑力、體能與年齡模擬`,run:()=>rnRun(n,km)}))
+];
+const RNREF={5:390,10:380,21:395,42:420};
+function rnRun(n,km){
+ tlInit();mFix();
+ const f=S.skl.fit*.5+S.runlv*.5;let pace=540-3.3*f;
+ const a=S.age;pace*=a<20?1+(20-a)*.015:a>35?1+(a-35)*.006+(a>60?(a-60)*.01:0):1;
+ if(S.health<60)pace*=1+(60-S.health)*.002;
+ pace*={5:1,10:1.04,21:1.10,42:1.22}[Math.round(km)];
+ if(km>40&&S.runlv<30)pace*=1.12;
+ pace*=Math.exp(.05*nrm());
+ if(km>40&&S.runlv<20&&chance(.3)){chg('health',-R(5,12));chg('happy',-4);const m=`${n}跑到一半抽筋倒下，沒有完賽（準備不足）。`;S.cpr.push({y:calYear(),a:S.age,n:'路跑 '+n,r:'未完賽',p:0});return B(m)}
+ const t=pace*km,key=Math.round(km),pb=S.rpb[key],pct=Math.max(.1,100*(1-cpPhi((Math.log(RNREF[key])-Math.log(pace))/.22)));
+ let m=`你完成 ${n}，成績 ${cpFmt(t)}（配速每公里 ${cpFmt(pace)}），約全場前 ${pct.toFixed(pct<10?1:0)}%。`;
+ let tone='good',prize=0;
+ if(pb==null||t<pb){if(pb!=null)m+=`破了個人最佳（原 ${cpFmt(pb)}）！`;S.rpb[key]=t}
+ if(pct<=2){prize=km>40?R(10000,30000):R(2000,8000);S.money+=prize;m+=`拿到組別名次，獎金 ${money(prize)}。`;S.cfame=Math.min(100,S.cfame+2)}
+ chg('health',km>40?-R(0,3):R(0,2));chg('happy',km>40?R(6,12):R(2,6));mFix();S.skl.fit=Math.min(100,S.skl.fit+(km>20?2:1));
+ S.cpr.push({y:calYear(),a:S.age,n:'路跑 '+n,r:cpFmt(t)+'・前'+pct.toFixed(0)+'%',p:prize});
+ return [m,tone];
+}
+
+/* ---- 比賽 ---- */
+const CPS=[
+ /* id,名稱,最小,最大,階段,獎金[冠,亞,季],報名成本,需求函式,類型,出道職業 */
+ ['sch_sing','校內歌唱比賽',8,22,['初賽','決賽'],[3000,2000,1000],0,()=>S.tl.sing*.55+S.skl.cre*.15+S.skl.comm*.1+S.looks*.2,'sing'],
+ ['nat_sing','全國歌唱大賽',14,35,['縣市初賽','區域複賽','全國決賽'],[100000,50000,20000],1500,()=>S.tl.sing*.65+S.skl.cre*.1+S.skl.comm*.1+S.looks*.15-6,'sing','演員／歌手'],
+ ['idol','電視選秀節目（唱跳）',15,30,['海選','淘汰賽','晉級賽','總決賽'],[1000000,300000,100000],0,()=>(S.tl.sing*.3+S.tl.dance*.3)+S.skl.cre*.1+S.skl.comm*.1+S.looks*.2-8,'idol','演員／歌手'],
+ ['sch_dance','校內舞蹈比賽',8,22,['初賽','決賽'],[3000,2000,1000],0,()=>S.tl.dance*.55+S.skl.fit*.2+S.looks*.15+S.skl.cre*.1,'dance'],
+ ['street','街舞大賽',13,35,['海選','複賽','決賽'],[80000,40000,15000],1500,()=>S.tl.dance*.6+S.skl.fit*.25+S.skl.cre*.15-5,'dance','演員／歌手'],
+ ['talent','才藝大賽',10,40,['初賽','決賽'],[30000,15000,8000],800,()=>Math.max(S.tl.sing,S.tl.dance,S.tl.music,S.tl.paint)*.65+S.skl.comm*.15+S.looks*.15,'talent','演員／歌手'],
+ ['band','校園樂團大賽',12,30,['初賽','決賽'],[50000,25000,10000],1000,()=>S.tl.music*.55+S.tl.sing*.2+S.skl.cre*.15+S.skl.comm*.1,'music','演員／歌手'],
+ ['model','模特兒選拔賽',16,30,['海選','決選'],[100000,50000,20000],0,()=>S.looks*.6+S.skl.comm*.15+S.skl.fit*.15+S.skl.cre*.1-10,'model','模特兒'],
+ ['speech','演講比賽',9,40,['班級','校內','縣市','全國'],[10000,6000,3000],0,()=>S.tl.debate*.5+S.skl.comm*.3+S.smarts*.2,'brain'],
+ ['sci','科學展覽',10,19,['校內','縣市','全國'],[20000,10000,5000],0,()=>S.smarts*.5+S.skl.tech*.3+S.tl.code*.2,'brain'],
+ ['write','作文與寫作比賽',8,40,['校內','全國'],[8000,5000,2000],0,()=>S.smarts*.4+S.skl.cre*.4+S.tl.debate*.2,'brain'],
+ ['art','美術比賽',7,40,['校內','縣市','全國'],[15000,8000,4000],0,()=>S.tl.paint*.65+S.skl.cre*.25+S.smarts*.1,'brain'],
+ ['chess','圍棋與棋藝賽',8,60,['初賽','複賽','決賽'],[15000,8000,4000],0,()=>S.smarts*.6+S.skl.tech*.2+S.skl.cre*.2,'brain'],
+ ['esport','電競大賽',12,35,['海選','小組賽','淘汰賽','決賽'],[300000,100000,40000],0,()=>S.smarts*.35+S.skl.tech*.2+S.tl.code*.1+S.skl.fit*.1+S.skl.comm*.1+8,'brain'],
+ ['hack','黑客松／創業競賽',16,45,['書面審查','複賽','決賽'],[200000,80000,30000],0,()=>S.skl.tech*.35+S.tl.code*.25+S.smarts*.2+S.skl.lead*.2,'brain'],
+ ['cook','廚藝大賽',14,60,['初賽','決賽'],[50000,20000,10000],1000,()=>S.skl.cre*.35+S.skl.tech*.15+S.smarts*.2+S.skl.fit*.1+20,'brain'],
+ ['track','田徑錦標賽',8,40,['初賽','複賽','決賽'],[20000,10000,5000],0,()=>S.skl.fit*.5+S.runlv*.25+S.health*.25-4,'sport'],
+ ['swimc','游泳錦標賽',8,40,['預賽','決賽'],[20000,10000,5000],500,()=>S.skl.fit*.55+S.health*.25+S.runlv*.1,'sport'],
+ ['pageant','選拔賽（先生／小姐）',18,30,['初賽','複賽','決賽'],[300000,100000,50000],0,()=>S.looks*.55+S.skl.comm*.25+S.smarts*.1+S.skl.cre*.1-10,'model','模特兒']
+];
+function cpLevel(def){const [id,n,mn,mx,st,pz,cost,need,tp,dj]=def;return {id,n,mn,mx,st,pz,cost,need,tp,dj}}
+const CPD=CPS.map(cpLevel);
+function cpRun(d){
+ tlInit();
+ const need=Math.max(0,Math.min(100,d.need()));
+ const base=[.75,.5,.38,.3];
+ let k=0,out=null;
+ for(;k<d.st.length;k++){
+  const last=k===d.st.length-1;
+  if(!last){
+   const p=Math.max(.04,Math.min(.95,(base[Math.min(k,3)]||.35)+(need-50)/90));
+   if(!chance(p)){out=`止步${d.st[k]}`;break}
+   log(`你通過了「${d.n}」的${d.st[k]}。`,'good');
+  }
+ }
+ let place=null;
+ if(!out){
+  const p1=Math.max(.02,Math.min(.6,.14+(need-55)/150));
+  place=chance(p1)?0:chance(.3)?1:chance(.35)?2:3;
+  out=['冠軍','亞軍','季軍','入圍決賽（未得名次）'][place];
+ }
+ let prize=place!=null&&place<3?d.pz[place]:0;
+ S.money+=prize;
+ const fameD=place===0?(d.cost>=800||d.pz[0]>=50000?8:3):place!=null&&place<3?(d.pz[0]>=50000?4:1):place===3?1:0;
+ S.cfame=Math.min(100,S.cfame+fameD);
+ chg('happy',place===0?12:place!=null&&place<3?8:place===3?3:-2);
+ if(place===0)S.karma=cl(S.karma+1);
+ S.cpr.push({y:calYear(),a:S.age,n:d.n,r:out,p:prize});if(S.cpr.length>80)S.cpr.shift();
+ if(d.dj&&place!=null&&place<4)cpDebut(d,place);
+ const m=`你參加「${d.n}」，結果：${out}${prize?`，獎金 ${money(prize)}`:''}。`;
+ return place!=null&&place<3?G(m):place===3?N(m):B(m);
+}
+function cpDebut(d,place){
+ if(S.ent||(S.job&&/演員|模特/.test(S.job.t)))return;
+ const p=[.7,.5,.35,.1][place]*(d.tp==='idol'?1.2:1)*(S.age>30?.5:1);
+ if(!chance(Math.min(.95,p)))return;
+ const jn=d.dj,co=pick(['星途娛樂','潮音唱片','雙子星經紀','藍海娛樂','橘子音樂','群星經紀']);
+ queue.push({run:()=>({t:`${co}的星探在${d.n}後找上你，想簽下你${jn==='模特兒'?'當模特兒':'出道當藝人'}。${S.age<18?'（未滿 18 歲，需要家長同意，爸媽表示尊重你的決定。）':''}`,c:[
+  ch('簽約出道',()=>cpSign(jn,co)),
+  ch('婉拒，專心做自己的事',()=>{chg('happy',1);return N('你客氣地婉拒了邀約。')})]})});
+}
+function cpSign(jn,co){
+ const idx=JOBS.findIndex(j=>j.t===jn);if(idx<0)return N('合約最後沒談成。');
+ if(S.school||S.age<18){
+  S.ent={co,jn,y:calYear()};chg('happy',6);log(`你與${co}簽下練習生合約，在學期間有少量通告收入，畢業後正式出道。`,'good');
+  return G('你成為練習生，夢想踏出第一步。');
+ }
+ return cpDebutNow(jn,co);
+}
+function cpDebutNow(jn,co){
+ const idx=JOBS.findIndex(j=>j.t===jn);if(idx<0)return N('出道計畫取消了。');
+ if(S.job&&!S.job.founder)log(`你辭去了${S.job.t}，專心走演藝路線。`);
+ const o=hireJob(JOBS[idx]);o.emp=co;o.fame=(o.fame||0)+Math.min(.8,(S.cfame||0)/120);
+ S.job=o;S.ent=null;chg('happy',10);
+ return G(`你正式出道，成為${co}旗下的${jn}，年薪約 ${money(o.sal)}（收入浮動大）。`);
+}
+const _y60=yearly;
+yearly=function(){
+ _y60();
+ try{
+  if(S.tl){Object.keys(S.tl).forEach(k=>{if(S.tl[k]>12&&chance(.5))S.tl[k]--});S.runlv=Math.max(0,(S.runlv||0)-4);if(S.cfame>0&&chance(.5))S.cfame--}
+  if(S.ent&&!S.dead){
+   if(S.school){const g=R(20000,100000);S.money+=g;log(`練習生通告與活動收入 ${money(g)}。`,'good');chg('health',-R(0,2))}
+   else if(S.age>=18&&!S.jail){const r=cpDebutNow(S.ent.jn,S.ent.co);log(r[0],r[1])}
+  }
+ }catch(e){}
+};
+/* 加入活動清單、技能對應 */
+CPD.forEach(d=>NEWACTS.push({id:'cp_'+d.id,l:d.n,cat:'比賽',min:d.mn,max:d.mx,cost:d.cost||0,sub:`${d.st.length} 階段・冠軍獎金 ${money(d.pz[0])}${d.cost?'・報名 '+money(d.cost):''}（獎金為遊戲設定）${d.dj?'・有機會被星探發掘':''}`,run:()=>cpRun(d)}));
+ACTS.push(...NEWACTS);
+Object.assign(ACTFX,{runtrain:[['s','fit',1],['p','con',2]],swim:[['s','fit',1]],hike:[['p','opn',1],['p','sta',1]],bike:[['p','opn',1],['p','con',1]],yoga:[['p','sta',2]],ball:[['p','ext',1]],lsing:[['p','con',1]],ldance:[['p','ext',1]],lmusic:[['s','cre',1]],lpaint:[['s','cre',1]],ldebate:[['s','comm',1]],lcode:[['s','tech',1]],volun:[['p','agr',2]],concert:[['p','ext',1]]});
+/* 比賽紀錄頁 */
+function cpRecHTML(){
+ tlInit();
+ const wins=S.cpr.filter(r=>r.r==='冠軍').length,tot=S.cpr.reduce((s,r)=>s+(r.p||0),0);
+ let h=`<div class="item"><b>名聲</b> ${S.cfame}${pbar(S.cfame)}<small>冠軍 ${wins} 次・累積獎金 ${money(tot)}${S.ent?'・練習生（'+esc(S.ent.co)+'）':''}</small></div>`;
+ h+='<div class="sec">才藝等級（練習後才有實力參賽）</div><div class="item">'+Object.keys(TLN).map(k=>`${TLN[k]} ${S.tl[k]}`).join(' ・ ')+`<br>跑力 ${S.runlv}</div>`;
+ const pbs=Object.keys(S.rpb);
+ if(pbs.length)h+='<div class="sec">路跑個人最佳</div><div class="item">'+pbs.map(k=>({5:'5K',10:'10K',21:'半馬',42:'全馬'}[k])+' '+cpFmt(S.rpb[k])).join(' ・ ')+'</div>';
+ h+='<div class="sec">歷年成績</div>';
+ h+=S.cpr.length?S.cpr.slice(-25).reverse().map(r=>`<div class="item"><b>${esc(r.n)}</b><br>${r.a} 歲・${esc(r.r)}${r.p?'・獎金 '+money(r.p):''}</div>`).join(''):'<p class="sub">還沒參加過比賽。</p>';
+ return h;
+}
+/* ---- p61：所有人物都有頭像；大學以上學費來源（獎學金／學貸／父母／自付） ---- */
+function npcInfo(key){
+ mFix();let p=null,sx='',age=0;
+ if(key==='mom'&&S.mom){p=S.mom;sx='女';age=S.age+(p.off||28)}
+ else if(key==='dad'&&S.dad){p=S.dad;sx='男';age=S.age+(p.off||30)}
+ else if(key==='partner'&&S.partner){p=S.partner;sx=p.sx;age=S.age+(p.off||0)}
+ else if(key[0]==='f'&&S.friends[+key.slice(1)]){p=S.friends[+key.slice(1)];sx=p.sx||'男';if(p.off==null)p.off=R(-3,3);age=S.age+p.off}
+ else if(key[0]==='c'&&S.crush[+key.slice(1)]){p=S.crush[+key.slice(1)];sx=p.sx;if(p.off==null)p.off=R(-3,3);age=S.age+p.off}
+ else if(key[0]==='k'&&S.kids[+key.slice(1)]){p=S.kids[+key.slice(1)];return {k:p}}
+ return p?{p,sx,age:Math.max(1,age)}:null;
+}
+function npcAv(key,size){
+ try{
+  const o=npcInfo(key);if(!o)return '';
+  if(o.k)return avSVG({g:kidGenome(o.k),o:{},age:o.k.age,sx:o.k.sx,happy:60,health:o.k.hl,stress:20},size);
+  const p=o.p;avEnsure();
+  if(key==='partner')avPartner();
+  else if(!p.gn){const code=(p.o&&nameToCode(p.o))||S.cn||'TW',g=genFor(code);p.gn=(key==='mom'||key==='dad')?avChild(S.av.g,g,0):g}
+  const dead=false;
+  return avSVG({g:avFill(p.gn,'EW'),o:{},age:o.age,sx:o.sx,happy:p.rel!=null?Math.max(30,Math.min(85,p.rel)):60,health:70,stress:30,dead},size);
+ }catch(e){return ''}
+}
+function npcKey(act){
+ let m;
+ if((m=act.match(/^rel:(mom|dad|partner)$/)))return m[1];
+ if((m=act.match(/^rel:(f\d+|k\d+)$/)))return m[1];
+ if(act==='rom:go:p')return 'partner';
+ if((m=act.match(/^rom:c:(\d+)$/)))return 'c'+m[1];
+ if((m=act.match(/^kid:page:(\d+)$/)))return 'k'+m[1];
+ return null;
+}
+function npcRows(h){
+ return h.replace(/<div class="item row">((?:(?!<div class="item row">)[\s\S])*?)<button class="mini" data-a="([^"]+)">/g,(m,mid,act)=>{
+  if(mid.startsWith('<span class="npc">'))return m;const k=npcKey(act);if(!k)return m;const v=npcAv(k,44);
+  return v?`<div class="item row"><span class="npc">${v}</span>${mid}<button class="mini" data-a="${act}">`:m;
+ });
+}
+function npcHead(h,k,size){const v=npcAv(k,size||84);return v?h.replace('<h3>',`<div class="npcbig">${v}</div><h3>`):h}
+const _rh61=relHTML;relHTML=function(){return npcRows(_rh61())};
+const _rm61=romHome;romHome=function(){return npcRows(_rm61())};
+const _rr61=romRow;romRow=function(){return npcRows(_rr61())};
+const _sb61=subHTML;
+subHTML=function(k){
+ const h=_sb61(k);
+ if(k==='mom'||k==='dad')return npcHead(h,k);
+ if(k&&k[0]==='f'&&/^f\d+$/.test(k))return npcHead(h,k);
+ return h;
+};
+const _ro61=romHTML;
+romHTML=function(k){
+ const h=_ro61(k);
+ if(k==='Rp')return npcHead(h,'partner');
+ if(k&&/^Rc\d+$/.test(k))return npcHead(h,'c'+k.slice(2));
+ return h;
+};
+const _kh61=kidHTML;
+kidHTML=function(i){const h=_kh61(i);return /class="npcbig"/.test(h)?h:npcHead(h,'k'+i)};
+(function(){try{const st=document.createElement('style');st.textContent='.npc{flex:none;margin-right:10px;display:flex;align-items:center}.npcbig{display:flex;justify-content:center;margin:4px 0 2px}';document.head.appendChild(st)}catch(e){}})();
+
+/* ---- 學費來源 ---- */
+const TFU=['大學','碩士','博士'];
+function tfParents(){return [S.mom,S.dad].filter(p=>p&&p.alive)}
+function tfShare(){
+ const ps=tfParents();if(!ps.length)return 0;
+ const rel=ps.reduce((a,p)=>a+p.rel,0)/ps.length;
+ if(rel<30)return 0;
+ const cap={清寒:.2,小康:.75,富裕:1}[S.fam]||.5;
+ return Math.max(0,Math.min(1,cap*(.55+rel/200+(Math.random()-.5)*.2)));
+}
+function tfEvent(tu){
+ const lo=money(60000);
+ const c=[];
+ const ps=tfParents();
+ c.push(ch(`請父母支付學費${ps.length?`（家境${S.fam}・親子關係約 ${Math.round(ps.reduce((a,p)=>a+p.rel,0)/ps.length)}）`:'（父母已不在）'}`,()=>{
+  const sh=tfShare(),amt=Math.round(tu*sh);
+  if(!ps.length)return N('父母已經過世，你只能自己想辦法。');
+  if(amt<=0)return B('爸媽這次沒辦法或不願意出學費，你只能自己付。');
+  S.money+=amt;ps.forEach(p=>p.rel=cl(p.rel+1));
+  const m=amt>=tu?`爸媽幫你付了全部學費 ${money(amt)}。`:`爸媽負擔了學費的一部分 ${money(amt)}，其餘你自己付。`;
+  return G(m)}));
+ c.push(ch(`申請獎學金（看成績與智力）`,()=>{
+  const sc=S.grade*.6+S.smarts*.4+(S.fam==='清寒'?5:0);
+  if(sc>=82&&chance(.5)){S.money+=tu;chg('happy',6);return G(`你拿到全額獎學金，抵掉學費 ${money(tu)}。`)}
+  if(sc>=68&&chance(.55)){const a=Math.round(tu*.5);S.money+=a;chg('happy',3);return G(`你拿到半額獎學金 ${money(a)}。`)}
+  if(sc>=55&&chance(.5)){const a=Math.min(tu,20000);S.money+=a;return G(`你拿到小額獎學金 ${money(a)}。`)}
+  chg('happy',-2);return B('這次獎學金沒有申請上，學費要自己付。')}));
+ if(S.fam!=='富裕'){
+  c.push(ch('就學貸款：只借學費',()=>{S.sloan=(S.sloan||0)+tu;S.sgr=0;S.money+=tu;return N(`你申請就學貸款 ${money(tu)}，畢業一年後開始還。`)}));
+  c.push(ch(`就學貸款：學費加生活費（共多借 ${lo}）`,()=>{const a=tu+60000;S.sloan=(S.sloan||0)+a;S.sgr=0;S.money+=a;return N(`你申請學貸 ${money(a)}（學費加生活費），畢業一年後開始還。`)}));
+ }
+ c.push(ch('自己付（動用存款或打工收入）',()=>N('你決定自己負擔學費。')));
+ return {t:`新學年的學費 ${money(tu)} 已經繳了。這筆錢你想怎麼處理？${S.fam!=='富裕'?'（學貸利率約 1.3%，為遊戲估算值；家境富裕者不符資格）':''}`,c};
+}
+const _y61=yearly;
+yearly=function(){
+ const tu=(TFU.includes(S.school)&&S.tuition>0&&S.age>=18)?S.tuition:0;
+ _y61();
+ if(tu&&!S.dead)queue.push({run:()=>tfEvent(tu)});
+ if(S.sloan>0&&!S.dead&&!TFU.includes(S.school)){
+  S.sgr=(S.sgr||0)+1;
+  if(S.sgr>1){
+   S.sloan=Math.round(S.sloan*1.013);
+   const pay=Math.min(S.sloan,Math.max(60000,Math.round(S.sloan/8)));
+   S.money-=pay;S.sloan-=pay;
+   log(S.sloan>0?`償還就學貸款 ${money(pay)}，剩餘 ${money(S.sloan)}。`:`你還清了就學貸款（最後一期 ${money(pay)}）。`,S.sloan>0?'':'good');
+   if(S.sloan<=0)S.sloan=0;
+  }
+ }
+};
+const _ah61=astHTML;
+astHTML=function(){const h=_ah61();return S.sloan>0?h+`<div class="item"><b>就學貸款</b><div class="sub">未還餘額 ${money(S.sloan)}（已計入淨資產）</div></div>`:h};
+/* ---- p62：所有頁面區塊可收合；一鍵維繫人際關係 ---- */
+function secCollapse(){
+ try{
+  const body=document.getElementById('sheetBody');if(!body||!body.querySelectorAll||!body.querySelectorAll('.sec').length)return;
+  view.col=view.col||{};
+  [...body.querySelectorAll('.sec')].forEach(sec=>{
+   if(sec.dataset.cz)return;sec.dataset.cz='1';
+   const key=(view.tab||'')+'|'+(view.sub||view.lsub||'')+'|'+sec.textContent.trim();
+   const arr=[];let n=sec.nextSibling;
+   while(n){
+    if(n.nodeType===1&&(n.classList.contains('sec')||n.dataset&&n.dataset.a==='close'||n.classList.contains('msec')))break;
+    arr.push(n);n=n.nextSibling;
+   }
+   if(!arr.length)return;
+   const grp=document.createElement('div');grp.className='cgrp';
+   sec.parentNode.insertBefore(grp,arr[0]);arr.forEach(x=>grp.appendChild(x));
+   sec.classList.add('cz');
+   const apply=c=>{grp.style.display=c?'none':'';sec.classList.toggle('cl',c)};
+   apply(!!view.col[key]);
+   sec.onclick=()=>{view.col[key]=!view.col[key];apply(view.col[key])};
+  });
+ }catch(e){}
+}
+const _ss62=showSheet;
+showSheet=function(tab,sub){const r=_ss62(tab,sub);secCollapse();return r};
+(function(){try{const st=document.createElement('style');st.textContent='.sec.cz{cursor:pointer;display:flex;justify-content:space-between;user-select:none}.sec.cz::after{content:"收合";font-weight:400;font-size:12px}.sec.cz.cl::after{content:"展開"}';document.head.appendChild(st)}catch(e){}})();
+
+/* 一鍵維繫 */
+function kpPeople(){
+ const a=[];
+ if(S.mom&&S.mom.alive)a.push(S.mom);if(S.dad&&S.dad.alive)a.push(S.dad);
+ if(S.partner)a.push(S.partner);
+ (S.friends||[]).forEach(f=>a.push(f));(S.kids||[]).forEach(k=>a.push(k));
+ return a;
+}
+function kpDo(kind){
+ const ps=kpPeople();if(!ps.length)return B('身邊沒有可以聯絡的人。');
+ const key=kind==='a'?'kpA':'kpB';
+ if(S.acts[key])return B('今年已經做過了。');
+ const cost=kind==='b'?1000*ps.length:0;
+ if(S.money<cost)return B('你的錢不夠。');
+ S.acts[key]=1;S.money-=cost;
+ ps.forEach(p=>{const d=kind==='a'?(p===S.partner?R(2,4):R(1,3)):(p===S.partner?R(4,7):R(3,6));p.rel=cl(p.rel+d)});
+ S.net=cl((S.net||0)+(kind==='a'?0:1));chg('happy',kind==='a'?1:3);
+ const m=kind==='a'?`你一一傳訊息問候了 ${ps.length} 位家人與朋友，關係都有一點改善。`:`你請大家吃飯、準備小禮物，一共花了 ${money(cost)}，${ps.length} 位的關係都明顯提升。`;
+ log(m,'good');return G(m);
+}
+const _rh62=relHTML;
+relHTML=function(){
+ const h=_rh62(),ps=kpPeople(),n=ps.length,dis=S.jail||S.dead;
+ if(!n)return h;
+ const blk=`<button class="btn p" data-a="kp:a" ${dis||S.acts.kpA?'disabled':''}>一鍵問候全部（${n} 人）<small>免費・全員好感小幅提升・每年 1 次${S.acts.kpA?'（今年已做）':''}</small></button><button class="btn" data-a="kp:b" ${dis||S.acts.kpB||S.money<1000*n?'disabled':''}>一鍵請客送禮<small>費用 ${money(1000*n)}（每人 NT$1,000）・全員好感明顯提升・每年 1 次${S.acts.kpB?'（今年已做）':''}</small></button>`;
+ return h.replace('</h3>','</h3>'+blk);
+};
+const _hd62=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&a.startsWith('kp:')){const r=kpDo(a.slice(3));view.msg=r;view.tab='rel';render();showSheet('rel');return}
+ return _hd62(a);
+};
+/* ---- p63：伴侶檔案（逐步了解的個人故事）與多元互動 ---- */
+const PBTAG=['溫柔','慢熱','幽默','嘴硬心軟','責任感強','愛操心','浪漫','理性','愛玩','自律','念舊','貪吃','內向','外向','固執','貼心','獨立','愛面子','樂觀','敏感'];
+const PBHOB=['烘焙','爬山','攝影','看電影','打籃球','桌遊','露營','騎車','閱讀','咖啡','畫畫','彈吉他','旅行','健身','追劇','園藝','釣魚','瑜伽','電玩','看展','手作'];
+const PBLL=['言語肯定','精心時刻','接受禮物','服務行動','肢體接觸'];
+const PBDR=['開一間自己的小店','環遊世界一年','寫一本書','在海邊買房','成為領域裡頂尖的專家','組一個溫暖的家','學會一樣樂器並上台演出','創辦自己的品牌','考上理想的研究所','回鄉照顧家人','完成一次馬拉松','存夠錢提早退休'];
+const PBWR=['怕自己不夠好','擔心父母的健康','害怕被拋下','對金錢沒有安全感','工作壓力很大','怕被拿來和別人比較','難以開口說出自己的需求','怕生活一成不變'];
+const PBFP={rich:['從小走在父母安排好的路上，直到大學才第一次自己做決定。','家裡忙於事業，小時候多半由保母陪伴，所以特別在意有人陪。'],mid:['在普通的家庭長大，爸媽每個週末都帶全家出去走走，成了最珍貴的回憶。','小時候家裡開過小店，放學後常在店裡寫作業。'],poor:['家境不寬裕，很早就學會打工分擔家計，所以特別獨立。','小時候搬過好幾次家、換過好幾所學校，不太容易相信長久的關係。']};
+const PBGP=['國中時曾被同學排擠，後來靠社團重新找回自信。','高中時差點放棄升學，是一位老師改變了想法。','大學時休學一年去旅行，回來後想法完全不同。','第一次失戀後，把自己埋在工作裡好幾個月。','曾經養過一隻很愛的寵物，牠離開後很久才走出來。','年輕時曾搬到外地獨自生活，學會了照顧自己。'];
+const PBPL=['朋友的聚會','工作上的專案','社團活動','咖啡店的同一張長桌','運動場館','交友軟體上的一則訊息','共同朋友的婚禮','一場雨天的公車站'];
+const PBIM=['對方一開始給人有點冷淡的印象，其實只是怕生。','你們一聊就聊到末班車快沒了。','你本來只當對方是普通朋友，後來卻每天都想傳訊息。','對方記住了你隨口提過的小事，讓你很意外。'];
+const PBSE=['對方偷偷存了一筆錢，打算有天帶你去看極光。','對方其實很怕黑，一直不好意思說。','對方曾有一段很深的感情，結束得不太好，所以格外珍惜你。','對方偷偷報名了一個課程，想給你一個驚喜。','對方一直想換工作，但怕你擔心而沒說。','對方寫了一首歌（或一封長信）給你，還沒敢拿出來。'];
+const PBSB=['獨生子女','有一位姊姊','有一位哥哥','有一位弟弟','有一位妹妹','有兩位手足'];
+const PBHM=['台北','新北','桃園','台中','台南','高雄','新竹','嘉義','花蓮','屏東','宜蘭','彰化','苗栗','南投'];
+function pbZod(m,d){const z=[['魔羯',20],['水瓶',19],['雙魚',21],['牡羊',20],['金牛',21],['雙子',22],['巨蟹',23],['獅子',23],['處女',23],['天秤',23],['天蠍',22],['射手',22]];const i=d<z[m-1][1]?(m+10)%12:m-1;return z[i][0]+'座'}
+function pbFix(p){
+ if(!p||p.pb)return p&&p.pb;
+ pxFix(p);try{pFix2(p)}catch(e){}
+ const m=R(1,12),d=R(1,28),tags=[],tg=PBTAG.slice();for(let i=0;i<3;i++)tags.push(tg.splice(R(0,tg.length-1),1)[0]);
+ const hb=[],hh=PBHOB.slice();for(let i=0;i<3;i++)hb.push(hh.splice(R(0,hh.length-1),1)[0]);
+ const yrs=Math.max(0,S.age-(p.since==null?S.age:p.since)),r=Math.random();
+ const home=(S.cn||'TW')==='TW'?pick(PBHM):(CNS[S.cn]?CNS[S.cn].n:'');
+ p.pb={zd:pbZod(m,d),bd:m+'月'+d+'日',tg:tags,hb,ll:pick(PBLL),dr:pick(PBDR),wr:pick(PBWR),
+  ed:r<.15?'高中職':r<.7?'大學':r<.95?'碩士':'博士',hm:home,sb:pick(PBSB),
+  past:pick(PBFP[p.fb||'mid'])+pick(PBGP),
+  meet:`${calYear()-yrs} 年，你們在${pick(PBPL)}認識。${pick(PBIM)}`,
+  se:pick(PBSE),kn:Math.min(100,R(5,15)+yrs*8),pet:null,mf:0,mi:0};
+ return p.pb;
+}
+const pbKn=(p,d)=>{const b=pbFix(p);b.kn=Math.min(100,b.kn+d)};
+const pbHe=p=>p.sx==='男'?'他':'她';
+function pbProfile(p){
+ const b=pbFix(p),k=b.kn,lock=n=>`<div class="sub">（再多了解${pbHe(p)}一些就會知道，了解度 ${k}／${n}）</div>`;
+ let h=`<div class="item"><b>了解度 ${k}</b>${pbar(k)}<div class="sub">聊天、約會、陪伴都會增加了解，解鎖更多故事。</div></div>`;
+ h+=`<div class="item"><b>基本資料</b><br>${S.age+(p.off||0)} 歲・${b.zd}（${b.bd}）・家鄉 ${esc(b.hm)}・${b.ed}畢業・${esc(p.job||'—')}・${b.sb}</div>`;
+ h+=`<div class="item"><b>相識的故事</b><br>${esc(b.meet)}</div>`;
+ h+=`<div class="item"><b>個性與喜好</b><br>`+(k>=15?`${b.tg.join('、')}<br>興趣：${b.hb.join('、')}<br>愛的語言：${b.ll}`:lock(15))+'</div>';
+ h+=`<div class="item"><b>成長故事</b><br>`+(k>=35?esc(b.past):lock(35))+'</div>';
+ h+=`<div class="item"><b>夢想與煩惱</b><br>`+(k>=60?`夢想：${b.dr}<br>煩惱：${b.wr}`:lock(60))+'</div>';
+ h+=`<div class="item"><b>藏在心裡的小秘密</b><br>`+(k>=80?esc(b.se):lock(80))+'</div>';
+ if(b.pet)h+=`<div class="item"><b>家裡的寵物</b><br>你們一起養了一隻${b.pet}。</div>`;
+ return h;
+}
+/* 互動 */
+const PBA=[
+ ['cook','一起下廚',800,1,['烘焙','咖啡','園藝'],2,5,['你們一起煮了一桌菜，廚房亂成一團卻笑個不停。','你教對方做拿手菜，對方學得有模有樣。']],
+ ['movie','看電影',600,1,['看電影','追劇','桌遊'],2,4,['你們窩在電影院，散場後聊了很久劇情。','對方在感人的片段偷偷擦眼淚，你假裝沒看到。']],
+ ['sport','一起運動',0,1,['健身','爬山','騎車','打籃球','瑜伽'],2,4,['你們一起流汗，結束後互相打氣。','對方運動時意外地認真，你有點刮目相看。'],()=>{mFix();S.skl.fit=Math.min(100,S.skl.fit+1);chg('health',R(1,3))}],
+ ['museum','逛展覽或書店',500,1,['看展','閱讀','畫畫','攝影'],2,4,['你們在展場慢慢走，對方分享了很多想法。','在書店各挑了一本書，約好交換讀完。'],()=>chg('smarts',1)],
+ ['trip','小旅行',3000,1,['旅行','露營','爬山','釣魚'],4,8,['你們安排了一趟兩天一夜的小旅行，留下許多合照。','路上迷了路，卻意外發現一家很棒的小店。']],
+ ['surprise','準備小驚喜',500,1,['手作','烘焙'],3,6,['你悄悄準備了一份小禮物，對方又驚又喜。','你記得對方提過的小東西，特別買來送給對方。'],null,'接受禮物'],
+ ['letter','寫長訊息或手寫信',0,0,[],2,5,['你寫了一段很長的話，把平常不好意思說的都說了。','對方把你的信收進抽屜，說會一直留著。'],null,'言語肯定'],
+ ['help','幫對方分擔事情',0,1,[],2,5,['你幫對方處理了一件麻煩事，對方鬆了口氣。','你主動分擔家事，對方很感動。'],null,'服務行動'],
+ ['cuddle','安靜依偎的夜晚',0,0,[],2,4,['你們什麼也沒做，只是靠在一起，覺得很安心。','對方靠著你的肩膀睡著了。'],null,'肢體接觸'],
+ ['game','一起打電動或玩桌遊',0,1,['電玩','桌遊'],2,4,['你們玩到忘了時間，輸的人要請宵夜。','對方玩輸了耍賴，你笑到不行。']],
+ ['anniv','慶祝紀念日',3000,1,[],5,9,['你們訂了餐廳慶祝，回顧一路走來的點滴。','對方準備了一個小蛋糕，上面寫著你們的日期。']],
+ ['dream','一起規劃夢想',0,1,[],3,7,['你們把各自的夢想寫下來，討論怎麼一起完成。','聊著聊著，兩人眼睛都亮了起來。'],null,null,60],
+ ['night','深夜長談',0,1,[],1,3,['你們聊到天亮，聊到很多從沒講過的事。','在陽台吹著風，對方慢慢說起心裡的話。'],null,null,0,8]
+];
+function pbRun(id){
+ const p=S.partner;if(!p)return B('目前沒有伴侶。');const b=pbFix(p);
+ if(id==='mf'||id==='mi')return pbFam(id);
+ if(id==='pet')return pbPet();
+ if(id==='rec')return pbRec();
+ const a=PBA.find(x=>x[0]===id);if(!a)return null;
+ const [,,cost,ap,tags,lo,hi,tx,fx,ll,need,kn]=a;
+ if(S.acts['pb'+id])return B('今年已經做過這件事了。');
+ if(need&&b.kn<need)return B('還需要更了解對方才行。');
+ if(ap&&S.ap<1)return B('行動點不足。');if(S.money<cost)return B('你的錢不夠。');
+ S.acts['pb'+id]=1;if(ap)S.ap--;S.money-=cost;
+ let g=R(lo,hi);const hit=tags.some(t=>b.hb.includes(t));if(hit)g+=2;if(ll&&b.ll===ll)g+=3;
+ let m=pick(tx);
+ if(hit)m+=`（這正好是${pbHe(p)}的興趣。）`;if(ll&&b.ll===ll)m+=`（${pbHe(p)}的愛的語言就是「${ll}」，效果特別好。）`;
+ if(Math.random()<.1&&!hit){g=-R(1,3);m+='不過今天對方有點心不在焉，氣氛普通。'}
+ p.rel=cl(p.rel+g);chg('happy',g>0?R(1,3):-1);fx&&fx();pbKn(p,kn||R(2,5));
+ if(S.partner)p.lastI=S.age;
+ const r=`${p.n}：${m}好感 ${g>=0?'+':''}${g}。`;log(r,g>0?'good':'');return g>0?G(r):N(r);
+}
+function pbFam(id){
+ const p=S.partner,b=p.pb;
+ if(id==='mf'){
+  if(b.mf)return B('你已經拜訪過對方的家人了。');if(S.ap<1)return B('行動點不足。');S.ap--;b.mf=1;
+  const ok=p.rel>=60||chance(.5),fb=p.fb==='rich'?'氣派的老家':p.fb==='poor'?'簡樸卻溫暖的老家':'乾淨整齊的老家';
+  if(ok){p.rel=cl(p.rel+R(4,8));pbKn(p,10);const m=`你到${p.n}的${fb}拜訪，家人準備了豐盛的飯菜，氣氛不錯。`;log(m,'good');return G(m)}
+  p.rel=cl(p.rel-R(2,6));pbKn(p,8);S.stress=cl(S.stress+3);const m=`${p.n}的家人對你有些保留，整頓飯氣氛有點緊繃。`;log(m,'bad');return B(m);
+ }
+ if(b.mi)return B('你已經帶對方見過你的家人了。');if(S.ap<1)return B('行動點不足。');
+ const ps=[S.mom,S.dad].filter(x=>x&&x.alive);if(!ps.length)return B('你的父母都已不在了。');
+ S.ap--;b.mi=1;const avg=ps.reduce((a,x)=>a+x.rel,0)/ps.length;
+ if(chance(.35+avg/200)){p.rel=cl(p.rel+R(4,8));ps.forEach(x=>x.rel=cl(x.rel+2));const m=`你帶${p.n}回家，爸媽很喜歡${pbHe(p)}，還一直問你們的計畫。`;log(m,'good');return G(m)}
+ p.rel=cl(p.rel-R(1,4));const m=`你帶${p.n}回家，爸媽問了很多問題，${p.n}回程時有點累。`;log(m,'bad');return N(m);
+}
+function pbPet(){
+ const p=S.partner,b=p.pb;if(b.pet)return B('你們已經有寵物了。');if(!(p.married||p.cohab))return B('需要先同居或結婚。');
+ if(S.money<8000)return B('你的錢不夠。');S.money-=8000;b.pet=pick(['貓','狗']);p.rel=cl(p.rel+R(4,8));chg('happy',6);
+ const m=`你們領養了一隻${b.pet}，家裡多了一個小傢伙。`;log(m,'good');return G(m);
+}
+function pbRec(){
+ const p=S.partner;if(S.acts.pbrec)return B('今年已經談過一次了。');if(S.ap<1)return B('行動點不足。');S.ap--;S.acts.pbrec=1;
+ if(chance(.55)){p.rel=cl(p.rel+R(6,12));pbKn(p,6);const m=`你和${p.n}坐下來好好談了一次，誤會一一解開。`;log(m,'good');return G(m)}
+ p.rel=cl(p.rel-R(1,4));S.stress=cl(S.stress+3);const m=`你們談得不順利，需要一點時間冷靜。`;log(m,'bad');return B(m);
+}
+function pbButtons(p){
+ const b=pbFix(p);
+ const mk=a=>{const [id,l,cost,ap,,,,,,,need]=a,used=S.acts['pb'+id],lock=need&&b.kn<need;
+  return `<button class="btn" data-a="pb:${id}" ${used||lock||S.dead?'disabled':''}>${l}<small>${cost?'費用 '+money(cost)+'・':''}${ap?'1 點行動':'不耗行動點'}${lock?'・了解度 '+need+' 解鎖':''}${used?'（今年已做）':''}</small></button>`};
+ let h=PBA.map(mk).join('');
+ h+=`<button class="btn" data-a="pb:mf" ${b.mf?'disabled':''}>拜訪對方的家人<small>1 點行動・只能一次${b.mf?'（已完成）':''}</small></button>`;
+ h+=`<button class="btn" data-a="pb:mi" ${b.mi?'disabled':''}>帶對方見你的家人<small>1 點行動・只能一次${b.mi?'（已完成）':''}</small></button>`;
+ if(p.married||p.cohab)h+=`<button class="btn" data-a="pb:pet" ${b.pet?'disabled':''}>一起養寵物<small>費用 ${money(8000)}・只能一次${b.pet?'（已有）':''}</small></button>`;
+ if(p.rel<50)h+=`<button class="btn" data-a="pb:rec" ${S.acts.pbrec?'disabled':''}>認真談一次、修復關係<small>1 點行動・可能成功也可能更僵</small></button>`;
+ return h;
+}
+const _pp63=partnerPage;
+partnerPage=function(){
+ const h=_pp63(),p=S.partner;if(!p)return h;
+ if(view.scene&&view.scene.k==='p')return h;
+ const i=h.indexOf('<button class="btn"'),j=h.lastIndexOf('<button class="btn" data-a="rom:go:h">');
+ if(i<0||j<0||j<i)return h;
+ return h.slice(0,i)+'<div class="sec">伴侶檔案</div>'+pbProfile(p)+'<div class="sec">基本互動</div>'+h.slice(i,j)+'<div class="sec">更多互動（依對方的興趣與愛的語言，效果不同）</div>'+pbButtons(p)+h.slice(j);
+};
+const _hd63=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&a.startsWith('pb:')){const r=pbRun(a.slice(3));view.msg=r;view.tab='rel';render();showSheet('rel','partner');return}
+ return _hd63(a);
+};
+const _y63=yearly;
+yearly=function(){
+ _y63();
+ try{const p=S.partner;if(p){const b=pbFix(p);pbKn(p,(p.married||p.cohab)?5:3);if(b.pet){p.rel=cl(p.rel+1);if(chance(.4))log(`家裡的${b.pet}今年又闖了禍，卻讓你們笑了很久。`,'good')}}}catch(e){}
+};
+/* ---- p64：出國留學入口（畢業時可選）與獎學金留學 ---- */
+function wUniSch(k){
+ wEnsure();
+ if(S.edu!==3||S.school||S.age<17)return B('需高中（職）畢業且目前沒有在學。');
+ if(S.cn!=='TW'&&!(S.ab&&S.cn===k))return B('你目前住在國外，請先回台灣或直接在當地就讀。');
+ if(!WD[k])return B('這個國家目前無法申請。');
+ if(S.acts['wsch'+k])return B('今年已經申請過這個國家的獎學金了。');
+ if(S.grade<65||S.smarts<60)return B('申請獎學金需要成績 65、智力 60 以上，目前條件不足。');
+ S.acts['wsch'+k]=1;
+ const fee=Math.min(S.money,5000);S.money-=fee;
+ const e=WD[k].e||3,lang=S.lang&&S.lang[k]!=null?S.lang[k]:langInit(k),islang=['en','sg'].includes(CNS[k].lgn);
+ const sc=S.grade*.5+S.smarts*.5,p=clmp(.08+(sc-65)/110+(islang||lang>=50?.08:-.1)-(e-3)*.05,.03,.6);
+ if(!chance(p)){chg('happy',-4);return B(`你申請${WD[k].n}的獎學金留學沒有成功（機率約 ${Math.round(p*100)}%），支付申請費 ${money(fee)}。`)}
+ const full=sc>=85&&chance(.5),yrs=(['GB','AU','NZ','IE'].includes(k)||WD[k].reg==='EW')?3:4,t=tuitTW(k);
+ const ownT=full?0:Math.round(t*.5);
+ const mv=30000,pay=Math.min(S.money,mv);S.money-=pay;if(pay<mv)S.sloan=(S.sloan||0)+(mv-pay);
+ S.cn=k;S.ab={cn:k,visa:'study',left:0,yrs:0,wk:0,nojob:0,nu:0,minor:0,fam:famShare(),sch:full?1:0};
+ S.lang[k]=cl((S.lang[k]!=null?S.lang[k]:langInit(k))+(islang?10:20));S.trav[k]=(S.trav[k]||0)+1;
+ enroll('大學',yrs,ownT,e>=5?3:e>=4?2:e>=3?1:0);chg('happy',10);
+ if(!S.major){S.exam=exScore();queue.push(catEvent({exam:'當地入學考試',abroad:`${WD[k].n}大學`}))}
+ const m=full?`你拿到${WD[k].n}的全額獎學金（學費全免，每年另有生活津貼），前往就讀大學（${yrs} 年）。`:`你拿到${WD[k].n}的半額獎學金，學費每年約 ${money(ownT)}（可搭配學貸、打工），前往就讀大學（${yrs} 年）。`;
+ log(m,'good');return G(m);
+}
+function wHSsch(k){
+ wEnsure();
+ if(S.age<14||S.age>17)return B('限 14–17 歲的國中與高中階段。');if(!['國中','高中','高職'].includes(S.school))return B('需正在就讀國中或高中。');if(S.ab)return B('你已經在國外。');
+ if(!WD[k])return B('這個國家目前無法申請。');if(S.acts['whs'+k])return B('今年已經申請過了。');
+ if(S.grade<80||S.smarts<70)return B('申請高中階段的留學獎學金需要成績 80、智力 70 以上。');
+ S.acts['whs'+k]=1;
+ const lang=S.lang&&S.lang[k]!=null?S.lang[k]:langInit(k),islang=['en','sg'].includes(CNS[k].lgn);
+ const p=clmp(.1+(S.grade-80)/120+(S.smarts-70)/200+(islang||lang>=50?.06:-.08),.03,.45);
+ if(!chance(p)){chg('happy',-3);return B(`${WD[k].n}的高中留學獎學金沒有申請上（機率約 ${Math.round(p*100)}%）。`)}
+ S.cn=k;S.ab={cn:k,visa:'study',left:0,yrs:0,wk:0,nojob:0,nu:0,minor:1,fam:0,sch:1};S.tuition=0;
+ S.lang[k]=cl((S.lang[k]!=null?S.lang[k]:langInit(k))+20);[S.mom,S.dad].forEach(x=>{if(x&&x.alive)x.rel=cl(x.rel-3)});S.trav[k]=(S.trav[k]||0)+1;
+ chg('happy',R(2,8));const m=`你拿到${WD[k].n}的全額獎學金，前往就讀${S.school}（學費與寄宿由獎學金支應）。`;log(m,'good');return G(m);
+}
+const _lh64=lfHandle;
+lfHandle=function(x,y,z,u){if(x==='wd'&&y==='sch')return wUniSch(z);if(x==='wd'&&y==='hss')return wHSsch(z);return _lh64(x,y,z,u)};
+const _wc64=wdCtry;
+wdCtry=function(k){
+ const h=_wc64(k),btn=(a,t,s,dis)=>`<button class="btn" data-a="${a}" ${dis?'disabled':''}>${t}<small>${s}${dis?'・'+dis:''}</small></button>`;
+ const b1=btn(`lf:wd:hss:${k}`,'高中留學獎學金申請','成績 80、智力 70 以上才有機會，全額補助',S.age<14||S.age>17?'限 14–17 歲就學中':S.ab?'你已在國外':'');
+ const b2=btn(`lf:wd:sch:${k}`,'大學獎學金申請（家境不限）','成績 65、智力 60 以上；全額或半額，機率依成績與語言',S.edu!==3||S.school||S.age<17?'需高中畢業且未在學':'');
+ const mk=`<button class="btn" data-a="cn:mv:${k}:study"`;
+ return h.includes(mk)?h.replace(mk,b1+b2+mk):h;
+};
+const _y64=yearly;
+yearly=function(){
+ _y64();
+ try{if(S.ab&&S.ab.sch&&S.ab.visa==='study'&&S.cn!=='TW'&&!S.dead){const g=Math.round((S.ab.minor?.35:.6)*wTW(S.cn));S.money+=g;log(`獎學金生活津貼 ${money(g)}。`,'good')}}catch(e){}
+};
+/* 高中畢業時可選擇出國留學 */
+const _eu64=E_UNI.run;
+E_UNI.run=function(){
+ const r=_eu64();
+ if((S.cn||'TW')!=='TW'||!r||!r.c||(S.ab&&S.ab.visa))return r;
+ const ctr=['US','GB','JP','AU','CA','DE','SG','KR','NL','FR'].filter(k=>WD[k]);
+ if(!ctr.length)return r;
+ const pickMode=k=>({run:()=>({t:`你想怎麼前往${WD[k].n}念大學？（家境：${S.fam}；成績 ${S.grade}、智力 ${S.smarts}）`,c:[
+   ch(`自費／由家人支持${S.fam==='清寒'?'（家境清寒，通常負擔不起）':''}`,()=>{const x=wUni(k);if(x[1]==='bad'&&!S.school)queue.unshift(E_UNI);return x}),
+   ch('申請獎學金（成績好才有機會）',()=>{const x=wUniSch(k);if(x[1]==='bad'&&!S.school)queue.unshift(E_UNI);return x}),
+   ch('先不出國了',()=>{queue.unshift(E_UNI);return N('你回頭想想其他選項。')})]})});
+ const pickC={run:()=>({t:'你想去哪個國家念大學？',c:ctr.map(k=>ch(WD[k].n,()=>{queue.unshift(pickMode(k));return N(`你開始研究去${WD[k].n}念大學。`)})).concat([ch('先不出國了',()=>{queue.unshift(E_UNI);return N('你回頭想想其他選項。')})])})};
+ const c=r.c.slice();c.splice(Math.max(1,c.length-1),0,ch('出國念大學（自費或獎學金）',()=>{queue.unshift(pickC);return N('你開始研究出國留學。')}));
+ return Object.assign({},r,{c});
+};
+/* ---- p65：能力總覽（所有能力值一眼看清楚，附說明與提升方式） ---- */
+const STHL=[
+ ['health','健康','低於 30 容易生重病；運動、看醫生、規律作息可提升','運動'],
+ ['happy','快樂','影響人生分數；休閒、旅行、陪伴家人朋友可提升','休閒'],
+ ['smarts','智力','影響成績與求職；讀書、學習才藝可提升','才藝'],
+ ['looks','外貌','影響戀愛與部分職業；運動、保養可維持','運動'],
+ ['stress','壓力','越低越好；過高會傷身與影響心情；冥想、瑜伽可降低','休閒'],
+ ['karma','品德','做善事提高、犯罪降低；影響名聲與部分事件','休閒'],
+ ['net','人脈','影響求職與引薦；聚會、社團、志工可提升','休閒']
+];
+function stBar(v,bad){const c=bad?(v>=70?'#c0553a':v>=40?'#e0a030':'#4a9a6a'):(v<30?'#c0553a':v<60?'#e0a030':'#4a9a6a');return `<div class="bar"><i style="width:${Math.max(0,Math.min(100,v))}%;background:${c}"></i></div>`}
+function stRow(n,v,d,go,bad){return `<div class="item"><div style="display:flex;justify-content:space-between"><b>${n}</b><span>${Math.round(v)}</span></div>${stBar(v,bad)}<div class="sub">${d}</div>${go?`<button class="mini" data-a="ac:go:${go}">去「${go}」提升</button>`:''}</div>`}
+function statHTML(){
+ mFix();if(typeof tlInit==='function')tlInit();
+ let h='<h3>能力總覽</h3><div class="sub">點「去…提升」可直接跳到對應活動分類。</div><div class="sec">基本能力</div>';
+ h+=STHL.map(x=>stRow(x[1],S[x[0]]||0,x[2],x[3],x[0]==='stress')).join('');
+ h+='<div class="sec">技能（影響求職、賺錢與生活）</div>';
+ h+=SKN.map(([k,n])=>stRow(n,S.skl[k]||0,(typeof SKD!=='undefined'&&SKD[k])||'',k==='fit'?'運動':'才藝')).join('');
+ h+='<div class="sec">個性（由你的選擇慢慢形塑）</div>';
+ h+=PTN.map(([k,n])=>stRow(n,S.pt[k]||50,(typeof PTD!=='undefined'&&PTD[k])||'')).join('');
+ if(S.tl){h+='<div class="sec">才藝與比賽實力</div>'+Object.keys(TLN).map(k=>stRow(TLN[k],S.tl[k],'練習後才有實力參加比賽','才藝')).join('')+stRow('跑力',S.runlv||0,'影響路跑成績，要持續訓練','運動')+stRow('名聲',S.cfame||0,'比賽成績累積，有機會被星探發掘','比賽')}
+ h+='<div class="sec">學業與工作</div><div class="item">';
+ h+=`學歷：${EDU[S.edu]}${S.school?`<br>就讀：${S.school}（成績 ${S.grade}）`:''}${S.job?`<br>工作：${esc(S.job.t)}，年薪 ${money(S.job.sal)}`:''}${S.ptj?`<br>兼職：${esc(ptJob(S.ptj.id).t)}，每週 ${S.ptj.h} 小時`:''}${S.ent?`<br>練習生：${esc(S.ent.co)}`:''}</div>`;
+ h+=`<div class="sec">財務</div><div class="item">現金 ${money(S.money)}${S.sloan?`<br>就學貸款 ${money(S.sloan)}`:''}<br>淨資產 ${money(netWorth())}</div>`;
+ return h;
+}
+const _lf65=lifeHTML;
+lifeHTML=function(){return view.lsub==='stat'?statHTML():_lf65()};
+(function(){try{const s=document.getElementById('stats');if(s){s.style.cursor='pointer';s.addEventListener('click',()=>{if(S&&typeof handle==='function')handle('lf:stat')})}}catch(e){}})();
+const _qb65=qbUpdate;
+qbUpdate=function(){
+ _qb65();
+ try{const q=document.getElementById('qbar');if(q&&S&&!S.dead&&!q.querySelector('[data-st]')){q.insertAdjacentHTML('afterbegin','<button data-st="1">能力</button>');const b=q.querySelector('[data-st]');b.onclick=e=>{e.stopPropagation();handle('lf:stat')}}}catch(e){}
+};
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();

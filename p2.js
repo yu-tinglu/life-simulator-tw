@@ -21,4 +21,4 @@ let S=null,queue=[],busy=false;
 const log=(t,c)=>S.log[S.log.length-1].lines.push({t:typeof logV==='function'?logV(t):t,c:c||''});
 const chg=(k,d)=>{S[k]=cl(S[k]+d)};
 const ch=(l,f)=>({l,f}),G=t=>[t,'good'],B=t=>[t,'bad'],N=t=>[t,''];
-const netWorth=()=>S.money+(S.house?S.house.value:0)-(S.mort?S.mort.left:0)+(S.car?S.car.value:0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0)+(typeof stake==="function"?stake(S.co):0)+(typeof cnAssets==="function"?cnAssets():0);
+const netWorth=()=>S.money-(S.sloan||0)+(S.house?S.house.value:0)-(S.mort?S.mort.left:0)+(S.car?S.car.value:0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0)+(typeof stake==="function"?stake(S.co):0)+(typeof cnAssets==="function"?cnAssets():0);

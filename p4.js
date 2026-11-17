@@ -40,7 +40,7 @@ function yearly(){
  if(a>=28)chg('looks',-R(0,a>50?2:1));
  if(a>60)chg('smarts',-R(0,2));
  if(S.flags.smoker)chg('health',-R(0,2));
- if(a>=6&&a<18)S.money+={清寒:2000,小康:8000,富裕:30000}[S.fam];
+ if(a>=6&&a<18){const pm={清寒:2000,小康:8000,富裕:30000}[S.fam];S.money+=pm;log(`${a===6?'爸媽開始固定給你零用錢（遊戲設定：依家境每年 清寒 NT$2,000／小康 NT$8,000／富裕 NT$30,000，非官方統計）。':'零用錢'}今年收到 ${money(pm)}。`)}
  if(a===6)enroll('小學',6,0);
  if(S.school){
   S.grade=cl(S.grade+R(-3,3)+(S.smarts-50)/12);chg('smarts',R(0,2));

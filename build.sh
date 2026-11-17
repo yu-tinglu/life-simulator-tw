@@ -1,5 +1,5 @@
-cd "$(dirname "$0")"
-cat p1.html p2.js p2b.js p2c.js p3.js p4.js p5.js p8b.js p8c.js p8d.js p9.js p10.js p11.js p12.js p13.js p14.js p15.js p16.js p17.js p18.js p19.js p20.js p21.js p22.js p23.js p24.js p25.js p26.js p27.js p28.js p29.js p30.js p31.js p32a.js p32b.js p32c.js p32d.js p33.js p34a.js p34b.js p35a.js p35b.js p35c.js p36.js p37.js p38.js p39.js p40.js p41.js p42.js p43.js p44.js p45.js p46.js p47.js p48.js p49.js p50.js p51.js p52.js p53.js p54.js p55.js p56.js p57.js p58.js p6.js p7.html > game.html
+cd /home/claude/life
+cat p1.html p2.js p2b.js p2c.js p3.js p4.js p5.js p8b.js p8c.js p8d.js p9.js p10.js p11.js p12.js p13.js p14.js p15.js p16.js p17.js p18.js p19.js p20.js p21.js p22.js p23.js p24.js p25.js p26.js p27.js p28.js p29.js p30.js p31.js p32a.js p32b.js p32c.js p32d.js p33.js p34a.js p34b.js p35a.js p35b.js p35c.js p36.js p37.js p38.js p39.js p40.js p41.js p42.js p43.js p44.js p45.js p46.js p47.js p48.js p49.js p50.js p51.js p52.js p53.js p54.js p55.js p56.js p57.js p58.js p59.js p60.js p61.js p62.js p63.js p64.js p65.js p6.js p7.html > game.html
 python3 -c "
 s=open('game.html').read();i=s.index('<script>')+8;j=s.rindex('</script>');open('game.js','w').write(s[i:j])"
 node --check game.js && echo SYNTAX_OK

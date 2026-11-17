@@ -87,13 +87,13 @@ if(typeof E!=='undefined')E.push(
   ch('算了',()=>N('你把這個念頭放下了。'))]}}},
 {id:'cmoney',min:6,max:22,w:2,if:()=>(S.mom&&S.mom.alive||S.dad&&S.dad.alive)&&!S.job,run:()=>({t:'你的零用錢花光了，想跟爸媽多要一點。',c:[
  ch('開口要零用錢',()=>{const g={清寒:R(500,1500),小康:R(2000,6000),富裕:R(5000,20000)}[S.fam]*(S.age>=15?2:1);if(chance(parentOK(g,'x')+.1)){S.money+=g;return G(`爸媽給了你 ${money(g)}。`)}return B('爸媽說「自己要學會規劃」，沒有給。')}),
- ch('找機會打工賺',()=>{if(S.age<15)return N('你還太小，沒有人要請你。');const g=R(8000,30000);S.money+=g;chg('happy',-1);return N(`你假日打工賺了 ${money(g)}。`)}),ch('省著用',()=>{chg('happy',-1);return N('你決定忍一忍。')})]})},
+ ch('找機會打工賺',()=>ptSummer()),ch('省著用',()=>{chg('happy',-1);return N('你決定忍一忍。')})]})},
 {id:'cvac',min:6,max:22,w:3,if:()=>!!S.school,run:()=>{
  const rich=S.fam==='富裕',a=S.age;
  const l=[ch('去補習班衝刺',()=>{S.grade=cl(S.grade+R(3,8));chg('smarts',R(1,3));S.stress=cl(S.stress+6);chg('happy',-3);return N('整個假期都在補習，成績進步了，也很累。')}),
   ch('參加營隊',()=>{chg('happy',R(5,9));S.net=cl((S.net||0)+R(1,3));return G('你在營隊認識了不少新朋友。')}),
   ch('在家耍廢',()=>{chg('happy',R(5,9));chg('health',-1);S.grade=cl(S.grade-R(0,3));return N('你睡到中午、打電動、看漫畫，爽翻了。')})];
- if(a>=15)l.push(ch('找打工',()=>{const g=R(30000,80000);S.money+=g;S.stress=cl(S.stress+3);return N(`你打工賺了 ${money(g)}，也學到不少社會經驗。`)}));
+ if(a>=15)l.push(ch('找打工',()=>ptSummer()));
  if(rich&&a>=12)l.push(ch('出國遊學',()=>{chg('smarts',R(2,5));chg('happy',R(6,10));return G('你去國外遊學一個月，眼界大開。')}));
  return {t:`寒暑假到了，你想怎麼過？`,c:l}}},
 {id:'chw',min:6,max:18,w:3,if:()=>!!S.school&&(S.mom&&S.mom.alive||S.dad&&S.dad.alive),run:()=>{
