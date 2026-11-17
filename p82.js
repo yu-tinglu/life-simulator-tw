@@ -1,6 +1,6 @@
 /* ---- p82：海外房產——任何國家只要開放外國人購屋都能買（規定與稅費為遊戲簡化）---- */
 const FREG={
- JP:{fee:.07,ltv:.5,spr:.015,tx:.0145,y:.04,cg:.2},KR:{fee:.05,ltv:.4,spr:.045,tx:.003,y:.03,cg:.22},US:{fee:.03,ltv:.6,spr:.065,tx:.011,y:.05,cg:.2},
+ JP:{fee:.07,ltv:.5,spr:.022,tx:.0145,y:.04,cg:.2},KR:{fee:.05,ltv:.4,spr:.045,tx:.003,y:.03,cg:.22},US:{fee:.03,ltv:.6,spr:.065,tx:.011,y:.05,cg:.2},
  CA:{ban:'加拿大禁止非公民、非永久居民購買住宅（至少到 2027 年）。取得永居或公民身分後可買。',ok:['pr','cit'],fee:.035,ltv:.75,spr:.045,tx:.009,y:.045,cg:.25},
  AU:{newOnly:1,note:'外國人只能買新建案（價格約 +10%），並要多付外國人印花稅與審查費。',fee:.12,ltv:.6,spr:.06,tx:.005,y:.04,cg:.23},
  GB:{fee:.09,ltv:.6,spr:.05,tx:.006,y:.05,cg:.24},DE:{fee:.10,ltv:.6,spr:.04,tx:.0035,y:.035,cg:.25},
@@ -52,7 +52,7 @@ hvYear=function(h){
 const _y82=yearly;
 yearly=function(){
  _y82();
- try{(S.props||[]).forEach(p=>{if(p.cn)S.money+=Math.round(p.value*.011)-Math.round(p.value*(p.tx||0))})}catch(e){}
+ try{(S.props||[]).forEach(p=>{if(p.cn)S.money+=Math.round(p.value*.011)-Math.round(p.value*(p.tx||0))-(p.cn===S.cn?0:Math.round(p.value*p.y*.15))})}catch(e){}
 };
 const _sn82=sellNew;
 sellNew=function(idx){

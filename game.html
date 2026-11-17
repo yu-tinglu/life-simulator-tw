@@ -8968,6 +8968,13 @@ avSVG=function(a,size){
  try{const g=a&&a.g;if(g&&g.hs!=null&&a.sx!=='女'&&[2,3,6,7,8,9].includes(g.hs)){const sh=[0,1,5,11];a=Object.assign({},a,{g:Object.assign({},g,{hs:sh[g.hs%sh.length]})})}}catch(e){}
  return _avS73(a,size);
 };
+/* 馬來姓名：男性用 bin、女性用 binti */
+const _nameOf73=nameOf;
+nameOf=function(key,sx){
+ let n=_nameOf73(key,sx);
+ if(key==='sgm'){n=sx==='男'?n.replace(/ binti /,' bin '):n.replace(/ bin /,' binti ')}
+ return n;
+};
 /* ---- p74：創業股權玩法（股權結構表、創投輪次與對賭、員工認股權、股票質押借款、公司買回庫藏股）---- */
 function eqFix(co){if(!co.eq)co.eq={vc:0,esop:0,pl:0,neg:0,rounds:[]};return co.eq}
 const eqPrice=co=>Math.max(10,coValue(co)/co.shares);
@@ -9372,7 +9379,7 @@ function frmHTML(id,o){
 /* 輸入狀態與快速金額 */
 (function(){try{
  document.addEventListener('input',e=>{const t=e.target;if(t&&t.id&&t.id.startsWith('frm_')){const p=t.id.split('_'),st=frmState(p[1]);st[p[2]]=t.value}},true);
- document.addEventListener('change',e=>{const t=e.target;if(t&&t.id&&t.id.startsWith('frm_')){const p=t.id.split('_'),st=frmState(p[1]);st[p[2]]=t.value;if((p[2]==='s'||p[1]==='hb')&&typeof render==='function'&&view.tab!=null){const x=document.getElementById('frm_'+p[1]+'_a');if(x)st.a=x.value;try{render();showSheet(view.tab,view.sub)}catch(err){}}}},true);
+ document.addEventListener('change',e=>{const t=e.target;if(t&&t.id&&t.id.startsWith('frm_')){const p=t.id.split('_'),st=frmState(p[1]);st[p[2]]=t.value;if((p[2]==='s'||p[1]==='hb'||p[1]==='jb')&&typeof render==='function'&&view.tab!=null){const x=document.getElementById('frm_'+p[1]+'_a');if(x)st.a=x.value;try{render();showSheet(view.tab,view.sub)}catch(err){}}}},true);
  document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('[data-fill]'):null;if(!b)return;e.preventDefault();e.stopPropagation();const [id,v]=b.dataset.fill.split(':'),x=document.getElementById(id);if(x){x.value=v;const p=id.split('_');frmState(p[1])[p[2]]=v}},true);
  const st=document.createElement('style');st.textContent=`.frm{display:grid;gap:8px;margin:6px 0 12px}.frm label{font-size:12px;color:var(--mut,#8a7f72)}.frm select,.frm input{width:100%;box-sizing:border-box;padding:12px;font-size:15px;font-family:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:var(--r,12px);-webkit-appearance:none;appearance:none}.frm select{background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:34px}.frm .chips{display:flex;gap:6px;flex-wrap:wrap}.frm .chips button{padding:6px 10px;font-size:12.5px;border:1px solid var(--line);background:var(--card);border-radius:999px;color:var(--ink)}.frm .acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}.frm .acts .btn{margin:0}`;document.head.appendChild(st);
 }catch(e){}})();
@@ -9611,7 +9618,7 @@ E.push({id:'otrv_c',min:16,max:70,w:4,if:()=>rvList(2).length>0&&!S.jail,run:()=
  return {t:`${rv.n}主動退出了：「我看得出來，${nm}心裡還在猶豫。」局勢回到你和${nm}之間。`,c:[ch('把握機會好好相處',()=>{otAdd(t,g.k,4);return G('你們的關係悄悄拉近了。（好感 +4）')})]}}});
 /* ---- p82：海外房產——任何國家只要開放外國人購屋都能買（規定與稅費為遊戲簡化）---- */
 const FREG={
- JP:{fee:.07,ltv:.5,spr:.015,tx:.0145,y:.04,cg:.2},KR:{fee:.05,ltv:.4,spr:.045,tx:.003,y:.03,cg:.22},US:{fee:.03,ltv:.6,spr:.065,tx:.011,y:.05,cg:.2},
+ JP:{fee:.07,ltv:.5,spr:.022,tx:.0145,y:.04,cg:.2},KR:{fee:.05,ltv:.4,spr:.045,tx:.003,y:.03,cg:.22},US:{fee:.03,ltv:.6,spr:.065,tx:.011,y:.05,cg:.2},
  CA:{ban:'加拿大禁止非公民、非永久居民購買住宅（至少到 2027 年）。取得永居或公民身分後可買。',ok:['pr','cit'],fee:.035,ltv:.75,spr:.045,tx:.009,y:.045,cg:.25},
  AU:{newOnly:1,note:'外國人只能買新建案（價格約 +10%），並要多付外國人印花稅與審查費。',fee:.12,ltv:.6,spr:.06,tx:.005,y:.04,cg:.23},
  GB:{fee:.09,ltv:.6,spr:.05,tx:.006,y:.05,cg:.24},DE:{fee:.10,ltv:.6,spr:.04,tx:.0035,y:.035,cg:.25},
@@ -9663,7 +9670,7 @@ hvYear=function(h){
 const _y82=yearly;
 yearly=function(){
  _y82();
- try{(S.props||[]).forEach(p=>{if(p.cn)S.money+=Math.round(p.value*.011)-Math.round(p.value*(p.tx||0))})}catch(e){}
+ try{(S.props||[]).forEach(p=>{if(p.cn)S.money+=Math.round(p.value*.011)-Math.round(p.value*(p.tx||0))-(p.cn===S.cn?0:Math.round(p.value*p.y*.15))})}catch(e){}
 };
 const _sn82=sellNew;
 sellNew=function(idx){
@@ -9712,6 +9719,108 @@ handle=function(a){
   const r=buyForeign(k,+t,m);view.msg=r;render();try{showSheet(view.tab,view.sub)}catch(e){}return;
  }
  return _hd82(a);
+};
+/* ---- p83：信託改為下拉＋自填金額 ---- */
+const _lg83=legacyHTML;
+legacyHTML=function(){
+ let h=_lg83();
+ if(S.tr||!/data-a="lg:tr:/.test(h))return h;
+ h=h.replace(/<button class="btn" data-a="lg:tr:(live|gift):[^"]*"[^>]*>[\s\S]*?<\/button>/g,'');
+ const opts=[['live','生前信託（可撤銷，仍計入遺產，免繼承程序費）'],...S.kids.map(x=>['gift:'+x.id,`為 ${x.n} 設立他益信託（30 歲交付，視同贈與課稅）`])];
+const F=frmHTML('tr',{sl:'信託種類',opts,def:'5000000',chips:[2000000,5000000,10000000,50000000],al:'放入金額（另付設立費 NT$150,000）',btns:[['go','設立信託','p']]});
+ return /<button class="btn" data-a="back">/.test(h)?h.replace(/(<button class="btn" data-a="back">)/,F+'$1'):h+F;
+};
+const _hd83=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&a==='frmgo:tr:go'){
+  const g=frmGet('tr');if(!(g.a>0)){view.msg=B('請輸入金額，例如 500000 或 50萬。');render();try{showSheet(view.tab,view.sub)}catch(e){}return}
+  const p=String(g.s).split(':');return _hd83(`lg:tr:${p[0]}:${g.a}`+(p[1]?':'+p[1]:''));
+ }
+ return _hd83(a);
+};
+/* ---- p84：居住安排（租屋品質、海外自住省租金）---- */
+const HQN=['精簡（合租／小套房）','標準','舒適（獨立好房）'];
+function ownsHere(){return !!(S.house&&(S.cn||'TW')==='TW')||(S.props||[]).some(p=>p.cn&&p.cn===S.cn)}
+const _lc84=livingCost;
+livingCost=function(){
+ let v=_lc84();
+ try{
+  if(S.cn!=='TW'&&(S.props||[]).some(p=>p.cn===S.cn))v*=.88;
+  if(!ownsHere())v*=[.92,1,1.1][S.hq==null?1:S.hq];
+ }catch(e){}
+ return Math.round(v);
+};
+const _y84=yearly;
+yearly=function(){
+ _y84();
+ try{
+  (S.props||[]).forEach(p=>{if(p.cn&&p.cn===S.cn)S.money-=Math.round(p.value*p.y)});
+  if(!ownsHere()&&S.hq!=null&&S.hq!==1)chg('happy',S.hq===2?1:-1);
+ }catch(e){}
+};
+const _hs84=hsHTML;
+hsHTML=function(){
+ let h=_hs84();
+ if(!ownsHere()){
+  const F=`<div class="sec">居住安排（租屋）</div>`+frmHTML('hq',{sl:'租屋品質（影響每年生活費與心情）',opts:HQN.map((n,i)=>[String(i),n+(i===0?'・生活費約 −8%、心情略低':i===2?'・生活費約 +10%、心情略高':'')]),amt:false,btns:[['go','套用','p']]});
+  h=h.replace('<h3>房屋與房市</h3>','<h3>房屋與房市</h3>'+F);
+ }else if(S.cn!=='TW'&&(S.props||[]).some(p=>p.cn===S.cn))h=h.replace('<h3>房屋與房市</h3>','<h3>房屋與房市</h3><p class="sub">你住在自己的海外房子裡，每年生活費約少 12%，這間房不再收租金。</p>');
+ return h;
+};
+const _hd84=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&a==='frmgo:hq:go'){S.hq=+frmGet('hq').s;view.msg=G('已調整居住安排：'+HQN[S.hq]+'。');render();try{showSheet(view.tab,view.sub)}catch(e){}return}
+ return _hd84(a);
+};
+/* ---- p85：長說明收進摺疊、長下拉可搜尋、職缺改下拉 ---- */
+(function(){try{const st=document.createElement('style');st.textContent=`details.note{margin:6px 0}details.note>summary{font-size:12px;color:var(--mut,#8a7f72);cursor:pointer;padding:4px 0;list-style:none}details.note>summary::-webkit-details-marker{display:none}details.note>summary::before{content:"說明 ▸ "}details.note[open]>summary::before{content:"說明 ▾ "}details.note>p{margin:4px 0 0}.frm .srch{margin-bottom:-2px}`;document.head.appendChild(st)}catch(e){}})();
+function noteFold(root){
+ if(!root||!root.querySelectorAll)return;
+ root.querySelectorAll('p.sub').forEach(p=>{
+  if(p.closest('details')||p.closest('.frm')||p.dataset.nf)return;
+  const t=(p.textContent||'').trim();if(t.length<90)return;
+  p.dataset.nf=1;const d=document.createElement('details');d.className='note';const s=document.createElement('summary');s.textContent=t.slice(0,18)+'…';
+  p.parentNode.insertBefore(d,p);d.appendChild(s);d.appendChild(p);
+ });
+}
+function selSearch(root){
+ if(!root||!root.querySelectorAll)return;
+ root.querySelectorAll('.frm select').forEach(sel=>{
+  if(sel.dataset.sr||sel.options.length<=15)return;sel.dataset.sr=1;
+  const all=Array.from(sel.options).map(o=>[o.value,o.textContent]),inp=document.createElement('input');
+  inp.type='search';inp.placeholder='輸入關鍵字搜尋';inp.className='srch';inp.autocomplete='off';
+  sel.parentNode.insertBefore(inp,sel);
+  inp.addEventListener('input',()=>{
+   const q=inp.value.trim().toLowerCase(),cur=sel.value,L=all.filter(x=>!q||x[1].toLowerCase().includes(q));
+   sel.innerHTML=(L.length?L:[['','沒有符合的項目']]).map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');
+   if(L.some(x=>x[0]===cur))sel.value=cur;
+   const p=sel.id.split('_');if(sel.value!==''){const stt=frmState(p[1]);stt[p[2]]=sel.value}
+  });
+ });
+}
+const _ss85=showSheet;
+showSheet=function(tab,sub){
+ const r=_ss85(tab,sub);
+ try{const b=document.getElementById('sheetBody');noteFold(b);selSearch(b)}catch(e){}
+ return r;
+};
+/* 職缺：下拉＋詳細資料 */
+const _jh85=jobHTML;
+jobHTML=function(){
+ let h=_jh85();
+ const re=/<button class="btn" data-a="job:(\d+)"[^>]*>[\s\S]*?<\/button>/g,ids=[];
+ h=h.replace(re,(m,i)=>{ids.push(+i);return ids.length===1?'@@JB@@':''});
+ if(!ids.length)return h;
+ h=h.replace(/<div class="sec">(?:國小|國中|高中職|高中|專科|大學|碩士|博士|不拘|無學歷|不限)[^<]*<\/div>(?=\s*(?:@@JB@@|<div class="sec">|$|<button))/g,'');
+ const opts=ids.map(i=>{const j=JOBS[i],ok=S.edu>=j.edu&&!jobBlock(j)&&!S.acts['job'+i];return [String(i),`${j.t}・${salRange(j)}${ok?'':'（不能應徵）'}`]});
+ const st=frmState('jb'),cur=opts.some(x=>x[0]===st.s)?st.s:opts[0][0],j=JOBS[+cur],blk=jobBlock(j);
+ const info=`<div class="item"><b>${j.t}</b><div class="sub">薪資 ${salRange(j)}・需${EDU[j.edu]}${j.sm?'・智力 '+j.sm+'+':''}${j.lk?'・外貌 '+j.lk+'+':''}${blk?'・'+blk:''}${S.acts['job'+cur]?'（今年已應徵）':''}</div></div>`;
+ return h.replace('@@JB@@',frmHTML('jb',{sl:'選擇職缺',opts,amt:false,btns:[['go','應徵','p']]})+info);
+};
+const _hd85=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&a==='frmgo:jb:go'){let s=frmState('jb').s;try{const e=document.getElementById('frm_jb_s');if(e&&e.value!=='')s=e.value}catch(e){}return _hd85('job:'+s)}
+ return _hd85(a);
 };
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
