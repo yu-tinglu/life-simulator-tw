@@ -1,0 +1,11 @@
+const vm=require('vm'),fs=require('fs');
+const stub=new Proxy(function(){},{get:(t,k)=>k===Symbol.toPrimitive?()=>0:stub,set:()=>true,apply:()=>stub});
+const ctx={document:{getElementById:()=>new Proxy({value:''},{get:(t,k)=>k in t?t[k]:stub,set:()=>true}),querySelectorAll:()=>stub},localStorage:{_d:{},setItem(k,v){this._d[k]=v},getItem(k){return this._d[k]||null},removeItem(k){delete this._d[k]}},console,Math,Date,JSON,Object,Array,String,Number,parseInt,parseFloat,isNaN,isFinite,Intl,setTimeout:()=>0};
+vm.createContext(ctx);
+vm.runInContext(fs.readFileSync('game.js','utf8')+`;globalThis.T=function(){ask=(t,l,cb)=>cb(0);showEnd=()=>{};const o={};
+ newGame('甲','男');mFix();S.edu=4;const j=JOBS.find(x=>/軟體工程師/.test(x.t));
+ const r=y=>{S.year=y;let a=0;for(let i=0;i<200;i++)a+=hireJob(j).sal;return Math.round(a/200/1e4)};
+ o.tech2000=r(2000);o.tech2002=r(2002);o.tech2021=r(2021);o.tech2023=r(2023);const t=JOBS.find(x=>/導遊/.test(x.t));
+ const r2=y=>{S.year=y;let a=0;for(let i=0;i<200;i++)a+=hireJob(t).sal;return Math.round(a/200/1e4)};o.trv2019=r2(2019);o.trv2020=r2(2020);
+ o.eco=ecoHTML().includes('行業景氣');return o}`,ctx);
+console.log(JSON.stringify(ctx.T()));
