@@ -231,5 +231,5 @@ lfHandle=function(x,y,z,u){
  if(x==='avs'){if(!y)return null;const st=avS();st[y]=(y==='pres'||y==='outfit')?z:+z;lsSet(AVSET,st);return null}
  return _lf51(x,y,z,u)};
 lifeHTML=function(){return view.lsub==='av'?avHTML():view.lsub==='avs'?avsHTML():_l51()};
-moreHTML=function(){return _m51().replace('<button class="tile" data-a="lf:health">','<button class="tile" data-a="lf:av"><b>貌</b>外貌與造型<small>頭像・髮型・基因・數值</small></button><button class="tile" data-a="lf:health">')};
+moreHTML=function(){return _m51()};
 const _sh51=sumHTML;sumHTML=function(){try{return _sh51().replace('<h3>人生總結卡</h3>','<h3>人生總結卡</h3><div style="display:flex;justify-content:center">'+avSVG(avSelf(),84)+'</div>')}catch(e){return _sh51()}};

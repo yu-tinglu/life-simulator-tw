@@ -1,5 +1,5 @@
 /* ---- p44：介面分類、常用功能、新手教學、總結卡改為長按儲存 ---- */
-const MCAT=[['人生記錄',['lf:ach','lf:tree','lf:rev','lf:tl','lf:ch','lf:dx']],['生活與家庭',['lf:stat','open:act','open:rel','lf:pol','lf:art','lf:health','lf:eth','lf:rg','lf:skill']],['財務與職涯',['lf:led','open:job','open:ast','open:eco','lf:hs','lf:si']],['世界',['lf:wd']],['系統',['lf:sv','lf:set','lf:help','lf:tour']]];
+const MCAT=[['生活與家庭',['lf:stat','lf:health','lf:skill','lf:av','open:rel','open:act','lf:pol','lf:eth','lf:art','lf:rg']],['財務與職涯',['lf:led','open:ast','open:job','lf:si','lf:hs','open:eco']],['人生記錄',['lf:ach','lf:ch','lf:tl','lf:rev','lf:tree','lf:dx']],['世界',['lf:wd']],['系統',['lf:tour','lf:set','lf:sv','lf:help']]];
 const FQK='lifesim_tw_freq_v1';
 const _hd44=handle;handle=function(a){try{if(typeof a==='string'&&/^(lf:[a-z]+|open:[a-z]+)$/.test(a)){const f=lsGet(FQK,{});f[a]=(f[a]||0)+1;lsSet(FQK,f)}}catch(e){}return _hd44(a)};
 const _mh44=moreHTML;
@@ -7,11 +7,12 @@ moreHTML=function(){
  const src=_mh44(),sm=src.match(/<input type="search"[^>]*>/),search=sm?sm[0]:'';
  const tiles=src.match(/<button class="tile"[^>]*>[\s\S]*?<\/button>/g)||[];
  const by={};tiles.forEach(t=>{const m=t.match(/data-a="([^"]+)"/);if(m)by[m[1]]=t});
- const used={};const f=lsGet(FQK,{});
- const top=Object.keys(f).filter(k=>by[k]).sort((a,b)=>f[b]-f[a]).slice(0,3);
+ by['lf:av']=by['lf:av']||'<button class="tile" data-a="lf:av"><b>貌</b>外貌與造型<small>頭像・髮型・基因・數值</small></button>';const used={};const f=lsGet(FQK,{});
+ const top=Object.keys(f).filter(k=>by[k]&&!/^open:/.test(k)).sort((a,b)=>f[b]-f[a]).slice(0,4);['lf:stat','lf:led','lf:health','lf:skill'].forEach(k=>{if(top.length<4&&by[k]&&!top.includes(k))top.push(k)});
  let h=search;
  if(top.length)h+=`<div class="sec">常用</div><div class="grid">${top.map(k=>by[k]).join('')}</div>`;
- MCAT.forEach(([n,ks])=>{const v=ks.filter(k=>by[k]);v.forEach(k=>used[k]=1);if(v.length)h+=`<div class="sec">${n}</div><div class="grid">${v.map(k=>by[k]).join('')}</div>`});
+ top.forEach(k=>used[k]=1);
+ MCAT.forEach(([n,ks])=>{const v=ks.filter(k=>by[k]&&!used[k]);v.forEach(k=>used[k]=1);if(v.length)h+=`<div class="sec">${n}</div><div class="grid">${v.map(k=>by[k]).join('')}</div>`});
  const rest=Object.keys(by).filter(k=>!used[k]);if(rest.length)h+=`<div class="sec">其他</div><div class="grid">${rest.map(k=>by[k]).join('')}</div>`;
  return h;
 };

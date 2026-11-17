@@ -178,6 +178,7 @@ moreHTML=function(){
  h=h.replace(/oninput="[^"]*"/,'oninput="tqf(this)"');
  return h.replace(/<div class="sec">([^<]*)<\/div><div class="grid">((?:(?!<\/div>)[\s\S])*)<\/div>/g,(m,n,body)=>{
   const k=i++,n2=(body.match(/class="tile"/g)||[]).length;
+  if(!view.mcInit&&n!=='常用'){view.mcInit=1;if(view.mco[k]==null)view.mco[k]=true}
   const open=n==='常用'||view.mco[k];
   return `<button class="msec" data-a="mc:${k}"><span>${n}（${n2}）</span><span>${open?'收合':'展開'}</span></button><div class="grid" data-cl="${open?0:1}" style="${open?'':'display:none'}">${body}</div>`;
  });
