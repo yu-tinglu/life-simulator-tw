@@ -123,7 +123,7 @@ function hintsList(){
  if((S.ill||[]).some(i=>!i.hid&&!i.cured&&!i.tx))L.push('有確診的疾病還沒開始治療（更多 → 健康醫療）');
  if(S.money<0)L.push('現金是負的，要小心利息與信用');
  if(emp()){const l=leaveEnt(S.job.years)-((S.lv&&S.lv.tu)||0);if(l>=5)L.push(`特休還剩 ${l} 天，年底沒休完會折發工資`)}
- if(S.age>=60&&S.age<65&&!S.flags.retired)L.push('快到 65 歲退休年齡了');
+ if(S.age>=60&&S.age<65&&!S.flags.retired&&!(S.job&&S.job.founder))L.push('快到 65 歲退休年齡了');
  if(S.age>=3&&S.age<18&&!L.length)L.push('成長期：多運動、多讀書、多交朋友');
  return L.slice(0,2);
 }

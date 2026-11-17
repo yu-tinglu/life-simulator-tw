@@ -16,8 +16,9 @@ function secCollapse(){
    sec.parentNode.insertBefore(grp,arr[0]);arr.forEach(x=>grp.appendChild(x));
    sec.classList.add('cz');
    const apply=c=>{grp.style.display=c?'none':'';sec.classList.toggle('cl',c)};
-   apply(!!view.col[key]);
-   sec.onclick=()=>{view.col[key]=!view.col[key];apply(view.col[key])};
+   const cur=()=>view.col[key]==null?true:!!view.col[key];
+   apply(cur());
+   sec.onclick=()=>{view.col[key]=!cur();apply(view.col[key])};
   });
  }catch(e){}
 }

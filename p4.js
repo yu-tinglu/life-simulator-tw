@@ -51,14 +51,15 @@ function yearly(){
  armyCheck(a);
  let jailed=false;
  if(S.jail>0){S.jail--;jailed=true;S.job=null;chg('happy',-8);chg('health',-3);log('你在獄中度過了一年。','bad')}
- if(a===65){S.flags.retired=1;S.pension=(S.job&&!S.job.founder&&S.job.years>=10)?360000:150000;if(S.job&&!S.job.founder){log(`你退休了，每年領退休金 ${money(S.pension)}。`);S.job=null}else log(`你滿 65 歲，開始領老年年金 ${money(S.pension)}（公司仍由你持有）。`)}
+ if(a===65&&S.job&&S.job.founder){S.flags.fpen=1;S.pension=150000;log(`創業者沒有退休年齡：你繼續經營公司，同時從 65 歲開始領老年年金 ${money(S.pension)}。`)}
+ else if(a===65){S.flags.retired=1;S.pension=(S.job&&!S.job.founder&&S.job.years>=10)?360000:150000;if(S.job&&!S.job.founder){log(`你退休了，每年領退休金 ${money(S.pension)}。`);S.job=null}else log(`你滿 65 歲，開始領老年年金 ${money(S.pension)}（公司仍由你持有）。`)}
  if(!jailed&&!S.army){
   if(S.job&&S.job.founder){S.job.years++}
   else if(S.job){const j=S.job;ldset('薪資');S.money+=j.var?varIncome(j):j.sal;ldset(null);j.years++;
    j.perf=cl(j.perf+R(-15,15)+(S.smarts-50)/10);
    if(j.perf>65&&chance(.25)){j.lv++;chg('happy',5);log(`你升遷了！現在的職稱是 Lv.${j.lv} ${j.t}，年薪 ${money(j.sal)}。`,'good')}
    else if((j.perf<30&&chance(.3))||chance(.015+layoffAdj())){log(`你被${j.t}的公司解僱了。`,'bad');chg('happy',-8);S.job=null}}
-  if(!S.job&&S.flags.retired||S.job&&S.job.founder&&S.flags.retired){ldset('退休金');S.money+=S.pension;ldset(null)}
+  if(!S.job&&S.flags.retired||S.job&&S.job.founder&&(S.flags.retired||S.flags.fpen)){ldset('退休金');S.money+=S.pension;ldset(null)}
  }
  if(S.co&&!jailed)coRun();
  if(a>=18&&!jailed){

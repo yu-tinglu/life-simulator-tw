@@ -276,3 +276,6 @@ header{background:var(--card);border-radius:0;box-shadow:none;border-bottom:1px 
 `;
  document.head.appendChild(st);
 }catch(e){}})();
+/* 創業者 65 歲後沒有退休年齡；若之後賣掉／結束公司才轉為退休 */
+const _y70e=yearly;
+yearly=function(){_y70e();try{if(S.flags&&S.flags.fpen&&!S.flags.retired&&(!S.job||!S.job.founder)&&S.age>=65){S.flags.retired=1;log('你不再經營公司，正式退休，繼續領老年年金。')}}catch(e){}};

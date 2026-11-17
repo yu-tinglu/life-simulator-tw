@@ -523,14 +523,15 @@ function yearly(){
  armyCheck(a);
  let jailed=false;
  if(S.jail>0){S.jail--;jailed=true;S.job=null;chg('happy',-8);chg('health',-3);log('你在獄中度過了一年。','bad')}
- if(a===65){S.flags.retired=1;S.pension=(S.job&&!S.job.founder&&S.job.years>=10)?360000:150000;if(S.job&&!S.job.founder){log(`你退休了，每年領退休金 ${money(S.pension)}。`);S.job=null}else log(`你滿 65 歲，開始領老年年金 ${money(S.pension)}（公司仍由你持有）。`)}
+ if(a===65&&S.job&&S.job.founder){S.flags.fpen=1;S.pension=150000;log(`創業者沒有退休年齡：你繼續經營公司，同時從 65 歲開始領老年年金 ${money(S.pension)}。`)}
+ else if(a===65){S.flags.retired=1;S.pension=(S.job&&!S.job.founder&&S.job.years>=10)?360000:150000;if(S.job&&!S.job.founder){log(`你退休了，每年領退休金 ${money(S.pension)}。`);S.job=null}else log(`你滿 65 歲，開始領老年年金 ${money(S.pension)}（公司仍由你持有）。`)}
  if(!jailed&&!S.army){
   if(S.job&&S.job.founder){S.job.years++}
   else if(S.job){const j=S.job;ldset('薪資');S.money+=j.var?varIncome(j):j.sal;ldset(null);j.years++;
    j.perf=cl(j.perf+R(-15,15)+(S.smarts-50)/10);
    if(j.perf>65&&chance(.25)){j.lv++;chg('happy',5);log(`你升遷了！現在的職稱是 Lv.${j.lv} ${j.t}，年薪 ${money(j.sal)}。`,'good')}
    else if((j.perf<30&&chance(.3))||chance(.015+layoffAdj())){log(`你被${j.t}的公司解僱了。`,'bad');chg('happy',-8);S.job=null}}
-  if(!S.job&&S.flags.retired||S.job&&S.job.founder&&S.flags.retired){ldset('退休金');S.money+=S.pension;ldset(null)}
+  if(!S.job&&S.flags.retired||S.job&&S.job.founder&&(S.flags.retired||S.flags.fpen)){ldset('退休金');S.money+=S.pension;ldset(null)}
  }
  if(S.co&&!jailed)coRun();
  if(a>=18&&!jailed){
@@ -3895,7 +3896,7 @@ function hintsList(){
  if((S.ill||[]).some(i=>!i.hid&&!i.cured&&!i.tx))L.push('有確診的疾病還沒開始治療（更多 → 健康醫療）');
  if(S.money<0)L.push('現金是負的，要小心利息與信用');
  if(emp()){const l=leaveEnt(S.job.years)-((S.lv&&S.lv.tu)||0);if(l>=5)L.push(`特休還剩 ${l} 天，年底沒休完會折發工資`)}
- if(S.age>=60&&S.age<65&&!S.flags.retired)L.push('快到 65 歲退休年齡了');
+ if(S.age>=60&&S.age<65&&!S.flags.retired&&!(S.job&&S.job.founder))L.push('快到 65 歲退休年齡了');
  if(S.age>=3&&S.age<18&&!L.length)L.push('成長期：多運動、多讀書、多交朋友');
  return L.slice(0,2);
 }
@@ -7243,7 +7244,7 @@ const _y59=yearly;
 yearly=function(){
  _y59();
  try{ptPay()}catch(e){}
- if(S.flags&&S.flags.retired&&S.pension>0&&!S.dead)log(`今年領到退休金／年金 ${money(S.pension)}。`,'good');
+ if(S.flags&&(S.flags.retired||S.flags.fpen)&&S.pension>0&&!S.dead)log(`今年領到退休金／年金 ${money(S.pension)}。`,'good');
 };
 /* 舊的「兼職打工」活動與事件改走新系統 */
 (function(){const o=ACTS.find(a=>a.id==='pt');if(o)o.if=()=>false})();
@@ -7323,7 +7324,6 @@ moreHTML=function(){
  h=h.replace(/oninput="[^"]*"/,'oninput="tqf(this)"');
  return h.replace(/<div class="sec">([^<]*)<\/div><div class="grid">((?:(?!<\/div>)[\s\S])*)<\/div>/g,(m,n,body)=>{
   const k=i++,n2=(body.match(/class="tile"/g)||[]).length;
-  if(!view.mcInit&&n!=='常用'){view.mcInit=1;if(view.mco[k]==null)view.mco[k]=true}
   const open=n==='常用'||view.mco[k];
   return `<button class="msec" data-a="mc:${k}"><span>${n}（${n2}）</span><span>${open?'收合':'展開'}</span></button><div class="grid" data-cl="${open?0:1}" style="${open?'':'display:none'}">${body}</div>`;
  });
@@ -7614,8 +7614,9 @@ function secCollapse(){
    sec.parentNode.insertBefore(grp,arr[0]);arr.forEach(x=>grp.appendChild(x));
    sec.classList.add('cz');
    const apply=c=>{grp.style.display=c?'none':'';sec.classList.toggle('cl',c)};
-   apply(!!view.col[key]);
-   sec.onclick=()=>{view.col[key]=!view.col[key];apply(view.col[key])};
+   const cur=()=>view.col[key]==null?true:!!view.col[key];
+   apply(cur());
+   sec.onclick=()=>{view.col[key]=!cur();apply(view.col[key])};
   });
  }catch(e){}
 }
@@ -8457,6 +8458,9 @@ header{background:var(--card);border-radius:0;box-shadow:none;border-bottom:1px 
 `;
  document.head.appendChild(st);
 }catch(e){}})();
+/* 創業者 65 歲後沒有退休年齡；若之後賣掉／結束公司才轉為退休 */
+const _y70e=yearly;
+yearly=function(){_y70e();try{if(S.flags&&S.flags.fpen&&!S.flags.retired&&(!S.job||!S.job.founder)&&S.age>=65){S.flags.retired=1;log('你不再經營公司，正式退休，繼續領老年年金。')}}catch(e){}};
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
