@@ -9,8 +9,8 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const SUR='陳林黃張李王吳劉蔡楊許鄭謝郭洪曾邱廖賴徐'.split('');
 const MG=['家豪','志明','建宏','俊傑','承翰','冠宇','柏翰','宗翰','信宏','彥廷','宇軒','哲瑋','品睿','子謙','奕辰'];
 const FG=['怡君','雅婷','淑芬','佳穎','欣怡','詩涵','宜庭','雅雯','心怡','婉如','紫晴','語彤','品妍','姿穎','怡萱'];
-const given=g=>pick(g==='男'?MG:FG);
-const fullName=g=>pick(SUR)+given(g);
+function given(g,by){return pick(g==='男'?MG:FG)}
+function fullName(g,by){return pick(SUR)+given(g,by)}
 const EDU=['無學歷','小學','國中','高中職','大學','碩士','博士'];
 const STATS=[['health','健康','#e11d48'],['happy','快樂','#d97706'],['smarts','智力','#2563eb'],['looks','外貌','#9333ea']];
 

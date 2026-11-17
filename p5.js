@@ -46,7 +46,7 @@ function interact(k,kind){
  if(kind==='baby'){
   if(!p.married||S.age>50)return B('現在不適合生小孩。');
   if(S.acts.baby)return B('今年已經努力過了。');S.acts.baby=1;
-  if(chance(.55)){const sx=pick(['男','女']),n=S.name[0]+given(sx);S.kids.push(newKid(sx,n));chg('happy',10);const m=`你們迎接了新生兒${n}！`;log(m,'good');return G(m)}
+  if(chance(.55)){const sx=pick(['男','女']),n=S.name[0]+given(sx,calYear());S.kids.push(newKid(sx,n));chg('happy',10);const m=`你們迎接了新生兒${n}！`;log(m,'good');return G(m)}
   return N('你們努力了，但還沒有好消息。')
  }
 }

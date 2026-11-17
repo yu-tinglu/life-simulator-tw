@@ -177,7 +177,7 @@ function actStart(t,isP,kind){
   if(S.acts.art)return B('今年已經嘗試過了。');const tw=(S.cn||'TW')==='TW',cost=tw?2000000:600000;
   if(S.money<cost)return B(`${tw?'台灣現行《人工生殖法》僅適用已婚異性夫妻，同性伴侶需赴海外人工生殖或代孕，費用高昂（遊戲估算約 NT$2,000,000）':'人工生殖約需 NT$600,000（遊戲估算）'}。`);
   S.acts.art=1;S.money-=cost;
-  if(chance(S.sx==='男'?.35:.45)){const sx=pick(['男','女']),n=S.name[0]+given(sx);S.kids.push(newKid(sx,n));chg('happy',12);birthSubsidy();return G(`你們迎接了新生兒${n}！`)}return N('這次沒有成功，但還有機會。')}
+  if(chance(S.sx==='男'?.35:.45)){const sx=pick(['男','女']),n=S.name[0]+given(sx,calYear());S.kids.push(newKid(sx,n));chg('happy',12);birthSubsidy();return G(`你們迎接了新生兒${n}！`)}return N('這次沒有成功，但還有機會。')}
  if(kind==='adopt')return adopt(t);
  return null
 }
@@ -185,7 +185,7 @@ function adopt(p){
  if(S.age<25||S.age>55)return B('領養者需 25～55 歲（遊戲簡化）。');
  if(p&&p.married&&p.sx===S.sx&&(S.cn||'TW')==='TW'&&calYear()<2023)return B('台灣 2023 年以前，已婚同性伴侶只能做繼親收養，不能共同收養無血緣兒童。');
  if(S.money<50000)return B('收出養程序與安置相關費用（遊戲估算約 NT$50,000）不足。');if(S.acts.adopt)return B('今年已經領養過了。');S.acts.adopt=1;S.money-=50000;
- const sx=pick(['男','女']),n=S.name[0]+given(sx),k=newKid(sx,n);k.age=R(0,3);k.rel=R(55,85);k.adopt=1;S.kids.push(k);chg('happy',10);return G(`歷經審查與評估，你領養了${n}（${k.age} 歲），成為家人。`)
+ const sx=pick(['男','女']),n=S.name[0]+given(sx,calYear()),k=newKid(sx,n);k.age=R(0,3);k.rel=R(55,85);k.adopt=1;S.kids.push(k);chg('happy',10);return G(`歷經審查與評估，你領養了${n}（${k.age} 歲），成為家人。`)
 }
 function sceneApply(t,isP,type,o){
  const A=ARCH[t.a];let d=0,q='n';
