@@ -8420,6 +8420,41 @@ handle=function(a){
 };
 const _as70=applySuccession;
 applySuccession=function(r,k){_as70(r,k);try{mFix();log(`第 ${S.gen||1} 代 ${S.name}（${S.sx}）的性向是「${S.ori}」，之後認識的對象會依此產生。`)}catch(e){}};
+/* ---- 沉靜版面：扁平、少陰影、少漸層，狀態列壓縮成一排 ---- */
+(function(){try{
+ const st=document.createElement('style');
+ st.textContent=`
+:root{--bg:#f6f2ea;--line:#e8e0d2;--r:14px;--sh:none}
+header{background:var(--card);border-radius:0;box-shadow:none;border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 14px 8px}
+.av{width:46px;height:46px;border-radius:14px;box-shadow:none;background:color-mix(in srgb,var(--acc) 8%,var(--card))}
+.nm{font-size:18px;letter-spacing:0}
+.chip{background:color-mix(in srgb,var(--ink) 6%,transparent);font-size:11.5px}
+.an{font-size:28px}
+.stats{display:grid!important;grid-template-columns:repeat(5,1fr);gap:8px;padding:8px 14px 8px;background:var(--card);border-bottom:1px solid var(--line)}
+.st{min-width:0}
+.st .lb{flex-direction:column;align-items:flex-start;gap:0;font-size:11px;line-height:1.25}
+.st .lb em{font-size:14px}
+.st .lb svg,.st .lb .ic{display:none}
+.bar{height:4px;margin-top:3px}
+#feed{padding:10px 12px 18px}
+.yr{box-shadow:none;border:1px solid var(--line);padding:10px 12px;margin:0 0 10px}
+.yr::before{display:none}
+.yr h4{font-size:16px;margin:0 0 4px}
+.ln{font-size:14.5px;line-height:1.55;padding:2px 0 2px 12px}
+.ln::before{width:5px;height:5px;top:.8em}
+.bottom{box-shadow:0 2px 12px rgba(40,30,10,.1);border:1px solid var(--line);border-radius:22px}
+#ageBtn{font-family:inherit;box-shadow:0 0 0 4px color-mix(in srgb,var(--card) 92%,transparent);background:var(--acc)}
+.pane{box-shadow:0 -4px 24px rgba(0,0,0,.12)}
+.pane h3,.sh b{font-family:inherit;font-weight:700}
+.btn,.item,.tile{box-shadow:none;border-radius:14px}
+.btn.p{background:var(--acc);box-shadow:none;font-family:inherit;letter-spacing:0}
+.tile{background:var(--card)}
+.sec{margin-top:18px}
+#qbar{padding:6px 12px;gap:6px;border-bottom:0}
+#qbar button{min-height:32px!important;height:32px;padding:0 11px!important;font-size:12.5px!important;border-radius:99px!important;background:color-mix(in srgb,var(--ink) 5%,transparent)!important;border:0!important;box-shadow:none!important}
+`;
+ document.head.appendChild(st);
+}catch(e){}})();
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
