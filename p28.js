@@ -1,3 +1,4 @@
+const IW28=()=>Math.max(1,typeof WI==='function'?WI():1);
 /* ---- 社會保險：勞保／健保／勞退／國保，及各國扣繳與提領（p28）----
    台灣：2026 年勞保費率 12.5%（含就保，員工 20%）、健保 5.17%（員工 30%）、勞退雇主提繳 6%、國保月投保金額 21,103 元費率 10.5%（自付 60%）。
    海外：以 2026 年法定費率估算；金額與退休給付為遊戲簡化。 */
@@ -20,9 +21,9 @@ function siCalc(){
  const job=S.job,works=job&&!S.army&&!S.jail&&!S.flags.retired&&!S.school;
  if(k==='TW'){
   if(works){
-   const m=job.founder?45800:job.sal/12;ins=Math.min(45800,Math.max(29500,m));lab=true;
+   const m=job.founder?Math.round(45800*IW28()):job.sal/12;ins=Math.min(Math.round(45800*IW28()),Math.max(29500,m));lab=true;
    const e1=Math.round(ins*.125*.2*12),r1=Math.round(ins*.125*.7*12);
-   const hb=Math.min(313000,Math.max(29500,m)),dep=Math.min(3,S.kids.filter(x=>x.age<20).length);
+   const hb=Math.min(Math.round(313000*IW28()),Math.max(29500,m)),dep=Math.min(3,S.kids.filter(x=>x.age<20).length);
    const e2=Math.round(hb*.0517*.3*(1+dep)*12),r2=Math.round(hb*.0517*.6*1.56*12);
    const r3=Math.round(Math.min(150000,Math.max(29500,m))*.06*12);
    L.push(['勞工保險（費率 12.5%，含就保）',e1,r1,'投保薪資 '+money(ins)+'／月（上限 45,800）']);
@@ -30,7 +31,7 @@ function siCalc(){
    L.push(['勞工退休金（雇主提繳 6%）',0,r3,'進入你的個人專戶']);
    ded=e1+e2;acc=r3;
   }else if(a>=25&&a<65&&!S.school&&!S.army&&!S.jail&&!S.flags.retired){
-   const e1=Math.round(21103*.105*.6*12),e2=Math.round(29500*.0517*.6*12);np=true;
+   const e1=Math.round(Math.round(21103*IW28())*.105*.6*12),e2=Math.round(29500*.0517*.6*12);np=true;
    L.push(['國民年金（月投保金額 21,103，費率 10.5%）',e1,0,'你付 60%，政府補助 40%']);
    L.push(['全民健保（第六類）',e2,0,'無雇主，自付 60%']);ded=e1+e2;
   }
@@ -55,7 +56,7 @@ function twPension(){
  if(s.lab>=15)labAnn=Math.round(Math.max(avg*s.lab*.0155,avg*s.lab*.00775+3000)*12);
  else if(s.lab>0)lump=Math.round(avg*s.lab);
  let npAnn=0;
- if(s.np>0)npAnn=Math.round((labAnn>0?21103*s.np*.013:Math.max(21103*s.np*.013,21103*s.np*.0065+4049))*12);
+ if(s.np>0)npAnn=Math.round((labAnn>0?Math.round(21103*IW28())*s.np*.013:Math.max(Math.round(21103*IW28())*s.np*.013,Math.round(21103*IW28())*s.np*.0065+4049))*12);
  return {labAnn,lump,npAnn,ann:labAnn+npAnn};
 }
 /* 海外退休金試算（供 p27 使用） */

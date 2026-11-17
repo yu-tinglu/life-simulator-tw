@@ -30,11 +30,20 @@ coHandle=function(x,y,z){
  if(x==='repayn'){const co=S.co,L=co.L,a=Math.min(+y,-L.loan,Math.max(0,L.cash));if(!(a>0))return B('無法還款（沒有借款或公司現金不足）。');const r=repayLoan(co,a);view.csub='co:fin';return r?G('已還款 '+money(r)):B('無法還款。')}
  return _cho79(x,y,z);
 };
+function giftFree(kidId){
+ const code=S.cn||'TW',fx=fxr(code),gs=S.gifts||[],yr=S.age;
+ const sumK=l=>gs.filter(g=>g.to===kidId&&yr-g.age<=l).reduce((a,g)=>a+g.amt,0);
+ const all=gs.filter(g=>g.age===yr).reduce((a,g)=>a+g.amt,0),yrK=gs.filter(g=>g.to===kidId&&g.age===yr).reduce((a,g)=>a+g.amt,0);
+ let f=null;
+ if(code==='TW')f=2440000-all;else if(code==='JP')f=1.1e6*fx-yrK;else if(code==='KR')f=5e7*fx-sumK(10);else if(code==='DE')f=4e5*fx-sumK(10);else if(code==='US')f=19000*fx-yrK;else if(code==='GB')f=3000*fx-all;
+ return f==null?null:Math.max(0,Math.floor(f/1e4)*1e4);
+}
 const _kh79=kidHTML;
 kidHTML=function(i){
  let h=_kh79(i);
  h=h.replace(/<button class="btn" data-a="kid:gift:\d+:\d+"[^>]*>[\s\S]*?<\/button>/g,'');
- h=h.replace(/(<button class="btn" data-a="back">← 返回<\/button>)$/,frmHTML('kg'+i,{opts:null,def:'1000000',chips:[500000,1000000,5000000,20000000],al:'贈與現金（新台幣，依規定課贈與稅）',btns:[['go','贈與','p']]})+'$1');
+ const fr=giftFree(S.kids[i]&&S.kids[i].id),fs=frmState('kg'+i);
+ h=h.replace(/(<button class="btn" data-a="back">← 返回<\/button>)$/,(fr!=null?`<div class="sub">${CNS[S.cn||'TW'].n}目前還有免稅額約 ${money(fr)}，輸入框預設為這個金額。</div>`:'')+frmHTML('kg'+i,{opts:null,def:String(fr!=null?fr:1000000),chips:[...(fr>0?[fr]:[]),500000,1000000,5000000,20000000].slice(0,5),al:'贈與現金（新台幣，超過免稅額的部分依規定課贈與稅）',btns:[['go','贈與','p']]})+'$1');
  return h;
 };
 const _hs79=hsHTML;
@@ -55,7 +64,7 @@ handle=function(a){
    if(id==='cl')return _hd79('co:'+g.s+':'+amt);
    if(id==='cx')return _hd79('co:capex:'+amt);
    if(id==='hp'){view.ppAmt=amt;return _hd79('lf:hs:prepay:main')}
-   return _hd79('kid:gift:'+id.slice(2)+':'+amt);
+   const rr=_hd79('kid:gift:'+id.slice(2)+':'+amt);try{delete frmState(id).a}catch(e){}return rr;
   }
  }
  return _hd79(a);
