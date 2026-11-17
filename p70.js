@@ -192,23 +192,26 @@ ledHTML=function(){
  }catch(e){}
  return h;
 };
-const LSUBT={art:'藝術',av:'頭像',ch:'人生記錄',dx:'圖鑑',eth:'倫理與價值',health:'健康',hs:'房市',led:'年度收支',rg:'宗教',set:'設定',si:'社會保險',skill:'個性與技能',stat:'能力總覽',sv:'存檔',tl:'人生時間軸',wd:'世界',ach:'成就與結局',tree:'家族史',rev:'年度回顧',pol:'政策與補助'};
+const LSUBT={art:'藝術',av:'頭像',ch:'人生記錄',dx:'圖鑑',eth:'倫理與價值',health:'健康',hs:'房市',led:'年度收支',rg:'宗教',set:'設定',si:'社會保險',skill:'個性與技能',stat:'能力總覽',cg:'戀愛回憶',sv:'存檔',tl:'人生時間軸',wd:'世界',ach:'成就與結局',tree:'家族史',rev:'年度回顧',pol:'政策與補助'};
 /* ---- 網路交友：關係頁可主動認識網友、互動、見面、告白 ---- */
 const ONST=['文字聊天','視訊往來','已見過面'];
-function onSeek(goal){
+function onSeek(){
  if(S.on)return B('你目前已有固定往來的網友，先結束或發展這段關係。');
  if(S.age<14)return B('年紀還小，先把時間放在學校與家人身上。');
  if(S.ap<1)return B('今年行動點數用完了。');
- S.ap--;const opp=S.sx==='男'?'女':'男';
- const sx=goal==='love'?(S.ori==='異性戀'?opp:S.ori==='同性戀'?S.sx:pick([opp,S.sx])):(chance(.5)?'男':'女');
- const cn=pick(XC.filter(k=>k!==(S.cn||'TW'))),key=XNK[cn],n=key?nameOf(key,sx):fullName(sx),plat=pick(PLAT);
- if(goal==='love'&&S.age<18)return B('未成年不適合在網路上找對象，先交朋友就好。');
- S.on={n,sx,cn,rel:R(35,55),st:0,a:R(0,ARCH.length-1),since:S.age,plat,goal};
- S.net=cl((S.net||0)+2);
- return G(`你在${plat}認識了來自${CNAME[cn]}的${n}，開始固定聊天。`);
+ ask('想認識什麼性別的網友？成為朋友或戀人，由你們相處之後再決定。',['男生','女生','都可以'],c=>{
+  S.ap--;const sx=c===0?'男':c===1?'女':(chance(.5)?'男':'女');
+  const cn=pick(XC.filter(k=>k!==(S.cn||'TW'))),key=XNK[cn],n=key?nameOf(key,sx):fullName(sx),plat=pick(PLAT);
+  S.on={n,sx,cn,rel:R(35,55),st:0,a:R(0,ARCH.length-1),since:S.age,plat};S.net=cl((S.net||0)+2);
+  try{onFix(S.on)}catch(e){}
+  log(`你在${plat}認識了來自${CNAME[cn]}的${n}，開始固定聊天。`,'good');
+  view.rmsg={q:'g',t:`你在${plat}認識了來自${CNAME[cn]}的${n}。要當朋友還是更進一步，看你們怎麼相處。`};
+  view.tab='rel';view.rsub='Ro';render();showSheet('rel','Ro');
+ });
+ return null;
 }
 function onDo(k){
- if(k==='love')return onSeek('love');if(k==='friend')return onSeek('friend');
+ if(k==='new')return onSeek();
  const o=S.on;if(!o)return N('目前沒有網友。');
  if(k==='end'){S.on=null;S.flags.xnetDone=1;return N(`你和${o.n}的往來告一段落。`)}
  const need=k==='chat'||k==='vid'||k==='gift'||k==='meet'||k==='conf';
@@ -225,22 +228,19 @@ function onHTML(){
  if(S.age<14||S.dead)return '';
  let h='<div class="sec">網路交友</div>';
  const o=S.on;
- if(!o)return h+`<div class="item"><div class="sub">認識來自世界各地的網友，聊天、視訊、見面，感情夠深還能發展成遠距離戀愛。每次 1 點行動點數。</div><button class="btn" data-a="on:friend">認識新網友（交朋友）</button>${S.age>=18?'<button class="btn" data-a="on:love">認識新網友（希望發展感情）</button>':''}</div>`;
- const dis=S.jail?'disabled':'';
- h+=`<div class="item"><b>${esc(o.n)}</b>・${esc(CNAME[o.cn])}・${ONST[Math.min(2,o.st)]}<div class="sub">認識於${esc(o.plat)}・好感 ${o.rel}${romOK()?'・你們可以發展感情':''}</div><div class="bar"><i style="width:${o.rel}%"></i></div></div>`;
- h+=`<button class="btn" data-a="on:chat" ${dis}>傳訊息聊天<small>好感 +，1 點行動點數</small></button><button class="btn" data-a="on:vid" ${dis}>視訊通話<small>好感 45 以上才適合</small></button><button class="btn" data-a="on:gift" ${dis}>寄小禮物<small>約 NT$800～2,500</small></button><button class="btn" data-a="on:meet" ${dis}>去見面<small>先視訊、好感 60 以上；費用含機票</small></button>`;
- if(romOK())h+=`<button class="btn" data-a="on:conf" ${dis}>告白<small>見過面且好感 75 以上</small></button>`;
- h+=`<button class="btn" data-a="on:end">結束往來</button>`;
- return h;
+ if(!o)return h+`<div class="item"><div class="sub">認識來自世界各地的網友。先選想認識的性別，成為朋友或戀人由你們相處後決定。每次 1 點行動點數。</div></div><button class="btn" data-a="on:new">認識新網友<small>選擇性別・1 點行動點</small></button>`;
+ return h+`<div class="item row"><div style="flex:1"><b>${esc(o.n)}</b>・${esc(CNAME[o.cn])}<div class="sub">${ONST[Math.min(2,o.st)]}・好感 ${o.rel}</div></div><button class="mini" data-a="ot:open:o">互動</button></div>`;
 }
 const _rh70=relHTML;relHTML=function(){return _rh70()+onHTML()};
 const _hd70=handle;
 handle=function(a){
- if(typeof a==='string'&&S&&a.startsWith('on:')){const r=onDo(a.slice(3));view.msg=r;view.tab='rel';render();showSheet('rel');return}
+ if(typeof a==='string'&&S&&a.startsWith('on:')){const r=onDo(a.slice(3));if(r){view.rmsg={q:r[1]==='bad'?'b':r[1]==='good'?'g':'n',t:r[0]}}view.tab='rel';if(S.on)view.rsub='Ro';render();showSheet('rel',S.on?'Ro':null);return}
  return _hd70(a);
 };
 const _as70=applySuccession;
-applySuccession=function(r,k){_as70(r,k);try{mFix();log(`第 ${S.gen||1} 代 ${S.name}（${S.sx}）的性向是「${S.ori}」，之後認識的對象會依此產生。`)}catch(e){}};
+applySuccession=function(r,k){_as70(r,k);try{
+ S.dis=0;S.care=null;S.ill=[];S.pcare=null;S.scrAt=-9;S.ptj=null;S.ptjy=0;S.clubLead=0;S.psup=null;S.sbl=null;S.divY=0;S.fxc=null;S.on=null;S.cfame=0;S.cpr=[];S.rpb={};S.runlv=0;S.sloan=0;S.need=null;
+ mFix();log(`第 ${S.gen||1} 代 ${S.name}（${S.sx}）的性向是「${S.ori}」，之後認識的對象會依此產生。`)}catch(e){}};
 /* ---- 沉靜版面：扁平、少陰影、少漸層，狀態列壓縮成一排 ---- */
 (function(){try{
  const st=document.createElement('style');
@@ -279,3 +279,43 @@ header{background:var(--card);border-radius:0;box-shadow:none;border-bottom:1px 
 /* 創業者 65 歲後沒有退休年齡；若之後賣掉／結束公司才轉為退休 */
 const _y70e=yearly;
 yearly=function(){_y70e();try{if(S.flags&&S.flags.fpen&&!S.flags.retired&&(!S.job||!S.job.founder)&&S.age>=65){S.flags.retired=1;log('你不再經營公司，正式退休，繼續領老年年金。')}}catch(e){}};
+/* ---- 物價與薪資同一把尺（WI）：長照、醫療、生活費隨名目薪資一起成長，不再各自複利 ---- */
+const _mi70=medIdx;
+medIdx=function(){
+ const n=Math.max(0,(S.year||2026)-2026),old=Math.pow(1.03,n);
+ const w=Math.max(1,typeof WI==='function'?WI():1),rm=S.rp?Math.max(.8,Math.min(1.6,S.rp.m)):1;
+ return _mi70()/old*w*rm;
+};
+const _lc70=livingCost;
+livingCost=function(){return Math.round(_lc70()*Math.max(.3,typeof WI==='function'?WI():1))};
+const _wg70=wageGrow;
+wageGrow=function(){return Math.min(1.045,_wg70()+.008)};
+/* ---- 左上角顯示所在地 ---- */
+const _rd70=render;
+render=function(){
+ const r=_rd70.apply(this,arguments);
+ try{
+  const h=document.getElementById('hSub');
+  if(h&&S&&S.cn){
+   const k=S.cn,nm=(CNS[k]&&CNS[k].n)||'台灣';
+   h.innerHTML=h.innerHTML.replace(/<span class="chip">[^<]*<\/span>/g,m=>(CNS[k]&&CNS[k].f&&m.indexOf(CNS[k].f)>=0)?'':m);
+   if(!h.querySelector('.loc'))h.insertAdjacentHTML('afterbegin',`<span class="chip loc">${esc(nm)}${S.ab&&k!=='TW'?'・'+({study:'留學',work:'工作簽證',pr:'永久居留',cit:'公民'}[S.ab.visa]||''):''}</span>`);
+  }
+ }catch(e){}
+ return r;
+};
+/* ---- 領養獨立成「關係」頁的區塊（單身或已婚皆可），不再藏在戀愛／伴侶頁 ---- */
+const _rhm70=romHTML;
+romHTML=function(k){return _rhm70(k).replace(/<button class="btn" data-a="rom:adopt">[\s\S]*?<\/button>/,'').replace(/<button class="btn" data-a="rom:act:p:adopt"[^>]*>[\s\S]*?<\/button>/,'')};
+const _rh70b=relHTML;
+relHTML=function(){
+ const h=_rh70b();
+ if(S.age<25||S.age>55||S.dead)return h;
+ const n=S.kids.filter(k=>k.adopt).length;
+ return h+`<div class="sec">領養</div><button class="btn" data-a="ad:go">領養孩子<small>25～55 歲・約 ${money(50000)}（估算）・單身或已婚皆可${n?`・已領養 ${n} 位`:''}</small></button>`;
+};
+const _hd70b=handle;
+handle=function(a){
+ if(a==='ad:go'&&S){const r=adopt(S.partner);view.msg=r;view.tab='rel';render();showSheet('rel');return}
+ return _hd70b(a);
+};
