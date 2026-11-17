@@ -1544,7 +1544,7 @@ function applySuccession(r,k){
  const yNow=calYear(),old={name:S.name,age:S.age,cause:S.cause,sx:S.sx,gen:S.gen||1,net:r.NE,tax:r.tax,cn:S.cn,ab:S.ab,sp:S.partner,spOff:S.partner?S.partner.off:0,will:S.will,tr:S.tr,sibs:S.kids.filter(x=>x!==k),job:S.job?S.job.t:'',ori:S.ori,kids:S.kids.length,spn:S.partner?S.partner.n:''};
  const A=r.A,sold=[];
  let others=0;Object.keys(r.parts).forEach(h=>{if(String(h)!==String(k.id))others+=r.parts[h]});
- const need=r.tax+r.cost+others;
+ const need=r.tax+r.cost;// 只有繳不出遺產稅／喪葬費才變賣；其他繼承人的份額只用現金支付，不為此賣資產
  let have=Math.max(0,S.money)+A.live;
  const H={house:S.house,mort:S.mort,car:S.car,co:S.co,fxh:S.fxh,inv:S.inv};
  const liq=(cond,val,fn,label)=>{if(have<need&&cond){have+=val;fn();sold.push(label)}};
@@ -1554,7 +1554,7 @@ function applySuccession(r,k){
  liq(!!H.car,A.car*.9,()=>{H.car=null},'汽車');
  liq(!!H.house,Math.max(0,A.house*.97-(H.mort?H.mort.left:0)),()=>{H.house=null;H.mort=null},'房產');
  liq(!!H.co,A.co*.8,()=>{H.co=null},'公司股權（急售折價 20%）');
- const left=Math.max(0,have-need);
+ const othPaid=Math.min(others,Math.max(0,have-need)),left=Math.max(0,have-need-othPaid);
  // 建立下一代
  const gen=old.gen+1,dead={role:old.sx==='男'?'父親':'母親',n:old.name,rel:k.rel,alive:false,off:old.age-k.age};
  const spk=old.sp&&old.sp.married?old.sp:null;
@@ -1588,7 +1588,7 @@ function applySuccession(r,k){
  if(wt&&S.age<wt&&S.money>0){const v=Math.round(S.money*.7);S.money-=v;S.tr=S.tr?{kind:'inh',v:S.tr.v+v,rel:wt}:{kind:'inh',v,rel:wt}}
  S.log.push({age:S.age,lines:[]});
  log(`第 ${gen} 代：你是 ${old.name} 的${k.sx==='男'?'兒子':'女兒'}，今年 ${S.age} 歲。遺產稅 ${money(r.tax)}，你分得約 ${money(net)}。`,'good');
- if(sold.length)log(`為繳稅與分配給其他繼承人，變賣了：${sold.join('、')}。`,'bad');
+ if(sold.length)log(`為繳納遺產稅與喪葬費，不得不變賣了：${sold.join('、')}。`,'bad');
  if(S.tr)log(`遺囑信託：${money(S.tr.v)} 交付信託，每年撥付 4%，${S.tr.rel} 歲時交付全額。`);
  busy=false;queue=queue||[];save();render();
  $('modalBody').innerHTML=`<h3>🌱 第 ${gen} 代</h3><p>你現在是 <b>${esc(S.name)}</b>（${S.age} 歲），${k.tal}天賦、${k.pers}。</p><p>${net>3e7?'家境富裕':net>3e6?'家境小康':'家境清寒'}，淨資產約 ${money(net)}。</p><button class="btn p" id="gcont">開始</button>`;
@@ -8855,6 +8855,290 @@ const _au72=ageUp;
 ageUp=function(){const r=_au72.apply(this,arguments);try{setTimeout(bkNudge,900)}catch(e){}return r};
 const _lh72=lfHandle;
 lfHandle=function(x,y,z,u){const r=_lh72(x,y,z,u);try{if(x==='set'&&y==='copy')localStorage.setItem(BKK,String(Date.now()))}catch(e){}return r};
+/* ---- p73：人物檔案加深（出身城市依國籍、外貌習慣、價值觀、感情史、未來規劃、內心世界；了解度越高解鎖越多）---- */
+const CITY={US:['紐約','洛杉磯','芝加哥','休士頓','西雅圖','舊金山','波士頓','奧斯汀','達拉斯','邁阿密'],JP:['東京','大阪','京都','福岡','札幌','名古屋','仙台','神戶'],KR:['首爾','釜山','大邱','仁川','光州','濟州'],CA:['多倫多','溫哥華','蒙特婁','卡加利','渥太華'],AU:['雪梨','墨爾本','布里斯本','伯斯','阿德萊德'],GB:['倫敦','曼徹斯特','愛丁堡','伯明罕','利物浦'],DE:['柏林','慕尼黑','漢堡','法蘭克福','科隆'],SG:['新加坡']};
+function pOrigin(p){
+ if(!p)return 'TW';
+ if(p.res&&p.res!=='TW')return p.res;if(p.cn&&p.cn!=='TW')return p.cn;if(p.res==='TW'||p.cn==='TW')return 'TW';
+ if(/^[A-Za-z]/.test(p.n||'')){if(!p.cn)p.cn=(S.cn&&S.cn!=='TW')?S.cn:pick(['US','CA','AU','GB','DE','JP','KR']);return p.cn}
+ return S.cn||'TW';
+}
+const _pbF73=pbFix;
+pbFix=function(p){
+ const b=_pbF73(p);
+ try{
+  if(b&&p&&!b.hfix){
+   const o=pOrigin(p);
+   if(o!=='TW'&&CITY[o]&&(PBHM.includes(b.hm)||b.hm===(CNS[S.cn]&&CNS[S.cn].n)||!b.hm)){b.hm=pick(CITY[o])+'（'+(CNAME[o]||o)+'）'}
+   b.hfix=1;
+  }
+ }catch(e){}
+ return b;
+};
+const D73={
+ sl:['早起鳥，六點就醒','夜貓子，半夜最有精神','作息規律，十一點準時睡','常常熬夜追劇'],
+ fd:['無辣不歡','口味清淡','甜食控','什麼都吃、特別愛小吃','吃素或少肉','咖啡成癮','火鍋愛好者','麵食派'],
+ sp:['很會存錢','想買就買、有點月光','只在重要的事上花錢','愛收集小東西','精打細算、愛比價'],
+ sg:['每週固定運動','偶爾健走','幾乎不運動','假日才爬山或騎車','心情不好才去健身房'],
+ vm:['金錢是安全感的來源','錢夠用就好，時間比較重要','願意為體驗花錢','相信穩定勝過冒險','想創業，願意承擔風險'],
+ vf:['家人永遠是第一順位','希望保有自己的空間','想早點成家','不急著結婚，重視當下','很在意父母的看法'],
+ vw:['事業是人生的重要部分','工作只是賺錢的手段','想做自己真正熱愛的事','追求穩定與準時下班','想往管理職發展'],
+ st:['簡約素色','運動休閒','文青復古','整潔襯衫','街頭潮流','低調深色系','色彩繽紛'],
+ ct:['「沒事啦，慢慢來。」','「真的假的？」','「我再想一下。」','「交給我吧。」','「好啊，都可以。」','「等等，讓我先喝口咖啡。」','「欸，你知道嗎…」'],
+ lh:['曾經被突然失聯，花了很久才走出來','曾經太遷就對方，後來學會說不','初戀因為距離而結束','曾被朋友背叛，對信任很謹慎','沒有受過太大的傷，但也還在學習相愛','曾為了工作錯過一段感情'],
+ fa:['家裡氣氛溫暖，常常一起吃飯','父母對他期望很高','家人話不多，但很關心彼此','從小和祖父母同住','父母忙碌，從小學會獨立','手足感情很好'],
+ pj:['教師','公務員','小吃店老闆','工程師','護理師','農夫','業務','會計','司機','退休軍人','家庭主婦／主夫','經營小公司'],
+ fk:['想要兩個孩子','想養一隻毛孩勝過生小孩','不確定要不要孩子','想要三個孩子熱熱鬧鬧','暫時沒有想過孩子'],
+ fl:['想住在靠海的小城','想留在熟悉的城市','想搬到國外生活','想住在山邊有院子的房子','只要有重要的人在，哪裡都可以'],
+ fr:['想退休後環島旅行','想開一間小店','想在鄉下種菜','想把時間留給家人','還沒想過，先把現在過好'],
+ fe:['怕黑','怕孤單','怕失去重要的人','怕失敗','怕蟲','怕搭飛機','怕被誤會'],
+ ff:['滷肉飯','拉麵','義大利麵','火鍋','燒肉','咖哩','小籠包','壽司'],
+ fm:['愛情片','懸疑片','動畫電影','紀錄片','喜劇','科幻片'],
+ mo:['做自己就好','今天比昨天好一點','愛是行動，不是承諾','慢慢來比較快','活在當下','善待自己'],
+ sr:['聽音樂','跑步','睡覺','煮飯','跟朋友聊天','一個人散步'],
+ bd:['瘦高','中等身材','健壯','嬌小','圓潤可愛','勻稱'],
+ hl:['偶爾失眠','容易過敏','有輕微近視','腸胃比較敏感','身體很好、很少生病','常常肩頸痠痛'],
+ mem:['小時候第一次看到海','國中時班上一起逃課去夜市','大學畢業典禮那天','第一次搭飛機出國','第一份薪水請家人吃飯','一個人搬家的那天'],
+ cur:['最近在學一項新的技能','最近換了新的工作環境','最近特別忙，常常很晚才睡','最近迷上了新的興趣','最近在存錢準備旅行','最近身體有點小狀況，剛好轉','最近心情特別好','最近有點煩惱，但還沒說出口']
+};
+function dpFix(p){
+ if(!p)return null;
+ if(!p.dp){
+  const m=p.sx==='男';
+  const ht=m?R(164,187):R(152,174);p.dp={ht,bd:pick(ht>=175?['瘦高','健壯','勻稱','中等身材']:ht<160?['嬌小','圓潤可愛','勻稱']:['中等身材','勻稱','圓潤可愛','健壯']),st:pick(D73.st),ct:pick(D73.ct),sl:pick(D73.sl),fd:pick(D73.fd),sp:pick(D73.sp),sg:pick(D73.sg),vm:pick(D73.vm),vf:pick(D73.vf),vw:pick(D73.vw),
+   fa:pick(D73.fa),pj:pick(D73.pj),pj2:pick(D73.pj),sib:R(0,3),ex:R(0,4),fl:R(15,25),lh:pick(D73.lh),fk:pick(D73.fk),fl2:pick(D73.fl),fr:pick(D73.fr),fe:pick(D73.fe),ff:pick(D73.ff),fm:pick(D73.fm),mo:pick(D73.mo),sr:pick(D73.sr),hl:pick(D73.hl),mem:pick(D73.mem)};
+ }
+ if(p.dp.cy!==(S.year||0)){p.dp.cy=S.year||0;p.dp.cur=pick(D73.cur)}
+ return p.dp;
+}
+function deepHTML(p,lv,title){
+ const d=dpFix(p);if(!d)return '';
+ const him=p.sx==='男'?'他':'她',lock=n=>`<div class="sub">（再多了解${him}一些就會知道，目前 ${lv}／${n}）</div>`;
+ const it=(t,n,body)=>`<div class="item"><b>${t}</b><div class="sub" style="line-height:1.7">${lv>=n?body:lock(n)}</div></div>`;
+ let h=`<div class="sec">${title||'個人檔案'}</div>`;
+ h+=it('外貌與習慣',0,`身高 ${d.ht} cm・${d.bd}・穿搭 ${d.st}<br>口頭禪 ${d.ct}<br>近況：${d.cur}`);
+ h+=it('生活習慣',10,`作息：${d.sl}<br>飲食：${d.fd}，最愛${d.ff}<br>運動：${d.sg}<br>花錢：${d.sp}`);
+ h+=it('價值觀',25,`金錢：${d.vm}<br>家庭：${d.vf}<br>工作：${d.vw}`);
+ h+=it('家庭背景',40,`${d.fa}。父母從事${d.pj}與${d.pj2}，有 ${d.sib} 位兄弟姊妹。`);
+ h+=it('感情史',55,`交往過 ${d.ex} 位對象，第一次心動在 ${d.fl} 歲。${d.lh}。`);
+ h+=it('未來規劃',70,`${d.fk}；${d.fl2}；${d.fr}。`);
+ h+=it('內心世界',85,`最怕：${d.fe}。紓壓方式：${d.sr}。座右銘「${d.mo}」。最難忘的回憶是${d.mem}。愛看${d.fm}。`);
+ return h;
+}
+const _pbP73=pbProfile;
+pbProfile=function(p){return _pbP73(p)+deepHTML(p,pbFix(p).kn,'深入了解')};
+otProfHTML=function(t,k){
+ otProf(t);if(k==='p')return '';
+ const a=otAff(t,k);
+ return `<div class="item"><b>${esc(t.n)} 的背景</b><div class="sub">職業：${t.pj}・興趣：${t.hb}・${a>=60?'祕密：'+t.sec:'好感 60 以上會告訴你心裡的祕密'}</div></div>`+deepHTML(t,a,'個人檔案');
+};
+const _sub73=subHTML;
+subHTML=function(k){
+ let h=_sub73(k);
+ try{
+  if((k==='mom'||k==='dad'||(k&&k[0]==='f'))&&getP(k)){
+   const p=getP(k),pf=`<div class="sec">個人檔案</div><div class="item"><b>基本資料</b><div class="sub">${esc(p.n)}${p.age!=null?'・'+p.age+' 歲':''}${p.kind?'・'+p.kind:''}${p.role?'・'+p.role:''}${p.o?'・來自'+esc(p.o):''}</div></div>`+deepHTML(p,p.rel,'深入了解').replace('<div class="sec">深入了解</div>','');
+   const m='<button class="btn" data-a="back">',j=h.lastIndexOf(m);h=j>=0?h.slice(0,j)+pf+h.slice(j):h+pf;
+  }
+ }catch(e){}
+ return h;
+};
+/* ---- p74：創業股權玩法（股權結構表、創投輪次與對賭、員工認股權、股票質押借款、公司買回庫藏股）---- */
+function eqFix(co){if(!co.eq)co.eq={vc:0,esop:0,pl:0,neg:0,rounds:[]};return co.eq}
+const eqPrice=co=>Math.max(10,coValue(co)/co.shares);
+function eqHTML(){
+ const co=S.co,e=eqFix(co),L=co.L,sh=co.shares,own=co.fs/sh,pr=eqPrice(co),stk=stake(co);
+ const oth=Math.max(0,sh-co.fs-e.vc-e.esop),pc=x=>(x/sh*100).toFixed(1)+'%';
+ const back='<button class="btn" data-a="co:menu:main">← 公司主頁</button>';
+ let h=`<h3>股權與資本運作</h3><table class="rt"><tr class="h"><td colspan="2">股權結構表（共 ${Math.round(sh).toLocaleString()} 股・每股約 ${money(pr)}）</td></tr>
+ <tr><td>創辦人（你）</td><td>${pc(co.fs)}・約 ${money(stk)}</td></tr>
+ ${e.vc?`<tr><td>創投與天使投資人</td><td>${pc(e.vc)}</td></tr>`:''}
+ ${e.esop?`<tr><td>員工認股權池</td><td>${pc(e.esop)}</td></tr>`:''}
+ ${oth>1?`<tr><td>合夥人／其他股東／公眾</td><td>${pc(oth)}</td></tr>`:''}
+ <tr class="b"><td>控制權</td><td>${own>=.5?'過半，掌握董事會':own>=.33?'三分之一以上，重大議案有否決權':'偏低，易受投資人影響'}</td></tr></table>`;
+ if(e.pl)h+=`<div class="item"><b>質押借款中</b><div class="sub">${money(e.pl)}・年利率 4%・持股價值低於借款 1.4 倍會被追繳</div></div>`;
+ h+=`<div class="sec">創投輪次</div><p class="sub">創投按較高估值入股並帶來資源（市場信心上升），但會要求對賭：入股後連續兩年虧損，你要無償轉讓 3% 股份。非公開發行階段才能募資，累計創投持股上限 45%。</p>`;
+ const can=co.stage<=1&&co.form!=='獨資'&&e.vc/sh<.4;
+ h+=[['種子輪',.08],['A 輪',.15],['B 輪',.2]].map(([n,f])=>{const v=coValue(co)*1.35,a=Math.round(v*f/(1-f)/1e5)*1e5;return `<button class="btn" data-a="co:eq:vc:${f}" ${can?'':'disabled'}>${n}：釋出 ${f*100}%<small>估值約 ${money(v)}，募得約 ${money(a)}</small></button>`}).join('');
+ h+=`<div class="sec">員工認股權</div><p class="sub">預留新股給員工，不收現金，但稀釋所有股東；員工更有向心力，每年市場信心小幅提升。上限 15%。</p>`;
+ h+=[.05,.1].map(f=>`<button class="btn" data-a="co:eq:esop:${f}" ${e.esop/sh+f>.151?'disabled':''}>增設認股權池 ${f*100}%</button>`).join('');
+ h+=`<div class="sec">股票質押借款</div><p class="sub">以持股向銀行借現金，額度為持股價值的 40%，不必賣股、不稀釋，但股價下跌會被追繳（強制賣股還款）。上市櫃前持股流動性差，只能借 25%。</p>`;
+ const lim=Math.max(0,stk*(co.stage>=3?.4:.25)-e.pl);
+ h+=[.5,1].map(f=>`<button class="btn" data-a="co:eq:pl:${f}" ${lim<1e6?'disabled':''}>借 ${money(Math.round(lim*f/1e5)*1e5)}</button>`).join('')
+  +`<button class="btn" data-a="co:eq:rp:1" ${e.pl>0&&S.money>0?'':'disabled'}>還款（最多 ${money(Math.min(e.pl,Math.max(0,S.money)))}）</button>`;
+ h+=`<div class="sec">公司買回股份</div><p class="sub">公司用現金向外部股東買回股份並註銷（溢價 5%），你的持股比例上升、控制權回來。</p>`;
+ const outside=sh-co.fs-e.esop;
+ h+=[.03,.1].map(f=>{const ns=sh*f,amt=ns*pr*1.05;return `<button class="btn" data-a="co:eq:bb:${f}" ${outside>=ns&&L.cash>=amt*1.1?'':'disabled'}>買回 ${f*100}%（約 ${money(amt)}）</button>`}).join('');
+ return h+back;
+}
+const _coH74=coHTML;
+coHTML=function(sub){
+ if(sub==='co:eq')return eqHTML();
+ let h=_coH74(sub);
+ if(S.co&&S.co.form!=='獨資'&&(!sub||sub==='co:main')&&!h.includes('co:menu:eq'))h=h.replace('<button class="btn" data-a="co:menu:fin">','<button class="btn" data-a="co:menu:eq">股權與資本運作</button><button class="btn" data-a="co:menu:fin">');
+ return h;
+};
+const _coHd74=coHandle;
+coHandle=function(x,y,z){
+ if(x!=='eq')return _coHd74(x,y,z);
+ const co=S.co;if(!co)return null;const e=eqFix(co),L=co.L,f=+z;view.csub='co:eq';
+ if(y==='vc'){
+  if(co.stage>1||e.vc/co.shares>=.4)return B('目前無法募資。');
+  const price=eqPrice(co)*1.35,ns=co.shares*f/(1-f),a=ns*price;
+  J(L,['cash',a],['capital',-ns*10],['apic',-(a-ns*10)]);co.shares+=ns;e.vc+=ns;e.rounds.push({f,a:Math.round(a),y:S.age});e.neg=0;
+  co.sent=Math.min(1.5,co.sent+.08);
+  const m=`創投以每股 ${money(price)} 入股，公司募得 ${money(a)}，你的持股降為 ${(co.fs/co.shares*100).toFixed(1)}%。`;log(m,'good');return G(m)}
+ if(y==='esop'){
+  if(e.esop/co.shares+f>.151)return B('超過上限。');
+  const ns=co.shares*f/(1-f);co.shares+=ns;e.esop+=ns;J(L,['capital',-ns*10],['apic',ns*10]);
+  const m=`增設員工認股權池 ${f*100}%，你的持股降為 ${(co.fs/co.shares*100).toFixed(1)}%。`;log(m);return G(m)}
+ if(y==='pl'){
+  const lim=Math.max(0,stake(co)*(co.stage>=3?.4:.25)-e.pl),a=Math.round(lim*f/1e5)*1e5;
+  if(a<1e6)return B('額度不足。');e.pl+=a;S.money+=a;const m=`以持股質押借得 ${money(a)}。`;log(m);return G(m)}
+ if(y==='rp'){const a=Math.min(e.pl,Math.max(0,S.money));if(a<=0)return B('沒有可還款的現金。');e.pl-=a;S.money-=a;const m=`償還質押借款 ${money(a)}。`;log(m);return G(m)}
+ if(y==='bb'){
+  const pr=eqPrice(co)*1.05,ns=co.shares*f,amt=ns*pr;
+  if(L.cash<amt*1.1||co.shares-co.fs-e.esop<ns)return B('現金不足或外部持股不夠。');
+  J(L,['cash',-amt],['capital',ns*10],['apic',amt-ns*10]);co.shares-=ns;const fromVc=Math.min(e.vc,ns);e.vc-=fromVc;
+  const m=`公司買回並註銷 ${f*100}% 股份，花費 ${money(amt)}，你的持股升至 ${(co.fs/co.shares*100).toFixed(1)}%。`;log(m,'good');return G(m)}
+ return null;
+};
+const _coY74=coYear;
+coYear=function(){
+ const r=_coY74.apply(this,arguments);
+ try{const co=S.co;if(co&&co.eq){const e=co.eq;
+  if(e.esop>0)co.sent=Math.min(1.5,co.sent+.03);
+  if(e.vc>0&&co.rec){
+   if(co.rec.NI<0)e.neg++;else e.neg=0;
+   if(e.neg>=2){const t=co.shares*.03;co.fs=Math.max(0,co.fs-t);e.vc+=t;e.neg=0;log(`【${co.name}】連續虧損觸發對賭條款，你無償轉讓 3% 股份給創投。`,'bad')}
+  }
+  if(e.pl>0){const it=Math.round(e.pl*.04);S.money-=it;
+   const stk=stake(co);
+   if(stk<e.pl*1.4){const need=Math.min(e.pl,co.fs*.9),px=stk/co.fs*1,sold=Math.min(co.fs*.9,e.pl/Math.max(1e-9,px)*1.0);
+    const get=sold*px;co.fs-=sold;const pay=Math.min(e.pl,get);e.pl-=pay;S.money+=get-pay;
+    log(`持股價值下跌，銀行追繳質押借款，被迫賣出約 ${(sold/co.shares*100).toFixed(1)}% 股份還款 ${money(pay)}。`,'bad')}
+  }
+ }}catch(err){}
+ return r;
+};
+/* ---- p75：公司經營改善（診斷、可執行的經營行動）、報表摘要頁與版面穩定、財稅設定收進進階 ---- */
+function coTmp(co){if(!co.tmp)co.tmp={g:[],s:[]};if(!co.actY)co.actY={};return co.tmp}
+const _cb75=coBonus;
+coBonus=function(co){let v=_cb75(co);try{if(co.tmp)v+=co.tmp.g.reduce((a,x)=>a+x.v,0)}catch(e){}return v};
+const _cy75=coYear;
+coYear=function(){
+ const co=S.co;let sv=0;
+ try{if(co&&co.tmp&&co.tmp.s.length&&co.prevRev){sv=co.tmp.s.reduce((a,x)=>a+x.v,0)*co.prevRev;if(sv>0)J(co.L,['cogs',-sv],['cash',sv])}}catch(e){}
+ const r=_cy75.apply(this,arguments);
+ try{if(co&&co.tmp){['g','s'].forEach(k=>{co.tmp[k].forEach(x=>x.y--);co.tmp[k]=co.tmp[k].filter(x=>x.y>0)})}}catch(e){}
+ return r;
+};
+const CACT=[
+ {k:'promo',n:'促銷檔期',d:'砸錢辦活動衝營收，只影響今年。',c:r=>Math.max(1e5,r*.015),t:'今年成長 +4 點'},
+ {k:'newp',n:'開發新產品',d:'投入研發與上市費用，之後三年持續帶來成長。',c:r=>Math.max(2e5,r*.04),t:'未來 3 年成長 +2.5 點'},
+ {k:'sup',n:'供應商議價',d:'不用花錢，但不一定談得成。',c:r=>0,t:'約 65% 成功：兩年成本降約 1.2% 營收'},
+ {k:'lean',n:'撙節與精簡編制',d:'縮減開支和人力，要付資遣費，成長會略受影響。',c:r=>Math.max(1e5,r*.01),t:'兩年成本降約 3% 營收，但成長 −1.5 點'},
+ {k:'key',n:'開發大客戶',d:'投入業務資源爭取大單。',c:r=>Math.max(1e5,r*.01),t:'約 55% 成功：今年成長 +8 點'}
+];
+function coDiag(co){
+ const r=co.rec,I=INDS[co.ind],L=co.L,P=co.policy,out=[];
+ if(!r||!r.R){return {head:'還沒有完整年度的數字，先撐過第一年。',items:[],loss:false}}
+ const R=r.R,pl=r.pl,gm=(-pl.rev-pl.cogs)/R,sr=pl.staff/R,mr=pl.mkt/R,rr=pl.rent/R,loss=r.NI<0;
+ const cap=co.faG*I.turn+I.base,util=co.prevRev/cap;
+ const run=r.NI<0?L.cash/Math.max(1,-r.NI):99;
+ const add=(t,btn)=>out.push({t,btn});
+ if(loss&&run<1.5)add(`現金只夠撐約 ${run.toFixed(1)} 年，要先止血或補資金。`,[['借款或增資','menu:fin']]);
+ if(sr>.35&&P.hr!==2)add(`人事費占營收 ${(sr*100).toFixed(0)}%，偏高。`,[['導入自動化','set:hr-2'],['外包／兼職','set:hr-0']]);
+ if(mr>.08&&loss&&P.mk>0)add(`行銷費占營收 ${(mr*100).toFixed(0)}%，虧損時可先減量。`,[['行銷降一級','set:mk-'+(P.mk-1)]]);
+ if(util<.6)add(`產能只用了 ${(util*100).toFixed(0)}%，需要更多訂單。`,[['促銷檔期','a:promo'],['開發大客戶','a:key']]);
+ if(util>.95)add('產能快滿了，營收難再成長。',[['擴廠投資','menu:capex']]);
+ if(gm<.25&&P.pr!==2)add(`毛利率只有 ${(gm*100).toFixed(0)}%，可以提高定價或壓低進貨成本。`,[['改高端定價','set:pr-2'],['供應商議價','a:sup']]);
+ if(rr>.2)add(`租金與營運費占營收 ${(rr*100).toFixed(0)}%，偏高。`,[['撙節與精簡','a:lean']]);
+ if(loss&&!out.length)add('各項比例都不算失控，可能是成長太慢，試著開發新產品。',[['開發新產品','a:newp']]);
+ const head=loss?`去年虧損 ${money(-r.NI)}（營收 ${money(R)}，毛利率 ${(gm*100).toFixed(0)}%）。`:`去年獲利 ${money(r.NI)}（營收 ${money(R)}，毛利率 ${(gm*100).toFixed(0)}%）。`;
+ return {head,items:out.slice(0,3),loss};
+}
+function coActHTML(){
+ const co=S.co,d=coDiag(co);coTmp(co);
+ const back='<button class="btn" data-a="co:menu:main">← 公司主頁</button>';
+ let h=`<h3>經營改善</h3><p class="sub">${d.head}</p>`;
+ d.items.forEach(x=>{h+=`<div class="item"><div class="sub" style="line-height:1.6">${x.t}</div>${x.btn.map(([n,a])=>`<button class="btn" data-a="co:act:${a.split(':')[0]}:${a.split(':').slice(1).join(':')}">${n}</button>`).join('')}</div>`});
+ h+='<div class="sec">可執行的行動（每項每年一次）</div>';
+ const base=Math.max(1e6,co.prevRev||0);
+ h+=CACT.map(a=>{const c=a.c(base),used=co.actY[a.k]===co.yrs;return `<button class="btn" data-a="co:act:a:${a.k}" ${used||co.L.cash<c?'disabled':''}>${a.n}${c?'（'+money(Math.round(c))+'）':'（免費）'}<small>${a.d} ${a.t}${used?'・今年已執行':''}</small></button>`}).join('');
+ const act=co.tmp.g.length+co.tmp.s.length;
+ if(act)h+=`<p class="sub">目前持續中的效果：${[...co.tmp.g.map(x=>'成長 '+(x.v>0?'+':'')+(x.v*100).toFixed(1)+' 點（剩 '+x.y+' 年）'),...co.tmp.s.map(x=>'成本降 '+(x.v*100).toFixed(1)+'% 營收（剩 '+x.y+' 年）')].join('、')}。</p>`;
+ h+='<p class="sub">行銷、定價、人力等長期設定在「經營決策」。</p>';
+ return h+back;
+}
+function coActDo(k){
+ const co=S.co,L=co.L,a=CACT.find(x=>x.k===k);if(!a)return null;coTmp(co);
+ if(co.actY[k]===co.yrs)return B('今年已經做過了。');
+ const c=Math.round(a.c(Math.max(1e6,co.prevRev||0)));
+ if(L.cash<c)return B('公司現金不足。');
+ if(c)J(L,['fee',c],['cash',-c]);co.actY[k]=co.yrs;
+ let m;
+ if(k==='promo'){co.tmp.g.push({v:.04,y:1});m='促銷檔期上線，今年營收有望加成。'}
+ else if(k==='newp'){co.tmp.g.push({v:.025,y:3});m='新產品開發完成，之後三年持續貢獻成長。'}
+ else if(k==='sup'){if(Math.random()<.65){co.tmp.s.push({v:.012,y:2});m='談成了！進貨成本下降，效果持續兩年。'}else m='供應商不肯讓步，這次沒談成。'}
+ else if(k==='lean'){co.tmp.s.push({v:.03,y:2});co.tmp.g.push({v:-.015,y:2});m=`精簡編制完成，付出資遣費 ${money(c)}，兩年成本下降但成長稍慢。`}
+ else if(k==='key'){if(Math.random()<.55){co.tmp.g.push({v:.08,y:1});m='談下大客戶訂單！今年營收可望大增。'}else m='大客戶最後選了別家，投入的業務費用沒有回收。'}
+ log(`【${co.name}】${m}`,m.includes('沒')?'bad':'good');view.csub='co:act';return m.includes('沒')?B(m):G(m);
+}
+const _ch75=coHTML;
+coHTML=function(sub){
+ if(sub==='co:act')return coActHTML();
+ let h=_ch75(sub);
+ if(sub==='co:pol'){
+  const i=h.indexOf('<div class="sec">租稅規劃');
+  if(i>0){h=h.slice(0,i)+'<details style="margin-top:12px"><summary style="font-size:13px;font-weight:700;padding:10px 0;cursor:pointer">財稅與法遵設定（進階，維持預設即可）</summary>'+h.slice(i)+'</details>'}
+ }
+ if(S.co&&(!sub||sub==='co:main')){
+  const co=S.co,d=coDiag(co);
+  h=h.replace(/<p class="sub">申報方式：[\s\S]*?<\/p>/,'').replace(/｜可扣抵虧損餘額 [^<]*/,'');
+  const box=`<div class="item"><b>${d.loss?'經營狀況：虧損中':'經營狀況'}</b><div class="sub" style="line-height:1.6">${d.head}${d.items.length?'<br>'+d.items.map(x=>'・'+x.t).join('<br>'):''}</div></div><button class="btn p" data-a="co:menu:act">經營改善行動<small>促銷、新品、議價、精簡、大客戶</small></button>`;
+  const j=h.indexOf('<button class="btn" data-a="co:rep">');
+  h=j>=0?h.slice(0,j)+box+h.slice(j):h+box;
+ }
+ return h;
+};
+const _cd75=coHandle;
+coHandle=function(x,y,z){
+ if(x==='act'){
+  if(y==='a')return coActDo(z);
+  if(y==='set'){const [key,v]=String(z).split('-'),co=S.co;if(co){co.policy[key]=+v;view.csub='co:act';const m='已調整經營決策，從今年開始生效。';return G(m)}return null}
+  if(y==='menu'){view.csub='co:'+z;return null}
+  return null;
+ }
+ return _cd75(x,y,z);
+};
+/* 報表：先看摘要（白話），再看詳細三大報表；固定高度避免切頁跑位 */
+const _rp75=reportRows;
+function repSummary(rec){
+ const R=rec.R||1,pl=rec.pl,gp=-pl.rev-pl.cogs;
+ const bars=[['進貨與製造成本',pl.cogs],['人事費用',pl.staff],['租金與營運',pl.rent],['行銷',pl.mkt],['研發',pl.rd],['其他（規費、折舊、稅捐、利息）',pl.depx+pl.fee+pl.audit+pl.gtax+pl.spx+pl.intx+pl.pen-pl.inti]];
+ let h=`<table class="rt"><tr class="h"><td colspan="2">這一年的結果</td></tr><tr><td>營收</td><td>${k1(rec.R)}</td></tr><tr><td>毛利率</td><td>${(gp/R*100).toFixed(1)}%</td></tr><tr class="b"><td>稅後淨利</td><td class="${rec.NI<0?'neg':''}">${k1(rec.NI)}</td></tr><tr><td>年底現金</td><td>${k1(rec.close.cash)}</td></tr><tr class="h"><td colspan="2">每 100 元營收花在哪</td></tr>`;
+ bars.forEach(([n,v])=>{h+=`<tr><td>${n}</td><td>${(v/R*100).toFixed(1)}</td></tr>`});
+ h+='</table>';
+ h+=`<p class="sub" style="line-height:1.6">${rec.NI<0?'虧損時：到公司主頁的「經營改善行動」看診斷與可做的事。':'獲利不錯，可考慮股利、擴廠或增資。'}</p>`;
+ return h;
+}
+showReport=function(rec,cb){
+ const names=['摘要','損益','資產負債','現金流','稅務'];
+ const draw=()=>{
+  const co=S.co,t=window.repTab75||0;
+  $('modalBody').innerHTML=`<h3>${esc(rec.name)} ${rec.yr} 年度財報</h3><div class="sub">${rec.ind}・${rec.form}・單位：新臺幣千元</div>
+  <div class="seg" style="margin:8px 0;display:grid;grid-template-columns:repeat(5,1fr);gap:4px">${names.map((n,i)=>`<button class="${i===t?'on':''}" style="font-size:12.5px;padding:8px 0;min-width:0" data-t="${i}">${n}</button>`).join('')}</div>
+  <div style="min-height:330px">${t===0?repSummary(rec):`<table class="rt" style="table-layout:fixed;width:100%">${_rp75(rec,t-1)}</table>`}</div>
+  ${rec.divDecl||co&&co.divDecl?`<p class="sub">董事會擬議於下年度發放現金股利約 ${money(co?co.divDecl:0)}。</p>`:''}
+  <button class="btn p" id="repOk">${cb?'關閉並繼續':'關閉'}</button>`;
+  $('modal').classList.add('on');
+  $('modalBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{window.repTab75=+b.dataset.t;draw()});
+  $('repOk').onclick=()=>{$('modal').classList.remove('on');$('modalBody').onclick=null;if(cb)cb()};
+ };
+ window.repTab75=0;draw();
+};
+(function(){try{const st=document.createElement('style');st.textContent=`.rt td:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.rt td:first-child{width:62%}.rt td[colspan]{text-align:left!important}#modalBody{scrollbar-gutter:stable}`;document.head.appendChild(st)}catch(e){}})();
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();

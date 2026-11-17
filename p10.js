@@ -143,7 +143,7 @@ function applySuccession(r,k){
  const yNow=calYear(),old={name:S.name,age:S.age,cause:S.cause,sx:S.sx,gen:S.gen||1,net:r.NE,tax:r.tax,cn:S.cn,ab:S.ab,sp:S.partner,spOff:S.partner?S.partner.off:0,will:S.will,tr:S.tr,sibs:S.kids.filter(x=>x!==k),job:S.job?S.job.t:'',ori:S.ori,kids:S.kids.length,spn:S.partner?S.partner.n:''};
  const A=r.A,sold=[];
  let others=0;Object.keys(r.parts).forEach(h=>{if(String(h)!==String(k.id))others+=r.parts[h]});
- const need=r.tax+r.cost+others;
+ const need=r.tax+r.cost;// 只有繳不出遺產稅／喪葬費才變賣；其他繼承人的份額只用現金支付，不為此賣資產
  let have=Math.max(0,S.money)+A.live;
  const H={house:S.house,mort:S.mort,car:S.car,co:S.co,fxh:S.fxh,inv:S.inv};
  const liq=(cond,val,fn,label)=>{if(have<need&&cond){have+=val;fn();sold.push(label)}};
@@ -153,7 +153,7 @@ function applySuccession(r,k){
  liq(!!H.car,A.car*.9,()=>{H.car=null},'汽車');
  liq(!!H.house,Math.max(0,A.house*.97-(H.mort?H.mort.left:0)),()=>{H.house=null;H.mort=null},'房產');
  liq(!!H.co,A.co*.8,()=>{H.co=null},'公司股權（急售折價 20%）');
- const left=Math.max(0,have-need);
+ const othPaid=Math.min(others,Math.max(0,have-need)),left=Math.max(0,have-need-othPaid);
  // 建立下一代
  const gen=old.gen+1,dead={role:old.sx==='男'?'父親':'母親',n:old.name,rel:k.rel,alive:false,off:old.age-k.age};
  const spk=old.sp&&old.sp.married?old.sp:null;
@@ -187,7 +187,7 @@ function applySuccession(r,k){
  if(wt&&S.age<wt&&S.money>0){const v=Math.round(S.money*.7);S.money-=v;S.tr=S.tr?{kind:'inh',v:S.tr.v+v,rel:wt}:{kind:'inh',v,rel:wt}}
  S.log.push({age:S.age,lines:[]});
  log(`第 ${gen} 代：你是 ${old.name} 的${k.sx==='男'?'兒子':'女兒'}，今年 ${S.age} 歲。遺產稅 ${money(r.tax)}，你分得約 ${money(net)}。`,'good');
- if(sold.length)log(`為繳稅與分配給其他繼承人，變賣了：${sold.join('、')}。`,'bad');
+ if(sold.length)log(`為繳納遺產稅與喪葬費，不得不變賣了：${sold.join('、')}。`,'bad');
  if(S.tr)log(`遺囑信託：${money(S.tr.v)} 交付信託，每年撥付 4%，${S.tr.rel} 歲時交付全額。`);
  busy=false;queue=queue||[];save();render();
  $('modalBody').innerHTML=`<h3>🌱 第 ${gen} 代</h3><p>你現在是 <b>${esc(S.name)}</b>（${S.age} 歲），${k.tal}天賦、${k.pers}。</p><p>${net>3e7?'家境富裕':net>3e6?'家境小康':'家境清寒'}，淨資產約 ${money(net)}。</p><button class="btn p" id="gcont">開始</button>`;
