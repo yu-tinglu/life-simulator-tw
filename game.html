@@ -9358,8 +9358,8 @@ hmYear=function(){
 };
 /* ---- p78：下拉選單＋自填金額（外匯、銀行存款、投資組合、移民國家），取代一長串按鈕 ---- */
 function frmNum(s){
- s=String(s==null?'':s).replace(/[,，\s]/g,'');const m=s.match(/^([\d.]+)(億|百萬|萬|k|K)?$/);if(!m)return NaN;
- const u={'億':1e8,'百萬':1e6,'萬':1e4,'k':1e3,'K':1e3}[m[2]]||1;return Math.round(parseFloat(m[1])*u);
+ s=String(s==null?'':s).replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/．/g,'.').replace(/[,，\s]/g,'').replace(/元$|塊$/,'').replace(/NT\$?/i,'');const m=s.match(/^([\d.]+)(億|千萬|百萬|萬|千|k|K|w|W|m|M)?$/);if(!m)return NaN;
+ const u={'億':1e8,'千萬':1e7,'百萬':1e6,'萬':1e4,'千':1e3,'k':1e3,'K':1e3,'w':1e4,'W':1e4,'m':1e6,'M':1e6}[m[2]]||1;return Math.round(parseFloat(m[1])*u);
 }
 function frmState(id){view.frm=view.frm||{};return view.frm[id]||(view.frm[id]={})}
 function frmGet(id){
@@ -9401,6 +9401,7 @@ handle=function(a){
   if(id==='bk'){
    if(act==='wda')return go('bk:wda');
    if(!(amt>0))return bad('請輸入金額，例如 500000 或 50萬。');
+   if(act==='in'&&amt>S.money)return bad(`現金不足：要存 ${money(amt)}，目前現金只有 ${money(S.money)}。`);
    view.bka=amt;
    if(act==='in')return go(g.s==='c'?'bk:dep':'bk:fd:'+g.s);
    if(act==='out'){if(g.s!=='c')return bad('定存要到期才能領回，或到下方定存單提前解約；這裡只能提領活存。');return go('bk:wd')}
@@ -9449,7 +9450,7 @@ bkHTML=function(){
  const b=bkInit();
  let h=`<div class="sec">銀行存款</div><div class="item"><b>活期存款</b>　${money(b.c)}<div class="sub">活存年利率 ${bkDm().toFixed(2)}%・定存 1 年期 ${bkFd().toFixed(2)}%（歷史為台灣牌告的大致水準，未來依物價與景氣推估；未計利息所得稅）</div></div>`;
  h+=`<div class="sub">可用現金 ${money(S.money)}</div>`;
- h+=frmHTML('bk',{sl:'存款種類',opts:[['c',`活存・年利率 ${bkDm().toFixed(2)}%・隨時可提領`],...[1,2,3].map(y=>[String(y),`定存 ${y} 年・年利率約 ${(bkFd()+(y-1)*.05).toFixed(2)}%・到期轉入活存`])],def:'100000',btns:[['in','存入','p'],['out','提領活存'],['wda','全部提領活存']]});
+ h+=frmHTML('bk',{sl:'存款種類',opts:[['c',`活存・年利率 ${bkDm().toFixed(2)}%・隨時可提領`],...[1,2,3].map(y=>[String(y),`定存 ${y} 年・年利率約 ${(bkFd()+(y-1)*.05).toFixed(2)}%・到期轉入活存`])],def:'100000',chips:[100000,1000000,5000000,20000000,50000000,100000000],btns:[['in','存入','p'],['out','提領活存'],['wda','全部提領活存']]});
  if(b.fd.length)h+='<div class="sec">定存單</div>'+b.fd.map((f,i)=>`<div class="item row"><div style="flex:1"><b>${money(f.amt)}</b>・${f.yrs} 年期・利率 ${f.r.toFixed(2)}%<div class="sub">還有 ${f.left} 年到期</div></div><button class="mini" data-a="bk:fdx:${i}">提前解約</button></div>`).join('');
  h+=`<button class="btn" data-a="open:cn">外幣存款與匯率<small>買進外幣存款，賺匯差與利差</small></button>`;
  return h;
@@ -9850,6 +9851,42 @@ yearly=function(){
  const r=_y86b.apply(this,arguments);
  try{if(S.age>=65&&S.money<0&&!S.co){const a=Math.round(Math.min(-S.money,livingCost()*.3));if(a>0){ldset('老年生活津貼');S.money+=a;ldset(null);log(`政府提供老年生活津貼 ${money(a)}。`)}}}catch(e){}
  return r;
+};
+// 子女自己的戀愛、結婚、生子
+function kdName(sx){try{return fullName(sx)}catch(e){return given(sx,calYear())}}
+function kdGk(k,sp){
+ const sx=pick(['男','女']),cjk=/[一-鿿]/.test(k.n),sur=cjk?((k.sx==='男'?k.n:sp.n)[0]):'';
+ return {n:sur+given(sx,calYear()),sx,age:0};
+}
+const _ky87=kidYear;
+kidYear=function(k){
+ _ky87(k);
+ if(!k||k.age<18||(k.age>=18&&k.done===0&&k.age<20))return;
+ if(!k.rm)k.rm={st:'single',sp:null,gk:[],y:0};
+ const r=k.rm;r.gk.forEach(g=>g.age++);
+ if(r.st==='single'){
+  const p=(k.age>=22&&k.age<=40)?(.13+(k.lk>70?.04:0)+(k.pers==='外向'||k.pers==='活潑'?.03:0)):0;
+  if(chance(p)){r.st='dating';r.y=0;r.sp={n:kdName(k.sx==='男'?'女':'男'),sx:k.sx==='男'?'女':'男'};log(`${k.n}交了男女朋友${r.sp.n}，開心地向你分享。`,'good')}
+ }else if(r.st==='dating'){
+  r.y++;
+  if(k.age>=24&&chance(.3+r.y*.08)){r.st='married';r.y=0;chg('happy',6);log(`${k.n}和${r.sp.n}結婚了！你參加了婚禮。`,'good')}
+  else if(chance(.12)){log(`${k.n}和${r.sp.n}分手了。`,'bad');r.st='single';r.sp=null;r.y=0}
+ }else if(r.st==='married'){
+  r.y++;
+  const lim=k.sx==='女'?40:44;
+  if(r.gk.length<3&&k.age<=lim&&r.y>=1&&chance(r.gk.length===0?.28:.16)){
+   const g=kdGk(k,r.sp);r.gk.push(g);chg('happy',8);log(`${k.n}生了孩子，你有了孫${g.sx==='男'?'子':'女'}${g.n}！`,'good');
+  }else if(chance(.02)){log(`${k.n}和${r.sp.n}感情出現問題，離婚了。`,'bad');r.st='single';r.sp=null;r.y=0}
+ }
+};
+const _kh87=kidHTML;
+kidHTML=function(i){
+ let h=_kh87(i);const k=S.kids[i];if(!k||!k.rm)return h;
+ const r=k.rm,t=r.st==='married'?`已婚，配偶 ${esc(r.sp.n)}`:r.st==='dating'?`交往中：${esc(r.sp.n)}`:(k.age>=22?'單身':'');
+ const g=r.gk.length?`<br>孫子女：${r.gk.map(x=>esc(x.n)+'（'+x.age+' 歲）').join('、')}`:'';
+ if(!t&&!g)return h;
+ const box=`<div class="item">感情：<b>${t}</b>${g}</div>`;
+ return h.includes('<div class="sec">教養決策</div>')?h.replace('<div class="sec">教養決策</div>',box+'<div class="sec">教養決策</div>'):h.replace(/(<button class="btn" data-a="back">)/,box+'$1');
 };
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){

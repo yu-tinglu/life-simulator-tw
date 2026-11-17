@@ -1,7 +1,7 @@
 /* ---- p78：下拉選單＋自填金額（外匯、銀行存款、投資組合、移民國家），取代一長串按鈕 ---- */
 function frmNum(s){
- s=String(s==null?'':s).replace(/[,，\s]/g,'');const m=s.match(/^([\d.]+)(億|百萬|萬|k|K)?$/);if(!m)return NaN;
- const u={'億':1e8,'百萬':1e6,'萬':1e4,'k':1e3,'K':1e3}[m[2]]||1;return Math.round(parseFloat(m[1])*u);
+ s=String(s==null?'':s).replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/．/g,'.').replace(/[,，\s]/g,'').replace(/元$|塊$/,'').replace(/NT\$?/i,'');const m=s.match(/^([\d.]+)(億|千萬|百萬|萬|千|k|K|w|W|m|M)?$/);if(!m)return NaN;
+ const u={'億':1e8,'千萬':1e7,'百萬':1e6,'萬':1e4,'千':1e3,'k':1e3,'K':1e3,'w':1e4,'W':1e4,'m':1e6,'M':1e6}[m[2]]||1;return Math.round(parseFloat(m[1])*u);
 }
 function frmState(id){view.frm=view.frm||{};return view.frm[id]||(view.frm[id]={})}
 function frmGet(id){
@@ -43,6 +43,7 @@ handle=function(a){
   if(id==='bk'){
    if(act==='wda')return go('bk:wda');
    if(!(amt>0))return bad('請輸入金額，例如 500000 或 50萬。');
+   if(act==='in'&&amt>S.money)return bad(`現金不足：要存 ${money(amt)}，目前現金只有 ${money(S.money)}。`);
    view.bka=amt;
    if(act==='in')return go(g.s==='c'?'bk:dep':'bk:fd:'+g.s);
    if(act==='out'){if(g.s!=='c')return bad('定存要到期才能領回，或到下方定存單提前解約；這裡只能提領活存。');return go('bk:wd')}
@@ -91,7 +92,7 @@ bkHTML=function(){
  const b=bkInit();
  let h=`<div class="sec">銀行存款</div><div class="item"><b>活期存款</b>　${money(b.c)}<div class="sub">活存年利率 ${bkDm().toFixed(2)}%・定存 1 年期 ${bkFd().toFixed(2)}%（歷史為台灣牌告的大致水準，未來依物價與景氣推估；未計利息所得稅）</div></div>`;
  h+=`<div class="sub">可用現金 ${money(S.money)}</div>`;
- h+=frmHTML('bk',{sl:'存款種類',opts:[['c',`活存・年利率 ${bkDm().toFixed(2)}%・隨時可提領`],...[1,2,3].map(y=>[String(y),`定存 ${y} 年・年利率約 ${(bkFd()+(y-1)*.05).toFixed(2)}%・到期轉入活存`])],def:'100000',btns:[['in','存入','p'],['out','提領活存'],['wda','全部提領活存']]});
+ h+=frmHTML('bk',{sl:'存款種類',opts:[['c',`活存・年利率 ${bkDm().toFixed(2)}%・隨時可提領`],...[1,2,3].map(y=>[String(y),`定存 ${y} 年・年利率約 ${(bkFd()+(y-1)*.05).toFixed(2)}%・到期轉入活存`])],def:'100000',chips:[100000,1000000,5000000,20000000,50000000,100000000],btns:[['in','存入','p'],['out','提領活存'],['wda','全部提領活存']]});
  if(b.fd.length)h+='<div class="sec">定存單</div>'+b.fd.map((f,i)=>`<div class="item row"><div style="flex:1"><b>${money(f.amt)}</b>・${f.yrs} 年期・利率 ${f.r.toFixed(2)}%<div class="sub">還有 ${f.left} 年到期</div></div><button class="mini" data-a="bk:fdx:${i}">提前解約</button></div>`).join('');
  h+=`<button class="btn" data-a="open:cn">外幣存款與匯率<small>買進外幣存款，賺匯差與利差</small></button>`;
  return h;
