@@ -165,7 +165,7 @@ const GN={閩南:'閩南人是台灣人口比例最高的族群，祖先多在�
 function ethHTML(){
  ethInit();const e=S.eth,k=S.cn||'TW',lg=LANGN[e.g];
  let h=`<h3>族群與文化</h3><div class="item"><b>你的族群背景：${esc(ethName(e))}</b><div class="sub">${esc(GN[e.g]||'你的家庭有自己的文化與傳統。')}</div></div>`;
- if(S.mt!=null&&lg)h+=`<div class="item"><b>${esc(e.g==='新住民及其子女'?famLang():lg)}熟練度 ${S.mt}%</b><div class="bar"><i style="width:${S.mt}%"></i></div><div class="sub">多和家人使用母語，才不會慢慢流失。</div><button class="btn" data-a="eth:prac">今年多練習母語</button></div>`;
+ if(S.mt!=null&&lg)h+=`<div class="item"><b>${esc(e.g==='新住民及其子女'?famLang():lg)}熟練度 ${S.mt}%</b><div class="bar"><i style="width:${S.mt}%"></i></div><div class="sub">多和家人使用母語，才不會慢慢流失。</div><button class="btn" data-a="lf:eth:prac">今年多練習母語</button></div>`;
  const par=[['媽媽',S.mom],['爸爸',S.dad]].filter(x=>x[1]).map(x=>x[0]+(x[1].o?`（來自${x[1].o}）`:'')).join('、');
  if(par)h+=`<div class="item"><b>父母</b><div class="sub">${esc(par)}</div></div>`;
  if(S.partner&&S.partner.eth)h+=`<div class="item"><b>伴侶：${esc(S.partner.n)}</b><div class="sub">${esc(ethName(S.partner.eth))}${S.partner.ld?'（遠距離）':''}</div></div>`;

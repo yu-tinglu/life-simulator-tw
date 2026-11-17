@@ -83,7 +83,7 @@ function ledHTML(){
  let i=view.ly==null?all.length-1:Math.max(0,Math.min(all.length-1,view.ly));view.ly=i;
  const c=all[i],cur=i===all.length-1,t=ldSum(c),end=cur?S.money:(c.m1!=null?c.m1:S.money);
  let h=`<h3>年度收支</h3><div class="seg"><button data-a="lf:led:prev" ${i<=0?'disabled':''}>前一年</button><button class="on">${c.age} 歲${cur?'（今年）':''}</button><button data-a="lf:led:next" ${cur?'disabled':''}>後一年</button></div>`;
- h+=`<div class="item"><b>${c.y} 年</b>　收入 ${money(t.i)}　支出 ${money(t.e)}<br>現金 ${money(c.m0)} → ${money(end)}（${end-c.m0>=0?'+':'-'}${money(Math.abs(end-c.m0))}）<div class="sub">另有資產買賣、存款轉換等不計入收支的項目，見最下方。</div></div>`;
+ h+=`<div class="item"><b>${c.y} 年</b><table class="rt"><tr><td>收入</td><td style="color:#2f855a">+${money(t.i)}</td></tr><tr><td>支出</td><td style="color:#c0553a">-${money(t.e)}</td></tr><tr><td>現金變化</td><td>${money(c.m0)} → ${money(end)}</td></tr></table><div class="sub">資產買賣、存款轉換等不計入收支的項目列在最下方。</div></div>`;
  h+='<div class="sec">收入</div>'+ldTable(ldRows(c,'i'));
  h+='<div class="sec">支出</div>'+ldTable(ldRows(c,'e'));
  const pw={};for(const k in c.r){const p=k.split('|');if(LDX.has(p[1]))continue;const w=p[2];pw[w]=pw[w]||{i:0,e:0};if(p[0]==='i')pw[w].i+=c.r[k];else pw[w].e-=c.r[k]}

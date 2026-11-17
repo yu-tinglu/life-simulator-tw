@@ -10,7 +10,7 @@ astHTML=function(){
  const h=_ah69();
  if(!S||!S.cn||S.cn==='TW'||!CNS[S.cn])return h;
  const c=CNS[S.cn],f=fxr(S.cn),i=h.indexOf('</h3>');
- const card=`<div class="item"><b>目前以${c.sym}顯示金額</b><div class="sub">1 ${c.sym} ＝ NT$${f.toFixed(f<1?4:2)}（隨經濟與匯率變動）。你在台灣的房子、存款等資產以台幣計價，這裡依目前匯率換算顯示；在「移民與匯率」可買賣外幣。</div></div>`;
+ const card=`<div class="item"><b>目前以${c.sym}顯示金額</b><div class="sub">1 ${c.sym} ＝ NT$${f.toFixed(f<1?4:2)}。手頭現金視為當地貨幣（匯率變動每年有匯兌損益）；台灣的房子、存款以台幣計價並依匯率換算。</div></div>`;
  return i<0?card+h:h.slice(0,i+5)+card+h.slice(i+5);
 };
 /* ---- 圖示分配 ---- */

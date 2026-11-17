@@ -44,7 +44,7 @@ function showSheet(tab,sub){
  if(m)h+=`<div class="msg ${m[1]==='bad'?'bad':''}">${esc(m[0])}</div>`;
  if(tab==='cn')h+=cnHTML(view.cnsub);else if(tab==='cn')h+=cnHTML(view.cnsub);else if(tab==='lg')h+=legacyHTML();else if(tab==='eco')h+=ecoHTML();else if(tab==='life')h+=lifeHTML();else if(tab==='more')h+=moreHTML();else if(tab==='act')h+=actHTML();else if(tab==='job')h+=jobHTML();else if(tab==='rel')h+=sub?subHTML(sub):relHTML();else h+=astHTML();
  const TT={job:'職業與學業',rel:'家庭',act:'活動',ast:'資產',cn:'移民與匯率',lg:'傳承',eco:'經濟',more:'更多',life:'人生'},hasSub=!!(view.sub||view.cnsub||view.fsub||view.csub||tab==='life');
- $('sheetBody').innerHTML=`<div class="sh"><button class="bk ${hasSub?'on':''}" data-a="back">←</button><b>${TT[tab]||''}</b><button data-a="close">✕</button></div>`+h+`<button class="btn" data-a="close">關閉</button>`;
+ $('sheetBody').innerHTML=`<div class="sh"><button class="bk ${hasSub?'on':''}" data-a="back">←</button><b>${(tab==='life'&&typeof LSUBT!=='undefined'&&LSUBT[view.lsub])||TT[tab]||''}</b><button data-a="close">✕</button></div>`+h+`<button class="btn" data-a="close">關閉</button>`;
  const pk=tab+'|'+(view.sub||view.lsub||view.csub||view.cnsub||view.fsub||'');if(view._pk!==pk||view._fresh){view._pk=pk;view._fresh=0;try{$('sheetBody').scrollTop=0;$('sheet').scrollTop=0}catch(e){}}
  $('sheet').classList.add('on');
 }
