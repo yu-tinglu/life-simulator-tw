@@ -57,7 +57,7 @@ cookHTML=function(){
   const r=ckInit(),sel=frmGet('ckc').s||'twn',cs=CUIS.find(c=>c[0]===sel)||CUIS[0];
   const dl=Object.values(DISH).filter(d=>d.cu===cs[0]),cur=frmGet('ckl').s,cd=DISH[cur]&&DISH[cur].cu===cs[0]?DISH[cur]:dl[0];
   const big=`<div class="item" style="display:flex;gap:12px;align-items:center">${dishSVG(cd.n,cd.cu,76)}<div><b>${esc(cd.n)}</b><div class="sub">${esc(cd.cun)}・${esc(cd.sc)}・難度 ${cd.lv}${r.known[cd.id]?'・熟練 '+r.known[cd.id].m+'%':'・還沒學過'}</div></div></div>`;
-  const gal=`<div class="sec op">${esc(cs[1])}圖鑑（${dl.length} 道）</div><div class="dgal">${dl.map(d=>`<button class="dcd${r.known[d.id]?' kn':''}${d.id===cd.id?' on':''}" data-a="ckpick:${d.id}">${dishSVG(d.n,d.cu,48)}<span>${esc(d.n)}</span><small>${r.known[d.id]?r.known[d.id].m+'%':'未學'}</small></button>`).join('')}</div>`;
+  const scs=[...new Set(dl.map(d=>d.sc))],gal=`<div class="sec op">${esc(cs[1])}圖鑑（${dl.length} 道）</div>`+scs.map(sc=>`<div class="sub" style="margin:8px 0 2px">${esc(sc)}</div><div class="dgal">${dl.filter(d=>d.sc===sc).map(d=>`<button class="dcd${r.known[d.id]?' kn':''}${d.id===cd.id?' on':''}" data-a="ckpick:${d.id}">${dishSVG(d.n,d.cu,48)}<span>${esc(d.n)}</span><small>${r.known[d.id]?r.known[d.id].m+'%':'未學'}</small></button>`).join('')}</div>`).join('');
   h=h.replace('<div class="sec op">學習食譜</div>','<div class="sec op">學習食譜</div>'+big);
   h=h.replace(/(<div class="sub">(?:生活圈的菜系|異國菜系)[^<]*<\/div>)/,'$1'+gal);
   r.own.forEach(d=>{const o='<div class="item"><b>'+esc(d.n)+'</b>';h=h.replace(o,'<div class="item" style="overflow:hidden"><span style="float:left;margin-right:10px">'+dishSVG(d.n,d.cu||'twn',44)+'</span><b>'+esc(d.n)+'</b>')});

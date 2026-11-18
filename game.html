@@ -12337,7 +12337,7 @@ cookHTML=function(){
   const r=ckInit(),sel=frmGet('ckc').s||'twn',cs=CUIS.find(c=>c[0]===sel)||CUIS[0];
   const dl=Object.values(DISH).filter(d=>d.cu===cs[0]),cur=frmGet('ckl').s,cd=DISH[cur]&&DISH[cur].cu===cs[0]?DISH[cur]:dl[0];
   const big=`<div class="item" style="display:flex;gap:12px;align-items:center">${dishSVG(cd.n,cd.cu,76)}<div><b>${esc(cd.n)}</b><div class="sub">${esc(cd.cun)}・${esc(cd.sc)}・難度 ${cd.lv}${r.known[cd.id]?'・熟練 '+r.known[cd.id].m+'%':'・還沒學過'}</div></div></div>`;
-  const gal=`<div class="sec op">${esc(cs[1])}圖鑑（${dl.length} 道）</div><div class="dgal">${dl.map(d=>`<button class="dcd${r.known[d.id]?' kn':''}${d.id===cd.id?' on':''}" data-a="ckpick:${d.id}">${dishSVG(d.n,d.cu,48)}<span>${esc(d.n)}</span><small>${r.known[d.id]?r.known[d.id].m+'%':'未學'}</small></button>`).join('')}</div>`;
+  const scs=[...new Set(dl.map(d=>d.sc))],gal=`<div class="sec op">${esc(cs[1])}圖鑑（${dl.length} 道）</div>`+scs.map(sc=>`<div class="sub" style="margin:8px 0 2px">${esc(sc)}</div><div class="dgal">${dl.filter(d=>d.sc===sc).map(d=>`<button class="dcd${r.known[d.id]?' kn':''}${d.id===cd.id?' on':''}" data-a="ckpick:${d.id}">${dishSVG(d.n,d.cu,48)}<span>${esc(d.n)}</span><small>${r.known[d.id]?r.known[d.id].m+'%':'未學'}</small></button>`).join('')}</div>`).join('');
   h=h.replace('<div class="sec op">學習食譜</div>','<div class="sec op">學習食譜</div>'+big);
   h=h.replace(/(<div class="sub">(?:生活圈的菜系|異國菜系)[^<]*<\/div>)/,'$1'+gal);
   r.own.forEach(d=>{const o='<div class="item"><b>'+esc(d.n)+'</b>';h=h.replace(o,'<div class="item" style="overflow:hidden"><span style="float:left;margin-right:10px">'+dishSVG(d.n,d.cu||'twn',44)+'</span><b>'+esc(d.n)+'</b>')});
@@ -12348,6 +12348,83 @@ handle=function(a){
  if(typeof a==='string'&&a.startsWith('ckpick:')&&S){frmState('ckl').s=a.slice(7);view.lsub='cook';render();try{showSheet('life')}catch(e){}return}
  return _hd122.apply(this,arguments)};
 (function(){try{const st=document.createElement('style');st.id='dg122';st.textContent=`.dgal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 10px}.dcd{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:1px solid var(--line);border-radius:14px;background:var(--card);font-size:13px;color:var(--ink);min-height:96px}.dcd span{font-weight:600;font-size:13px;text-align:center;line-height:1.25}.dcd small{font-size:11.5px;color:var(--mute)}.dcd.kn{border-color:var(--acc)}.dcd.on{background:color-mix(in srgb,var(--acc) 12%,var(--card));border-color:var(--acc)}.dsv{flex:none}`;document.head.appendChild(st)}catch(e){}})();
+/* ---- p123：食譜擴充（各菜系更多菜色，新增 15 個菜系）與新類型插圖；皆為遊戲設定，菜色名稱為通俗分類 ---- */
+function ckAdd(cu,cn,cc,data){
+ let c=CUMAP[cu];
+ if(!c){c=[cu,cn,cc,{}];CUIS.push(c);CUMAP[cu]=c}
+ for(const sc in data){
+  c[3][sc]=(c[3][sc]?c[3][sc]+',':'')+data[sc];
+  data[sc].split(',').forEach(s=>{const m=s.match(/^(.+?)(\d)$/);if(!m)return;const id=cu+'_'+m[1];if(DISH[id])return;DISH[id]={id,n:m[1],cu,cun:c[1],sc,lv:+m[2]}});
+ }
+}
+ckAdd('twn','','',{台菜:'雞肉飯1,麻油雞3,當歸鴨3,四神湯3,筒仔米糕2,碗粿2,肉粽2,蘿蔔糕2,控肉飯2,蝦仁飯2,貢丸湯1,豬血湯2',小吃:'大腸包小腸2,胡椒餅3,蔥抓餅1,棺材板3,鍋貼2,豆花1,愛玉冰1,芋圓2,地瓜球1,滷味2,炸雞排1,米血糕2,牛軋糖2,車輪餅1,雞蛋糕1',客家菜:'客家粄條2,艾草粄2,鹹豬肉2,福菜肉片湯2,炒粄條2',眷村菜:'豆漿燒餅油條2,牛肉捲餅3,酸菜白肉鍋3'});
+ckAdd('chn','','',{川菜:'魚香肉絲2,辣子雞3,口水雞2,麻辣燙2,毛血旺3,蒜泥白肉2,乾煸四季豆2,魚香茄子2,鹽煎肉2',粵菜:'廣式燒臘飯2,腸粉2,蝦仁燒賣3,白灼蝦2,豉汁蒸排骨2,港式奶茶1,蛋撻2,菠蘿油3,雲吞麵3,乳鴿4,艇仔粥2',湘菜:'小炒黃牛肉3,外婆菜炒蛋2,農家小炒肉2,辣椒炒蛋1',魯菜:'德州扒雞4,蔥爆羊肉3,糖醋裡脊2,醬爆雞丁2',江浙菜:'龍井蝦仁4,叫化雞4,蟹粉獅子頭5,蔥油拌麵2,生煎包3,蟹黃湯包5,醉雞3,油爆蝦3',閩菜:'沙茶麵2,蝦油雞3,海蠣煎2',北方菜:'北京烤鴨5,涮羊肉3,餃子2,鍋包肉3,殺豬菜2,炸醬麵2',西北菜:'羊肉泡饃3,蘭州拉麵3,肉夾饃2,涼皮2,臊子麵2,新疆羊肉串2,大盤雞3,手抓飯3',雲貴菜:'過橋米線3,汽鍋雞3,酸湯魚3,烤乳扇2'});
+ckAdd('jpn','','',{壽司:'鮭魚卵丼3,海鮮丼3,稻荷壽司2,手卷壽司2,鰻魚飯3',拉麵:'沾麵3,擔擔拉麵3,烏龍麵2,蕎麥涼麵2,炒烏龍麵2',炸物:'可樂餅2,炸蝦2,炸牡蠣3,章魚燒2,大阪燒3,廣島燒4',居酒屋:'毛豆1,烤飯糰2,味噌湯1,親子丼2,牛丼2,日式咖哩飯2,蛋包飯2,日式漢堡排3',懷石:'刺身拼盤5,壽喜燒4,涮涮鍋3,鐵板燒4,鰻魚蒲燒4',和菓子:'大福2,銅鑼燒2,抹茶蛋糕3,三色糰子3,鯛魚燒1,日式刨冰2'});
+ckAdd('kor','','',{傳統:'部隊鍋3,大醬湯2,泡菜鍋2,冷麵3,雜菜冬粉3,韓式煎餅2,韓式拌麵2,海帶湯2,醬油蟹5,血腸3',烤肉:'烤豬頸肉2,燒肉拼盤3,生拌牛肉3,辣燉雞3',街頭:'魚板串1,烤年糕串1,韓式雞蛋糕1,糖餅2,辣炒章魚3,韓式炸醬麵2,起司熱狗2',甜點:'韓式刨冰2,蜂蜜年糕2'});
+ckAdd('tha','','',{泰式:'紅咖哩2,瑪莎曼咖哩4,泰式炒飯1,泰式海南雞飯2,泰式烤雞3,涼拌海鮮3,涼拌牛肉3,泰式魚餅2,炸春捲1,椰奶雞湯3,香料蒸魚3,泰式奶茶1,香蕉煎餅1,泰式船麵3'});
+ckAdd('vnm','','',{越式:'越式煎餅3,炸春捲2,檸檬草烤雞2,越式雞絲沙拉2,越南咖啡1,越式蝦餅2,蟹肉米線湯4,碎米飯2,豬肉米線3'});
+ckAdd('ind','','',{北印:'馬薩拉雞3,唐杜里烤雞4,菠菜起司3,薩莫薩2,印度炒飯3,羊肉咖哩4,恰巴提1,拉西1,馬薩拉奶茶1',南印:'椰子咖哩魚3,伊德利2,烏塔帕3,拉薩姆湯3,印度烤肉串3',甜點:'古拉伯姜蒙3,印度奶凍3'});
+ckAdd('ita','','',{麵食:'波隆那肉醬麵3,墨魚麵4,蒜辣義大利麵2,海鮮義大利麵3,筆管麵2,義式餃子4,馬鈴薯麵疙瘩3',披薩:'四起司披薩3,夏威夷披薩2',其他:'義式燉牛膝4,羅馬炸朝鮮薊4,義式燉菜3,焗烤茄子3,義式冰淇淋2,潘娜托尼4,義式薄切牛肉3,義式海鮮湯3'});
+ckAdd('fra','','',{經典:'勃根地燉雞4,法式鵝肝4,尼斯沙拉2,普羅旺斯燉菜3,法式吐司1,法式鹹派3,焗烤馬鈴薯3,法式牛排薯條2,法式焗蝸牛4',甜點:'焦糖布蕾3,泡芙3,瑪德蓮2,法式蘋果塔3,舒芙蕾5,歐培拉蛋糕5,可頌3,法式長棍2'});
+ckAdd('usa','','',{美式:'熱狗2,起司通心粉2,美式鬆餅1,蛤蜊巧達濃湯3,美式牛排4,烤火雞4,布朗尼2,起司蛋糕3,費城起司牛肉堡3,辣肉醬2,波士頓龍蝦捲4,甜甜圈2'});
+ckAdd('mex','','',{墨式:'玉米片佐莎莎1,法士達3,恩奇拉達3,墨西哥玉米粽3,烤玉米2,炸玉米餅3,吉拿棒2,三奶蛋糕3,墨西哥燉肉湯4,墨式燉牛肉4'});
+ckAdd('tur','','',{中東:'土耳其烤餅3,土耳其烤肉卷3,伊斯坎德烤肉4,茄子泥2,葡萄葉飯卷3,土耳其軟糖2,果仁蜜餅4,法拉費2,土耳其湯餃4,土耳其咖啡1,塔布勒沙拉2,慢烤羊肉4'});
+ckAdd('deu','','',{德式:'德式酸菜2,德式馬鈴薯沙拉1,德式炸豬排3,德式肉丸2,德式燉牛肉3,黑森林蛋糕4,德式薑餅2,德式蘋果卷3,德式馬鈴薯餅2'});
+ckAdd('gbr','','',{英式:'牧羊人派3,英式烤牛肉4,約克夏布丁3,香腸馬鈴薯泥2,英式下午茶點心3,太妃糖布丁3,蘇格蘭蛋2,哈吉斯4,英式咖哩雞3'});
+ckAdd('esp','','',{西式:'西班牙火腿3,伊比利火腿4,西班牙冷湯2,辣醬馬鈴薯2,烤乳豬5,西班牙蒜蝦3,西班牙章魚3,焦糖布丁2,西班牙油條2'});
+ckAdd('por','葡萄牙料理','PT',{葡式:'葡式蛋撻2,鹽漬鱈魚3,烤沙丁魚2,葡式海鮮飯3,葡式燉豬肉蛤蜊4,葡式香腸2,葡萄牙綠湯2'});
+ckAdd('gre','希臘料理','GR',{希臘:'希臘沙拉1,希臘烤肉串2,慕沙卡3,希臘優格醬2,烤章魚3,菠菜派3,蜂蜜堅果酥4'});
+ckAdd('bra','巴西料理','BR',{巴西:'巴西黑豆燉肉3,巴西烤肉3,起司麵包2,巴西莓碗1,炸魚木薯3,椰奶燉魚4'});
+ckAdd('per','秘魯料理','PE',{秘魯:'檸汁生魚3,秘魯炒牛肉4,秘魯烤雞3,藜麥沙拉2,黃辣椒醬雞3'});
+ckAdd('arg','阿根廷料理','AR',{阿根廷:'阿根廷烤肉4,青醬牛排3,阿根廷餡餅2,焦糖牛奶醬甜點3'});
+ckAdd('idn','印尼料理','ID',{印尼:'印尼炒飯2,沙嗲串3,仁當牛肉4,加多加多沙拉2,印尼椰漿飯2,印尼炒麵2'});
+ckAdd('mys','馬來西亞料理','MY',{馬來:'肉骨茶3,叻沙3,馬來椰漿飯2,馬來海南雞飯2,咖哩麵3,印度煎餅2,炒粿條3'});
+ckAdd('sgp','新加坡料理','SG',{新加坡:'辣椒螃蟹4,咖椰吐司1,蠔煎2,福建炒麵3,新加坡魚頭咖哩3'});
+ckAdd('phl','菲律賓料理','PH',{菲式:'阿多波雞肉2,酸湯燉肉3,菲式烤乳豬5,菲式春捲1,哈囉哈囉冰品2'});
+ckAdd('rus','俄羅斯與東歐料理','RU',{俄式:'羅宋湯2,俄式餃子3,酸奶牛肉絲4,俄式薄餅2,黑麥麵包1,魚子醬吐司4'});
+ckAdd('mar','摩洛哥與北非料理','MA',{北非:'塔吉鍋4,摩洛哥薄荷茶1,哈里拉湯3,北非蛋2'});
+ckAdd('eth','衣索比亞料理','ET',{衣索比亞:'英傑拉薄餅3,多羅燉雞4,衣索比亞咖啡2'});
+ckAdd('aus','澳洲與紐西蘭料理','AU',{澳式:'澳式肉派2,澳式烤羊排4,蛋白霜水果蛋糕3,澳式早午餐3,澳式牛肉漢堡2'});
+ckAdd('pol','波蘭與中歐料理','PL',{中歐:'波蘭餃子3,獵人燉菜3,甜菜根湯2,捷克炸起司3,匈牙利燉牛肉3'});
+/* 新類型插圖規則（排在前面優先） */
+DTYPE.unshift(
+ [/冰淇淋|刨冰|冰品|愛玉冰|豆花|巴西莓|布丁|布蕾|優格|奶凍|拉西|芋圓|牛軋糖|蜂蜜年糕|三色糰子|軟糖|堅果酥|蛋白霜/,'sweetcup'],
+ [/肉派|牧羊人派|鹹派|餡餅|蘋果派|蘋果塔|菠菜派|蛋撻|蘋果卷/,'pie'],
+ [/麵包|可頌|長棍|吐司|燒餅|油條|恰巴提|司康|甜甜圈|潘娜|薑餅|銅鑼燒|鯛魚燒|車輪餅|雞蛋糕|瑪德蓮|泡芙|大福|吉拿棒|蘿蔔糕|菠蘿油|蔥抓餅|糖餅|歐培拉|黑森林|舒芙蕾|蜂蜜|鳳梨酥|土耳其烤餅|恰|薄餅/,'bread'],
+ [/奶茶|薄荷茶|咖啡|擂茶|珍珠/,'drink']
+);
+DTYPE.splice(DTYPE.length-1,0,
+ [/蟹|蠔|蛤|章魚|鮭魚卵|刺身|鰻|蚵/,'fish'],
+ [/沙拉|涼拌|涼皮|毛豆|泡菜|酸菜|茄子泥|塔布勒|藜麥|醬$|泥$|莎莎/,'salad'],
+ [/蛋|烘蛋|早午餐/,'egg'],
+ [/布朗尼|蜜餅|甜點|下午茶|奶酪/,'dessert'],
+ [/粽|粿|粄|腸粉|艾草|法拉費|可樂餅|地瓜球|滷味|麻辣燙/,'dumpling'],
+ [/丼|粥/,'rice'],[/通心粉|米線|冬粉|麵疙瘩/,'noodle'],[/煎餅|鬆餅|熱狗|法士達|恩奇拉達/,'wrap'],
+ [/燉菜|慕沙卡|哈吉斯|親子|泡菜鍋|黑豆燉/,'stew'],[/馬鈴薯|薩莫薩|伊德利|烏塔帕|菠菜起司|棺材板|胡椒餅/,'fried'],[/古拉伯|伊斯坎德/,'dessert'],
+ [/雞|鴨|鵝|牛|羊|豬|肉|排|腿|腸|鴿|火腿|烤|扒|燒|血|蝸牛|玉米|乳|毛血旺|鐵板|壽喜|糖醋|裡脊/,'meat']
+);
+(function(){const i=DTYPE.findIndex(x=>x[1]==='plate');if(i>=0)DTYPE[i][0]=/玉子燒|茶碗蒸|前菜|塔帕斯|椒鹽脆餅|風乾/})();
+const _dsv123=dishSVG;
+dishSVG=function(name,cu,size){
+ const t=dishType(name);
+ if(t!=='sweetcup'&&t!=='pie'&&t!=='bread'&&t!=='salad'&&t!=='egg')return _dsv123(name,cu,size);
+ const h=dHash(name),r=k=>((h>>>(k*3))%100)/100,hue=((DHUE[cu]||(h%360))+(h%24)-12+360)%360;
+ const gold=`hsl(${32+r(1)*12} 68% ${54+r(2)*8}%)`,brown=`hsl(${22+r(3)*10} 52% ${34+r(4)*8}%)`,pink=`hsl(${hue} 60% 78%)`,cream='#fff6e2',acc=`hsl(${(hue+20)%360} 62% 55%)`;
+ const plate='<ellipse cx="32" cy="42" rx="27" ry="12" fill="#fff" stroke="#e7dcc8" stroke-width="1.5"/>';
+ let g='';
+ if(t==='sweetcup'){
+  g=`<path d="M14 22h36l-4 30a4 4 0 0 1-4 3H22a4 4 0 0 1-4-3z" fill="#fffaf0" stroke="#d9cdb6" stroke-width="1.5"/><path d="M17 36h30l-2 16H19z" fill="${pink}"/><path d="M16 29h32l-1 7H17z" fill="${cream}"/><path d="M14 22q18-14 36 0z" fill="${acc}"/><circle cx="32" cy="12" r="3.2" fill="#d6455d"/>`+[0,1,2].map(i=>`<circle cx="${23+i*9}" cy="${44+(i%2)*3}" r="2" fill="${brown}"/>`).join('');
+ }else if(t==='pie'){
+  g=plate+`<ellipse cx="32" cy="38" rx="21" ry="10" fill="${gold}" stroke="#b9772a" stroke-width="1.5"/><ellipse cx="32" cy="36" rx="17" ry="7.5" fill="${acc}" opacity=".85"/>`+[0,1,2,3].map(i=>`<path d="M${18+i*7} 31l${6} 10" stroke="${gold}" stroke-width="2"/>`).join('')+[0,1,2].map(i=>`<path d="M${24+i*7} 43l${-6} -10" stroke="${gold}" stroke-width="2"/>`).join('');
+ }else if(t==='salad'){
+  g='<path d="M7 34h50a25 25 0 0 1-50 0z" fill="#fff" stroke="#d9cdb6" stroke-width="1.5"/>'+[0,1,2,3,4,5].map(i=>`<ellipse cx="${16+i*6.4}" cy="${30-(i%3)*3}" rx="7" ry="4.5" fill="hsl(${100+(h>>>i)%35} 45% ${42+i*3}%)" transform="rotate(${(i-3)*18} ${16+i*6.4} 30)"/>`).join('')+[0,1,2].map(i=>`<circle cx="${20+i*12+(h%5)}" cy="${28-(i%2)*4}" r="3" fill="${i%2?acc:'#e3633f'}"/>`).join('');
+ }else if(t==='egg'){
+  g=plate+[0,1].map(i=>`<path d="M${i?33:14} 38q2-12 11-9t6 11q-6 6-14 3t-3-5z" fill="#fffdf8" stroke="#e7dcc8" stroke-width="1.2"/><circle cx="${i?42:23}" cy="36" r="4" fill="#f4b928"/>`).join('')+`<path d="M12 46h16" stroke="${acc}" stroke-width="2.5" stroke-linecap="round"/>`;
+ }else{
+  g=plate+`<path d="M10 42q2-18 20-18t20 18q-20 6-40 0z" fill="${gold}" stroke="#b9772a" stroke-width="1.4"/><path d="M20 32l4 7M30 28l3 9M40 31l2 8" stroke="${brown}" stroke-width="2" stroke-linecap="round"/><circle cx="46" cy="46" r="4" fill="${cream}" stroke="#d9c9a5"/><circle cx="46" cy="46" r="1.6" fill="${acc}"/>`;
+ }
+ return `<svg viewBox="0 0 64 64" width="${size||52}" height="${size||52}" class="dsv" aria-hidden="true">${g}</svg>`;
+};
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
