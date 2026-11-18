@@ -11914,11 +11914,11 @@ E.push({id:'sc_retire',min:62,max:80,w:3,if:()=>S.job&&/教授|研究員|科學�
  ch('退得乾乾淨淨',()=>{S.stress=cl(S.stress-4);return N('你把研究室鑰匙交回去，覺得輕鬆。')})]})});
 /* ---- p116：「更多」頁嚴格分類：每個功能只出現在一個固定類別 ---- */
 const MCATX=[
- ['人物與成長',['lf:stat','lf:skill','lf:av','lf:art','lf:mind','lf:health','open:act']],
- ['家庭與感情',['open:rel','rom:go:h','lf:tree','lf:cg']],
- ['學業與事業',['open:job','lf:cook','lf:wk']],
- ['財富與資產',['lf:led','open:ast','lf:hs','lf:si','lf:ch','open:eco']],
- ['社會與世界',['lf:pol','lf:eth','lf:rg','lf:wd','open:cn']],
+ ['人物與成長',['lf:stat','lf:skill','lf:av','lf:art','lf:mind','lf:health']],
+ ['家庭與感情',['lf:tree','lf:cg']],
+ ['學業與事業',['lf:cook','lf:wk']],
+ ['財務資訊',['lf:si','lf:ch','open:eco']],
+ ['社會與世界',['lf:pol','lf:eth','lf:rg','lf:wd']],
  ['紀錄與傳承',['lf:tl','lf:rev','lf:ach','lf:dx','lf:sv','open:lg']],
  ['系統與說明',['lf:tour','lf:set','lf:help','lf:legal']]
 ];
@@ -11929,16 +11929,41 @@ moreHTML=function(){
  const used={},inp='<input type="search" id="tq" placeholder="搜尋功能或人生紀錄（例如：房、股、結婚）" style="width:100%;margin:6px 0;padding:10px;border-radius:12px;border:1px solid var(--line)" oninput="moreSearch(this.value)">';
  view.mco=view.mco||{};
  const cats=MCATX.map(([n,ks])=>[n,ks.filter(k=>tiles[k]&&!used[k]&&(used[k]=1))]);
- const rest=Object.keys(tiles).filter(k=>!used[k]);if(rest.length)cats.push(['其他',rest]);
- return inp+cats.filter(c=>c[1].length).map(([n,ks],i)=>{
+ const TABOWN=['open:rel','open:act','open:ast','open:job','lf:led','lf:hs','open:cn','rom:go:h'];
+ const rest=Object.keys(tiles).filter(k=>!used[k]&&TABOWN.indexOf(k)<0);if(rest.length)cats.push(['其他',rest]);
+ return inp+'<div class="sub" style="margin:2px 0 8px">職業、關係、活動、資產在下方分頁；這裡放其他功能。</div>'+cats.filter(c=>c[1].length).map(([n,ks],i)=>{
   const open=!!view.mco[i];
   return `<button class="msec" data-a="mc:${i}"><span>${n}（${ks.length}）</span><span>${open?'收合':'展開'}</span></button><div class="grid" data-cl="${open?0:1}" style="${open?'':'display:none'}">${ks.map(k=>tiles[k]).join('')}</div>`}).join('');
 };
+const _ah116=actHTML;
+actHTML=function(){return _ah116().replace(/<button[^>]*data-a="lf:cook"[^>]*>[\s\S]*?<\/button>/g,'')};
 const _ms116=moreSearch;
 moreSearch=function(v){
  const q=String(v||'').trim();
  document.querySelectorAll('.grid[data-cl]').forEach(g=>{g.style.display=q?'':(g.dataset.cl==='1'?'none':'')});
  return _ms116(v);
+};
+/* ---- p117：認識新朋友 ≠ 曖昧：朋友與心儀對象分開 ---- */
+function meetFriend(){
+ if(S.age<13)return B('年紀還太小。');if(S.ap<1)return B('今年的行動點用完了。');if(S.money<px(500))return B('你的錢不夠。');
+ if(S.friends.length>=14)return B('朋友已經很多了，先好好經營現有的友情吧。');
+ S.ap--;S.money-=px(500);const f=newFriend(),w=S.school?'學校活動':S.job?'公司聚會':'聚會';S.friends.push(f);
+ return G(`你在${w}認識了${f.n}，聊得很投緣，成為朋友。`)
+}
+const _oh117=onHTML;
+onHTML=function(){
+ return _oh117().replace(/<button class="btn" data-a="mt:new">[\s\S]*?<\/button>/,`<button class="btn" data-a="mt:new">認識新朋友<small>學校、公司、聚會・1 點行動點・約 ${money(px(500))}</small></button>`)
+};
+const _rh117=relHTML;
+relHTML=function(){
+ const h=_rh117();if(S.age<14||S.dead)return h;
+ const b=`<button class="btn" data-a="mt:crush">認識心儀對象<small>想發展戀情的對象・1 點行動點・約 ${money(px(1500))}</small></button>`;
+ return h.replace(/(<button[^>]*data-a="rom:go:h"[^>]*>[\s\S]*?<\/button>)/,'$1'+b)
+};
+const _hd117=handle;
+handle=function(a){
+ if((a==='mt:new'||a==='mt:crush')&&S){const r=a==='mt:new'?meetFriend():meetNew();view.msg=r;view.tab='rel';view.rsub=null;render();showSheet('rel');return}
+ return _hd117.apply(this,arguments)
 };
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
