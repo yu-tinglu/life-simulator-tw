@@ -9856,7 +9856,7 @@ yearly=function(){
 function kdName(sx){try{return fullName(sx)}catch(e){return given(sx,calYear())}}
 function kdGk(k,sp){
  const sx=pick(['男','女']),cjk=/[一-鿿]/.test(k.n),sur=cjk?((k.sx==='男'?k.n:sp.n)[0]):'';
- return {n:sur+given(sx,calYear()),sx,age:0};
+ return {id:'g'+Date.now()%1e7+Math.floor(Math.random()*1e3),n:sur+given(sx,calYear()),sx,age:0,rel:R(60,90),m:0};
 }
 const _ky87=kidYear;
 kidYear=function(k){
@@ -10012,24 +10012,26 @@ const PLV=[
  {n:'縣市長',age:30,cost:5e7,diff:84,sal:3e6,ty:'L',d:'地方首長，需要聲望與資源。',req:2},
  {n:'總統',age:40,cost:3e8,diff:95,sal:8e6,ty:'N',d:'全國最高職位，聲望與歷練缺一不可。',req:3}
 ];
+const PLN={JP:['町內會長','市町村議員','國會議員','都道府縣知事','內閣總理大臣'],US:['市議員','州議員','聯邦眾議員','州長','總統'],KR:['洞里代表','市道議員','國會議員','道知事','總統'],GB:['區議員','郡議員','下議院議員','市長','首相'],DE:['鄉鎮議員','邦議員','聯邦議員','邦總理','聯邦總理'],CA:['市議員','省議員','聯邦眾議員','省長','總理'],AU:['市議員','州議員','聯邦眾議員','州長','總理'],SG:['社區代表','市鎮會議員','國會議員','部長級','總理']};
+function PL(lv){const c=PLV[lv];if(!c)return c;const cn=S&&S.cn||'TW',nm=PLN[cn];let f=1;try{if(cn!=='TW')f=Math.max(.2,Math.min(8,wTW(cn)/761000))}catch(e){}return Object.assign({},c,{n:nm?nm[lv-1]:c.n,cost:Math.round(c.cost*f),sal:Math.round(c.sal*f)})}
 const PPT=[['rul','執政黨系',8],['opp','在野黨系',8],['thd','第三勢力',3],['ind','無黨籍',0]];
 const PBUD=[['0','精簡競選',.5,0],['1','標準競選',1,6],['2','大選戰',2,11]];
 function polInit(){if(!S.pol)S.pol={rep:0,office:null,hist:[],ly:{},party:'ind'};return S.pol}
 function polRep(){const p=polInit();let nw=0;try{nw=Math.max(0,netWorth())}catch(e){}return Math.min(100,Math.round(p.rep+Math.min(25,Math.max(0,Math.log10(Math.max(1,nw/1e6))*7))+(S.job&&S.job.lv?Math.min(12,S.job.lv*2):0)+((S.flags&&S.flags.donor)?Math.min(10,S.flags.donor):0)))}
 function polOk(lv){
- const c=PLV[lv],p=polInit(),y=calYear();
- if(S.cn!=='TW')return '目前只支援台灣的選舉制度';
+ const c=PL(lv),p=polInit(),y=calYear();
+ if(S.ab)return '需具有該國公民身分才能參選（遊戲目前沒有歸化流程）';
  if(S.age<c.age)return `需年滿 ${c.age} 歲`;
  if(S.jail)return '服刑中';
  if((y-2026)%4!==0&&c.ty==='L')return `地方選舉年才有（${y+(4-((y-2026)%4+4)%4)%4} 年）`;
  if(c.ty==='N'&&(y-2028)%4!==0)return `全國選舉年才有（${y+((2028-y)%4+4)%4} 年）`;
  if(p.ly[y])return '今年已參選過一次';
  if(lv>=4){let n=0;for(let i=p.hist.length-1;i>=0;i--){const h=p.hist[i];if(h.lv===lv&&h.won)n++;else break}if(n>=2)return '已連任一屆，依制度不得再連任'}
- if(c.req&&!(p.hist.some(h=>h.won&&h.lv>=c.req)||polRep()>=70))return `需當選過${PLV[c.req].n}以上，或聲望達 70`;
+ if(c.req&&!(p.hist.some(h=>h.won&&h.lv>=c.req)||polRep()>=70))return `需當選過${PL(c.req).n}以上，或聲望達 70`;
  return '';
 }
 function polRun(lv,bud,party){
- const c=PLV[lv],p=polInit(),y=calYear(),b=PBUD[+bud],cost=Math.round(c.cost*b[2]);
+ const c=PL(lv),p=polInit(),y=calYear(),b=PBUD[+bud],cost=Math.round(c.cost*b[2]);
  const bad=polOk(lv);if(bad)return B(bad);
  if(S.money<cost)return B(`競選經費不足：需要 ${money(cost)}。`);
  p.ly[y]=1;p.party=party;
@@ -10047,7 +10049,7 @@ function polRun(lv,bud,party){
  return B(`很可惜，這次落選了。花費 ${money(cost)}。`);
 }
 function elYear(){
- if(!S||S.dead||S.cn==='ZZ')return;const p=S.pol;if(!p||!p.office)return;const o=p.office,c=PLV[o.lv],y=calYear();
+ if(!S||S.dead)return;const p=S.pol;if(!p||!p.office)return;const o=p.office,c=PL(o.lv),y=calYear();
  if(y>=o.end){log(`你的${c.n}任期屆滿。`,'');p.office=null;elReset();return}
  if(p.rep<25&&Math.random()<.3){log(`你被選民罷免，${c.n}職位提前結束。`,'bad');chg('happy',-10);p.office=null;elReset();return}
  S.money+=c.sal;p.rep=Math.min(100,p.rep+1);S.stress=cl(S.stress+3+o.lv);
@@ -10057,22 +10059,22 @@ const _y91=yearly;
 yearly=function(){_y91.apply(this,arguments);try{elYear()}catch(e){}};
 function elHTML(){
  const p=polInit(),y=calYear(),rep=polRep();
- let h=`<h3>政治與選舉</h3><div class="sub">依台灣制度簡化：地方選舉每 4 年（2026、2030…），全國選舉每 4 年（2028、2032…）。薪津與經費為約略值，不含各項補助與實際制度細節。</div>`;
- h+=`<div class="item">聲望：<b>${rep}</b>／100　目前職位：<b>${p.office?PLV[p.office.lv].n+'（任期至 '+p.office.end+' 年）':'無'}</b><div class="sub">聲望來自財富、職位、慈善與從政經歷。</div></div>`;
- if(S.cn!=='TW')return h+`<div class="item">目前只支援台灣的選舉。</div><button class="btn" data-a="pol:x">← 返回</button>`;
- const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PLV[lv].n}・${PLV[lv].d}${bad?'（'+bad+'）':'・可參選'}`]});
+ let h=`<h3>政治與選舉</h3><div class="sub">依台灣制度簡化：地方選舉每 4 年（2026、2030…），全國選舉每 4 年（2028、2032…）。其他國家沿用相同的年份循環與職位層級，職稱、薪津與經費依該國薪資水準換算，皆為概略值。</div>`;
+ h+=`<div class="item">聲望：<b>${rep}</b>／100　目前職位：<b>${p.office?PL(p.office.lv).n+'（任期至 '+p.office.end+' 年）':'無'}</b><div class="sub">聲望來自財富、職位、慈善與從政經歷。</div></div>`;
+ if(S.ab)return h+`<div class="item">你是移居者，需具有該國公民身分才能參選（遊戲目前沒有歸化流程）。</div><button class="btn" data-a="pol:x">← 返回</button>`;
+ const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PL(lv).n}・${PL(lv).d}${bad?'（'+bad+'）':'・可參選'}`]});
  if(p.office){const done=p.acted===y;h+='<div class="sec">施政（每年一項）</div><div class="sub">施政會影響全國的薪資成長與房價，任期結束後效果會消失。目前：薪資成長 '+((elMod().w*100).toFixed(1))+'%、房價成長 '+((elMod().h*100).toFixed(1))+'%。</div><select id="pol_a">'+PACT.filter(x=>x[2]<=p.office.lv).map(x=>`<option value="${x[0]}">${x[1]}：${x[3]}</option>`).join('')+'</select><button class="btn p" data-a="pol:act" '+(done?'disabled':'')+'>'+(done?'今年已施政':'推動這項施政')+'</button>'}
  h+='<div class="sec">登記參選</div>'+frmHTML('pol',{sl:'選舉職位',opts,amt:false,btns:[]})
   +`<label for="pol_p">推薦政黨</label><select id="pol_p">${PPT.map(x=>`<option value="${x[0]}">${x[1]}${x[0]==='ind'?'（高層級較吃虧）':''}</option>`).join('')}</select>`
   +`<label for="pol_b">競選預算</label><select id="pol_b">${PBUD.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select><div class="sub">里長約 30 萬、議員 300 萬、立委 2,000 萬、縣市長 5,000 萬、總統 3 億（標準預算；精簡減半、大選戰加倍）。</div><button class="btn p" data-a="pol:go">登記參選</button>`;
- if(p.hist.length)h+='<div class="sec">參選紀錄</div>'+p.hist.slice(-8).reverse().map(x=>`<div class="item">${x.y} 年・${PLV[x.lv].n}・${(PPT.find(q=>q[0]===x.party)||PPT[3])[1]}・<b>${x.won?'當選':'落選'}</b></div>`).join('');
+ if(p.hist.length)h+='<div class="sec">參選紀錄</div>'+p.hist.slice(-8).reverse().map(x=>`<div class="item">${x.y} 年・${PL(x.lv).n}・${(PPT.find(q=>q[0]===x.party)||PPT[3])[1]}・<b>${x.won?'當選':'落選'}</b></div>`).join('');
  return h+`<button class="btn" data-a="pol:x">← 返回</button>`;
 }
 const _ac91=actHTML;
 actHTML=function(){
  if(view.polOn)return elHTML();
- const h=_ac91();if(S.age<23||S.cn!=='TW'&&!(S.pol&&S.pol.office))return h;
- const b=`<button class="btn" data-a="pol:o">政治與選舉<small>里長、議員、立委、縣市長、總統・${S.pol&&S.pol.office?'現任'+PLV[S.pol.office.lv].n:'聲望 '+polRep()}</small></button>`;
+ const h=_ac91();if(S.age<23)return h;
+ const b=`<button class="btn" data-a="pol:o">政治與選舉<small>里長、議員、立委、縣市長、總統・${S.pol&&S.pol.office?'現任'+PL(S.pol.office.lv).n:'聲望 '+polRep()}</small></button>`;
  const i=h.indexOf('</div>');return i<0?h+b:h.slice(0,i+6)+b+h.slice(i+6);
 };
 const _hd91=handle;
@@ -10115,7 +10117,7 @@ function elAct(k){
  if(k==='cool'){m.h=Math.max(-.04,m.h-.02);p.rep=Math.min(100,p.rep+1);log('政府推出房市降溫措施。','');return G('房價成長降低。')}
  if(k==='subs'){m.h=Math.min(.04,m.h+.015);p.rep=Math.min(100,p.rep+3);log('政府推出購屋補貼與社宅方案。','');return G('房價成長提高。')}
  if(k==='aus'){m.w=cl_(m.w-.003);p.rep=Math.max(0,p.rep-2);log('政府撙節預算，整頓財政。','');return N('財政較穩，但民怨增加。')}
- if(k==='bribe'){const g=PLV[o.lv].sal*3;S.money+=g;if(Math.random()<.3){const f=g*3;S.money-=f;p.rep=Math.max(0,p.rep-30);chg('happy',-15);log(`你收受回扣遭檢調查辦，失去${PLV[o.lv].n}職位並被罰款 ${money(f)}。`,'bad');p.office=null;elReset();return B('東窗事發，失去職位並被罰款。')}log('你收到一筆政治獻金，沒有被查到。','');return N(`拿到 ${money(g)}，風險仍在。`)}
+ if(k==='bribe'){const g=PL(o.lv).sal*3;S.money+=g;if(Math.random()<.3){const f=g*3;S.money-=f;p.rep=Math.max(0,p.rep-30);chg('happy',-15);log(`你收受回扣遭檢調查辦，失去${PL(o.lv).n}職位並被罰款 ${money(f)}。`,'bad');p.office=null;elReset();return B('東窗事發，失去職位並被罰款。')}log('你收到一筆政治獻金，沒有被查到。','');return N(`拿到 ${money(g)}，風險仍在。`)}
  return null;
 }
 const _wg91=wageGrow;
@@ -10131,6 +10133,39 @@ function medF(k){const t={TW:1,US:3.5,JP:.9,KR:.7,GB:1.3,DE:1.3,AU:1.8,CA:1.7,SG
 function carF(k){const t={TW:1,US:.95,JP:.9,KR:.95,GB:1.1,DE:1.0,AU:1.2,CA:1.1,SG:3.5,CN:.8,HK:1.8};if(t[k]!=null)return t[k];return ctryIdx(k,.4,.6,1.5)}
 medIdx=function(){return Math.pow(1.03,Math.max(0,(S.year||2026)-2026))*medF(S.cn||'TW')};
 CARS.forEach(c=>{const b=c.p;Object.defineProperty(c,'p',{get(){return Math.round(b*(typeof S!=='undefined'&&S?carF(S.cn||'TW'):1)/1e4)*1e4},configurable:true})});
+// 孫子女贈與、子女婚育相關事件
+const _kh93=kidHTML;
+kidHTML=function(i){
+ let h=_kh93(i);const k=S.kids[i];if(!k||!k.rm||!k.rm.gk.length)return h;
+ k.rm.gk.forEach(g=>{if(!g.id){g.id='g'+Date.now()%1e7+Math.floor(Math.random()*1e3);g.rel=g.rel||70;g.m=g.m||0}});
+ const opts=k.rm.gk.map(g=>[g.id,`${g.n}（${g.age} 歲）`]);
+ const blk=`<div class="sec">贈與孫子女（隔代贈與，同樣依贈與稅規定）</div>`+frmHTML('gg'+i,{sl:'受贈人',opts,def:'500000',chips:[200000,500000,1000000,5000000],al:'贈與現金（新台幣）',btns:[['go','贈與','p']]});
+ return h.replace(/(<button class="btn" data-a="back">← 返回<\/button>)$/,blk+'$1');
+};
+const _hd93=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&a.startsWith('frmgo:gg')){
+  const id=a.split(':')[1],i=+id.slice(2),g=frmGet(id),k=S.kids[i];
+  const rf=()=>{render();try{showSheet(view.tab,view.sub)}catch(e){}};
+  if(!k||!k.rm)return;
+  const gk=k.rm.gk.find(x=>String(x.id)===String(g.s));
+  if(!gk||!(g.a>0)){view.msg=B('請選擇受贈人並輸入金額。');rf();return}
+  view.msg=giftTo(gk,g.a);try{delete frmState(id).a}catch(e){}rf();return;
+ }
+ return _hd93(a);
+};
+const kdMar=()=>S.kids.filter(k=>k.rm&&k.rm.st==='married');
+E.push({id:'kd_home',min:45,max:85,w:3,if:()=>kdMar().some(k=>k.age>=26&&k.age<=40&&!k.hh),run:()=>{const k=pick(kdMar().filter(x=>x.age>=26&&x.age<=40&&!x.hh));return {t:`${k.n}和${k.rm.sp.n}想買第一間房子，開口問你能不能幫忙出一點頭期款。`,c:[
+ ch('資助 300 萬',()=>{if(S.money<3e6)return B('你的現金不夠。');S.money-=3e6;k.hh=1;k.m=(k.m||0)+3e6;k.rel=cl(k.rel+10);chg('happy',3);return G(`${k.n}很感動，房子順利買下來了。`)}),
+  ch('資助 100 萬',()=>{if(S.money<1e6)return B('你的現金不夠。');S.money-=1e6;k.hh=1;k.m=(k.m||0)+1e6;k.rel=cl(k.rel+5);return G(`${k.n}說會自己努力把剩下的湊齊。`)}),
+  ch('鼓勵他們自己存錢',()=>{k.rel=cl(k.rel-2);return N('他們說明白，但看得出有點失望。')})]}}});
+E.push({id:'kd_gk',min:55,max:95,w:4,if:()=>S.kids.some(k=>k.rm&&k.rm.gk.length),run:()=>{const k=pick(S.kids.filter(x=>x.rm&&x.rm.gk.length)),g=pick(k.rm.gk);return {t:`${k.n}希望你暑假幫忙照顧孫${g.sx==='男'?'子':'女'}${g.n}一陣子。`,c:[
+ ch('欣然答應',()=>{g.rel=cl((g.rel||70)+8);k.rel=cl(k.rel+4);S.stress=cl(S.stress+4);chg('happy',5);return G(`${g.n}黏著你，家裡熱鬧起來。`)}),
+ ch('偶爾幫忙，帶去玩一天',()=>{g.rel=cl((g.rel||70)+3);chg('happy',2);return G('大家都玩得很開心。')}),
+ ch('身體吃不消，婉拒',()=>{k.rel=cl(k.rel-2);return N('他們找了保母，心裡有點失落。')})]}}});
+E.push({id:'kd_gsch',min:60,max:95,w:3,if:()=>S.kids.some(k=>k.rm&&k.rm.gk.some(g=>g.age>=6&&g.age<=22)),run:()=>{const k=pick(S.kids.filter(x=>x.rm&&x.rm.gk.some(g=>g.age>=6&&g.age<=22))),g=pick(k.rm.gk.filter(x=>x.age>=6&&x.age<=22));return {t:`孫${g.sx==='男'?'子':'女'}${g.n}想學才藝，學費要 NT$${(60000).toLocaleString()}。`,c:[
+ ch('幫他出學費',()=>{if(S.money<6e4)return B('錢不夠。');S.money-=6e4;g.rel=cl((g.rel||70)+6);chg('happy',3);return G(`${g.n}開心地跑來抱你。`)}),
+ ch('讓爸媽決定',()=>N('你把決定留給父母。'))]}}});
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();

@@ -7,24 +7,26 @@ const PLV=[
  {n:'縣市長',age:30,cost:5e7,diff:84,sal:3e6,ty:'L',d:'地方首長，需要聲望與資源。',req:2},
  {n:'總統',age:40,cost:3e8,diff:95,sal:8e6,ty:'N',d:'全國最高職位，聲望與歷練缺一不可。',req:3}
 ];
+const PLN={JP:['町內會長','市町村議員','國會議員','都道府縣知事','內閣總理大臣'],US:['市議員','州議員','聯邦眾議員','州長','總統'],KR:['洞里代表','市道議員','國會議員','道知事','總統'],GB:['區議員','郡議員','下議院議員','市長','首相'],DE:['鄉鎮議員','邦議員','聯邦議員','邦總理','聯邦總理'],CA:['市議員','省議員','聯邦眾議員','省長','總理'],AU:['市議員','州議員','聯邦眾議員','州長','總理'],SG:['社區代表','市鎮會議員','國會議員','部長級','總理']};
+function PL(lv){const c=PLV[lv];if(!c)return c;const cn=S&&S.cn||'TW',nm=PLN[cn];let f=1;try{if(cn!=='TW')f=Math.max(.2,Math.min(8,wTW(cn)/761000))}catch(e){}return Object.assign({},c,{n:nm?nm[lv-1]:c.n,cost:Math.round(c.cost*f),sal:Math.round(c.sal*f)})}
 const PPT=[['rul','執政黨系',8],['opp','在野黨系',8],['thd','第三勢力',3],['ind','無黨籍',0]];
 const PBUD=[['0','精簡競選',.5,0],['1','標準競選',1,6],['2','大選戰',2,11]];
 function polInit(){if(!S.pol)S.pol={rep:0,office:null,hist:[],ly:{},party:'ind'};return S.pol}
 function polRep(){const p=polInit();let nw=0;try{nw=Math.max(0,netWorth())}catch(e){}return Math.min(100,Math.round(p.rep+Math.min(25,Math.max(0,Math.log10(Math.max(1,nw/1e6))*7))+(S.job&&S.job.lv?Math.min(12,S.job.lv*2):0)+((S.flags&&S.flags.donor)?Math.min(10,S.flags.donor):0)))}
 function polOk(lv){
- const c=PLV[lv],p=polInit(),y=calYear();
- if(S.cn!=='TW')return '目前只支援台灣的選舉制度';
+ const c=PL(lv),p=polInit(),y=calYear();
+ if(S.ab)return '需具有該國公民身分才能參選（遊戲目前沒有歸化流程）';
  if(S.age<c.age)return `需年滿 ${c.age} 歲`;
  if(S.jail)return '服刑中';
  if((y-2026)%4!==0&&c.ty==='L')return `地方選舉年才有（${y+(4-((y-2026)%4+4)%4)%4} 年）`;
  if(c.ty==='N'&&(y-2028)%4!==0)return `全國選舉年才有（${y+((2028-y)%4+4)%4} 年）`;
  if(p.ly[y])return '今年已參選過一次';
  if(lv>=4){let n=0;for(let i=p.hist.length-1;i>=0;i--){const h=p.hist[i];if(h.lv===lv&&h.won)n++;else break}if(n>=2)return '已連任一屆，依制度不得再連任'}
- if(c.req&&!(p.hist.some(h=>h.won&&h.lv>=c.req)||polRep()>=70))return `需當選過${PLV[c.req].n}以上，或聲望達 70`;
+ if(c.req&&!(p.hist.some(h=>h.won&&h.lv>=c.req)||polRep()>=70))return `需當選過${PL(c.req).n}以上，或聲望達 70`;
  return '';
 }
 function polRun(lv,bud,party){
- const c=PLV[lv],p=polInit(),y=calYear(),b=PBUD[+bud],cost=Math.round(c.cost*b[2]);
+ const c=PL(lv),p=polInit(),y=calYear(),b=PBUD[+bud],cost=Math.round(c.cost*b[2]);
  const bad=polOk(lv);if(bad)return B(bad);
  if(S.money<cost)return B(`競選經費不足：需要 ${money(cost)}。`);
  p.ly[y]=1;p.party=party;
@@ -42,7 +44,7 @@ function polRun(lv,bud,party){
  return B(`很可惜，這次落選了。花費 ${money(cost)}。`);
 }
 function elYear(){
- if(!S||S.dead||S.cn==='ZZ')return;const p=S.pol;if(!p||!p.office)return;const o=p.office,c=PLV[o.lv],y=calYear();
+ if(!S||S.dead)return;const p=S.pol;if(!p||!p.office)return;const o=p.office,c=PL(o.lv),y=calYear();
  if(y>=o.end){log(`你的${c.n}任期屆滿。`,'');p.office=null;elReset();return}
  if(p.rep<25&&Math.random()<.3){log(`你被選民罷免，${c.n}職位提前結束。`,'bad');chg('happy',-10);p.office=null;elReset();return}
  S.money+=c.sal;p.rep=Math.min(100,p.rep+1);S.stress=cl(S.stress+3+o.lv);
@@ -52,22 +54,22 @@ const _y91=yearly;
 yearly=function(){_y91.apply(this,arguments);try{elYear()}catch(e){}};
 function elHTML(){
  const p=polInit(),y=calYear(),rep=polRep();
- let h=`<h3>政治與選舉</h3><div class="sub">依台灣制度簡化：地方選舉每 4 年（2026、2030…），全國選舉每 4 年（2028、2032…）。薪津與經費為約略值，不含各項補助與實際制度細節。</div>`;
- h+=`<div class="item">聲望：<b>${rep}</b>／100　目前職位：<b>${p.office?PLV[p.office.lv].n+'（任期至 '+p.office.end+' 年）':'無'}</b><div class="sub">聲望來自財富、職位、慈善與從政經歷。</div></div>`;
- if(S.cn!=='TW')return h+`<div class="item">目前只支援台灣的選舉。</div><button class="btn" data-a="pol:x">← 返回</button>`;
- const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PLV[lv].n}・${PLV[lv].d}${bad?'（'+bad+'）':'・可參選'}`]});
+ let h=`<h3>政治與選舉</h3><div class="sub">依台灣制度簡化：地方選舉每 4 年（2026、2030…），全國選舉每 4 年（2028、2032…）。其他國家沿用相同的年份循環與職位層級，職稱、薪津與經費依該國薪資水準換算，皆為概略值。</div>`;
+ h+=`<div class="item">聲望：<b>${rep}</b>／100　目前職位：<b>${p.office?PL(p.office.lv).n+'（任期至 '+p.office.end+' 年）':'無'}</b><div class="sub">聲望來自財富、職位、慈善與從政經歷。</div></div>`;
+ if(S.ab)return h+`<div class="item">你是移居者，需具有該國公民身分才能參選（遊戲目前沒有歸化流程）。</div><button class="btn" data-a="pol:x">← 返回</button>`;
+ const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PL(lv).n}・${PL(lv).d}${bad?'（'+bad+'）':'・可參選'}`]});
  if(p.office){const done=p.acted===y;h+='<div class="sec">施政（每年一項）</div><div class="sub">施政會影響全國的薪資成長與房價，任期結束後效果會消失。目前：薪資成長 '+((elMod().w*100).toFixed(1))+'%、房價成長 '+((elMod().h*100).toFixed(1))+'%。</div><select id="pol_a">'+PACT.filter(x=>x[2]<=p.office.lv).map(x=>`<option value="${x[0]}">${x[1]}：${x[3]}</option>`).join('')+'</select><button class="btn p" data-a="pol:act" '+(done?'disabled':'')+'>'+(done?'今年已施政':'推動這項施政')+'</button>'}
  h+='<div class="sec">登記參選</div>'+frmHTML('pol',{sl:'選舉職位',opts,amt:false,btns:[]})
   +`<label for="pol_p">推薦政黨</label><select id="pol_p">${PPT.map(x=>`<option value="${x[0]}">${x[1]}${x[0]==='ind'?'（高層級較吃虧）':''}</option>`).join('')}</select>`
   +`<label for="pol_b">競選預算</label><select id="pol_b">${PBUD.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select><div class="sub">里長約 30 萬、議員 300 萬、立委 2,000 萬、縣市長 5,000 萬、總統 3 億（標準預算；精簡減半、大選戰加倍）。</div><button class="btn p" data-a="pol:go">登記參選</button>`;
- if(p.hist.length)h+='<div class="sec">參選紀錄</div>'+p.hist.slice(-8).reverse().map(x=>`<div class="item">${x.y} 年・${PLV[x.lv].n}・${(PPT.find(q=>q[0]===x.party)||PPT[3])[1]}・<b>${x.won?'當選':'落選'}</b></div>`).join('');
+ if(p.hist.length)h+='<div class="sec">參選紀錄</div>'+p.hist.slice(-8).reverse().map(x=>`<div class="item">${x.y} 年・${PL(x.lv).n}・${(PPT.find(q=>q[0]===x.party)||PPT[3])[1]}・<b>${x.won?'當選':'落選'}</b></div>`).join('');
  return h+`<button class="btn" data-a="pol:x">← 返回</button>`;
 }
 const _ac91=actHTML;
 actHTML=function(){
  if(view.polOn)return elHTML();
- const h=_ac91();if(S.age<23||S.cn!=='TW'&&!(S.pol&&S.pol.office))return h;
- const b=`<button class="btn" data-a="pol:o">政治與選舉<small>里長、議員、立委、縣市長、總統・${S.pol&&S.pol.office?'現任'+PLV[S.pol.office.lv].n:'聲望 '+polRep()}</small></button>`;
+ const h=_ac91();if(S.age<23)return h;
+ const b=`<button class="btn" data-a="pol:o">政治與選舉<small>里長、議員、立委、縣市長、總統・${S.pol&&S.pol.office?'現任'+PL(S.pol.office.lv).n:'聲望 '+polRep()}</small></button>`;
  const i=h.indexOf('</div>');return i<0?h+b:h.slice(0,i+6)+b+h.slice(i+6);
 };
 const _hd91=handle;
@@ -110,7 +112,7 @@ function elAct(k){
  if(k==='cool'){m.h=Math.max(-.04,m.h-.02);p.rep=Math.min(100,p.rep+1);log('政府推出房市降溫措施。','');return G('房價成長降低。')}
  if(k==='subs'){m.h=Math.min(.04,m.h+.015);p.rep=Math.min(100,p.rep+3);log('政府推出購屋補貼與社宅方案。','');return G('房價成長提高。')}
  if(k==='aus'){m.w=cl_(m.w-.003);p.rep=Math.max(0,p.rep-2);log('政府撙節預算，整頓財政。','');return N('財政較穩，但民怨增加。')}
- if(k==='bribe'){const g=PLV[o.lv].sal*3;S.money+=g;if(Math.random()<.3){const f=g*3;S.money-=f;p.rep=Math.max(0,p.rep-30);chg('happy',-15);log(`你收受回扣遭檢調查辦，失去${PLV[o.lv].n}職位並被罰款 ${money(f)}。`,'bad');p.office=null;elReset();return B('東窗事發，失去職位並被罰款。')}log('你收到一筆政治獻金，沒有被查到。','');return N(`拿到 ${money(g)}，風險仍在。`)}
+ if(k==='bribe'){const g=PL(o.lv).sal*3;S.money+=g;if(Math.random()<.3){const f=g*3;S.money-=f;p.rep=Math.max(0,p.rep-30);chg('happy',-15);log(`你收受回扣遭檢調查辦，失去${PL(o.lv).n}職位並被罰款 ${money(f)}。`,'bad');p.office=null;elReset();return B('東窗事發，失去職位並被罰款。')}log('你收到一筆政治獻金，沒有被查到。','');return N(`拿到 ${money(g)}，風險仍在。`)}
  return null;
 }
 const _wg91=wageGrow;

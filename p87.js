@@ -2,7 +2,7 @@
 function kdName(sx){try{return fullName(sx)}catch(e){return given(sx,calYear())}}
 function kdGk(k,sp){
  const sx=pick(['男','女']),cjk=/[一-鿿]/.test(k.n),sur=cjk?((k.sx==='男'?k.n:sp.n)[0]):'';
- return {n:sur+given(sx,calYear()),sx,age:0};
+ return {id:'g'+Date.now()%1e7+Math.floor(Math.random()*1e3),n:sur+given(sx,calYear()),sx,age:0,rel:R(60,90),m:0};
 }
 const _ky87=kidYear;
 kidYear=function(k){
