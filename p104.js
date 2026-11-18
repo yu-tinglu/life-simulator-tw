@@ -33,3 +33,29 @@ polHTML=function(){
   return h.replace('<div class="item"><b>同性婚姻</b>',blk+'<div class="item"><b>同性婚姻</b>');
  }catch(e){return h}
 };
+/* 海外居住成本（房租）依各國差異 */
+const RENTF={US:1.0,JP:.85,KR:.9,CA:1.05,AU:1.1,GB:1.1,DE:.9,SG:1.25};
+const _lc104=livingCost;
+livingCost=function(){const v=_lc104.apply(this,arguments);try{if(S.cn&&S.cn!=='TW'&&RENTF[S.cn])return Math.round(v*RENTF[S.cn])}catch(e){}return v};
+/* 聯合政府：議會制國家的最高職位可能需組聯合政府，施政效果打折且有垮台風險 */
+const PARL=['GB','DE','JP','CA','AU'];
+const _pr104=polRun;
+polRun=function(lv,bud,party){
+ const r=_pr104.apply(this,arguments);
+ try{const p=polInit();
+  if(lv===5&&PARL.includes(S.cn)&&p.office&&p.office.lv===5&&p.office.y0===calYear()&&Math.random()<.55){p.office.coal=1;log('國會沒有單一政黨過半，你與其他政黨組成聯合政府；施政效果打折，聯盟也可能破局。','')}
+ }catch(e){}
+ return r;
+};
+const _ea104=elAct;
+elAct=function(k){
+ const p=polInit(),m0=Object.assign({},elMod()),r=_ea104.apply(this,arguments);
+ try{if(p.office&&p.office.coal){const m=elMod();m.w=m0.w+(m.w-m0.w)*.7;m.h=m0.h+(m.h-m0.h)*.7}}catch(e){}
+ return r;
+};
+const _y104b=yearly;
+yearly=function(){
+ const r=_y104b.apply(this,arguments);
+ try{const p=S.pol;if(p&&p.office&&p.office.coal&&Math.random()<.1){log('聯合政府破局，你的內閣提前下台。','bad');chg('happy',-8);p.office=null;elReset()}}catch(e){}
+ return r;
+};

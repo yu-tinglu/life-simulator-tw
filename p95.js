@@ -4,8 +4,8 @@ function polEst(lv){
 }
 /* 專案事件 */
 const pjHeld=()=>PJK.filter(k=>S.pj&&S.pj[k]&&S.pj[k].val>=5e7&&['space','ev','ai','fus','media','vc'].includes(k));
-E.push({id:'pj_ipo',min:25,max:100,w:4,if:()=>pjHeld().length>0,run:()=>{const k=pick(pjHeld()),p=S.pj[k],c=PJ[k];return {t:`${c.n}的經營團隊提議公開上市，市場評價看起來不錯。`,c:[
- ch('支持上市',()=>{if(Math.random()<.75){const g=Math.round(p.val*.3);p.val+=g;log(`${c.n}上市，估值增加 ${money(g)}。`,'good');return G('上市順利，帳面價值上升。')}const l=Math.round(p.val*.15);p.val-=l;return B(`上市後股價走弱，估值減少 ${money(l)}。`)}),
+E.push({id:'pj_ipo',min:25,max:100,w:4,if:()=>pjHeld().some(k=>!S.pj[k].pub),run:()=>{const k=pick(pjHeld().filter(k=>!S.pj[k].pub)),p=S.pj[k],c=PJ[k];return {t:`${c.n}的經營團隊提議公開上市，市場評價看起來不錯。`,c:[
+ ch('支持上市',()=>{if(Math.random()<.75){const g=Math.round(p.val*.3);p.val+=g;p.pub=1;log(`${c.n}上市，估值增加 ${money(g)}。`,'good');return G('上市順利，帳面價值上升；之後可以用接近市價賣出。')}const l=Math.round(p.val*.15);p.val-=l;return B(`上市後股價走弱，估值減少 ${money(l)}。`)}),
  ch('反對，維持私有',()=>N('團隊雖然失望，但尊重你的決定。'))]}}});
 E.push({id:'pj_ma',min:25,max:100,w:3,if:()=>pjHeld().length>0,run:()=>{const k=pick(pjHeld()),p=S.pj[k],c=PJ[k];return {t:`有大型企業想併購${c.n}，開價約為目前估值的 1.4 倍（現金）。`,c:[
  ch('接受併購，全數套現',()=>{const v=Math.round(p.val*1.4);S.money+=v;log(`${c.n}被併購，你拿到 ${money(v)}。`,'good');delete S.pj[k];if(S.pjHeir)delete S.pjHeir[k];return G(`拿到 ${money(v)} 現金。`)}),

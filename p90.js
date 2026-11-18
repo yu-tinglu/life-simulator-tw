@@ -43,7 +43,7 @@ estateCalc=function(dry){
 function pjHTML(){
  const P=pjGet();let h=`<h3>大型投資與事業</h3><div class="sub">現金 ${money(S.money)}・專案合計 ${money(pjTotal())}（已計入淨資產）。專案估值每年波動，賣出時約打 85 折；去世時以 7 折變現後繼承。</div>`;
  const held=PJK.filter(k=>P[k]&&P[k].val>0);
- if(held.length)h+='<div class="sec op">持有中</div>'+held.map(k=>`<div class="item row"><div style="flex:1"><b>${PJ[k].n}</b>・${money(P[k].val)}<div class="sub">累計投入 ${money(P[k].inv)}・${P[k].val>=P[k].inv?'帳面獲利 '+money(P[k].val-P[k].inv):'帳面虧損 '+money(P[k].inv-P[k].val)}</div></div><button class="mini" data-a="pj:sell:${k}">賣出</button></div>`).join('');
+ if(held.length)h+='<div class="sec op">持有中</div>'+held.map(k=>`<div class="item row"><div style="flex:1"><b>${PJ[k].n}</b>${P[k].pub?'（已上市）':''}・${money(P[k].val)}<div class="sub">累計投入 ${money(P[k].inv)}・${P[k].val>=P[k].inv?'帳面獲利 '+money(P[k].val-P[k].inv):'帳面虧損 '+money(P[k].inv-P[k].val)}</div></div><button class="mini" data-a="pj:sell:${k}">賣出</button></div>`).join('');
  h+='<div class="sec op">新增或加碼</div><details><summary class="sub">各項目說明（點開）</summary><div class="sub">'+PJK.map(k=>`<b>${PJ[k].n}</b>（${money(PJ[k].min)} 起）：${PJ[k].d}`).join('<br>')+'</div></details>';
  h+=frmHTML('pj',{sl:'項目',opts:PJK.map(k=>[k,`${PJ[k].n}・最低 ${money(PJ[k].min)}`]),def:'100000000',al:'投入金額（新台幣，可輸入 5億、2億）',chips:[1e7,5e7,1e8,5e8,1e9],btns:[['go','投入','p']]});
  return h+`<button class="btn" data-a="pj:x">← 返回</button>`;
@@ -61,7 +61,7 @@ handle=function(a){
   const rf=()=>{render();try{showSheet('ast')}catch(e){}};
   if(a==='pj:o'){view.pjOn=1;rf();return}
   if(a==='pj:x'){view.pjOn=0;rf();return}
-  if(a.startsWith('pj:sell:')){const k=a.split(':')[2],p=S.pj&&S.pj[k];if(p&&p.val>0){const v=Math.round(p.val*.85);S.money+=v;log(`你賣出${PJ[k].n}，實拿 ${money(v)}。`,v>=p.inv?'good':'bad');delete S.pj[k]}rf();return}
+  if(a.startsWith('pj:sell:')){const k=a.split(':')[2],p=S.pj&&S.pj[k];if(p&&p.val>0){const v=Math.round(p.val*(p.pub?.97:.85));S.money+=v;log(`你賣出${PJ[k].n}${p.pub?'（已上市，隨時可賣）':''}，實拿 ${money(v)}。`,v>=p.inv?'good':'bad');delete S.pj[k]}rf();return}
   if(a==='frmgo:pj:go'){
    const g=frmGet('pj'),c=PJ[g.s];
    const bad=m=>{view.msg=B(m);rf()};

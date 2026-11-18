@@ -9972,7 +9972,7 @@ estateCalc=function(dry){
 function pjHTML(){
  const P=pjGet();let h=`<h3>大型投資與事業</h3><div class="sub">現金 ${money(S.money)}・專案合計 ${money(pjTotal())}（已計入淨資產）。專案估值每年波動，賣出時約打 85 折；去世時以 7 折變現後繼承。</div>`;
  const held=PJK.filter(k=>P[k]&&P[k].val>0);
- if(held.length)h+='<div class="sec op">持有中</div>'+held.map(k=>`<div class="item row"><div style="flex:1"><b>${PJ[k].n}</b>・${money(P[k].val)}<div class="sub">累計投入 ${money(P[k].inv)}・${P[k].val>=P[k].inv?'帳面獲利 '+money(P[k].val-P[k].inv):'帳面虧損 '+money(P[k].inv-P[k].val)}</div></div><button class="mini" data-a="pj:sell:${k}">賣出</button></div>`).join('');
+ if(held.length)h+='<div class="sec op">持有中</div>'+held.map(k=>`<div class="item row"><div style="flex:1"><b>${PJ[k].n}</b>${P[k].pub?'（已上市）':''}・${money(P[k].val)}<div class="sub">累計投入 ${money(P[k].inv)}・${P[k].val>=P[k].inv?'帳面獲利 '+money(P[k].val-P[k].inv):'帳面虧損 '+money(P[k].inv-P[k].val)}</div></div><button class="mini" data-a="pj:sell:${k}">賣出</button></div>`).join('');
  h+='<div class="sec op">新增或加碼</div><details><summary class="sub">各項目說明（點開）</summary><div class="sub">'+PJK.map(k=>`<b>${PJ[k].n}</b>（${money(PJ[k].min)} 起）：${PJ[k].d}`).join('<br>')+'</div></details>';
  h+=frmHTML('pj',{sl:'項目',opts:PJK.map(k=>[k,`${PJ[k].n}・最低 ${money(PJ[k].min)}`]),def:'100000000',al:'投入金額（新台幣，可輸入 5億、2億）',chips:[1e7,5e7,1e8,5e8,1e9],btns:[['go','投入','p']]});
  return h+`<button class="btn" data-a="pj:x">← 返回</button>`;
@@ -9990,7 +9990,7 @@ handle=function(a){
   const rf=()=>{render();try{showSheet('ast')}catch(e){}};
   if(a==='pj:o'){view.pjOn=1;rf();return}
   if(a==='pj:x'){view.pjOn=0;rf();return}
-  if(a.startsWith('pj:sell:')){const k=a.split(':')[2],p=S.pj&&S.pj[k];if(p&&p.val>0){const v=Math.round(p.val*.85);S.money+=v;log(`你賣出${PJ[k].n}，實拿 ${money(v)}。`,v>=p.inv?'good':'bad');delete S.pj[k]}rf();return}
+  if(a.startsWith('pj:sell:')){const k=a.split(':')[2],p=S.pj&&S.pj[k];if(p&&p.val>0){const v=Math.round(p.val*(p.pub?.97:.85));S.money+=v;log(`你賣出${PJ[k].n}${p.pub?'（已上市，隨時可賣）':''}，實拿 ${money(v)}。`,v>=p.inv?'good':'bad');delete S.pj[k]}rf();return}
   if(a==='frmgo:pj:go'){
    const g=frmGet('pj'),c=PJ[g.s];
    const bad=m=>{view.msg=B(m);rf()};
@@ -10064,7 +10064,7 @@ const _y91=yearly;
 yearly=function(){_y91.apply(this,arguments);try{elYear()}catch(e){}};
 function elHTML(){
  const p=polInit(),y=calYear(),rep=polRep();
- let h=`<h3>政治與選舉</h3><div class="sub">依台灣制度簡化：地方選舉每 4 年（2026、2030…），全國選舉每 4 年（2028、2032…）。其他國家沿用相同的年份循環與職位層級，職稱、薪津與經費依該國薪資水準換算，皆為概略值。</div>`;
+ let h=`<h3>政治與選舉</h3><div class="sub">各國依自己的選舉年與任期簡化（例如美國地方每 2 年、英國首相任期 5 年），職位層級相同，職稱、薪津與經費依該國薪資水準換算，皆為概略值。</div>`;
  h+=`<div class="item">聲望：<b>${rep}</b>／100　目前職位：<b>${p.office?PL(p.office.lv).n+'（任期至 '+p.office.end+' 年）':'無'}</b><div class="sub">聲望來自財富、職位、慈善與從政經歷。</div></div>`;
  if(S.ab&&!S.ab.nat)return h+`<div class="item">你是移居者，需具有該國公民身分才能參選（可在「政治與選舉」申請歸化）。</div><button class="btn" data-a="pol:x">← 返回</button>`;
  const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PL(lv).n}${bad?'（'+bad+'）':'・民調勝率約 '+polEst(lv)+'%'}`]});
@@ -10292,8 +10292,8 @@ function polEst(lv){
 }
 /* 專案事件 */
 const pjHeld=()=>PJK.filter(k=>S.pj&&S.pj[k]&&S.pj[k].val>=5e7&&['space','ev','ai','fus','media','vc'].includes(k));
-E.push({id:'pj_ipo',min:25,max:100,w:4,if:()=>pjHeld().length>0,run:()=>{const k=pick(pjHeld()),p=S.pj[k],c=PJ[k];return {t:`${c.n}的經營團隊提議公開上市，市場評價看起來不錯。`,c:[
- ch('支持上市',()=>{if(Math.random()<.75){const g=Math.round(p.val*.3);p.val+=g;log(`${c.n}上市，估值增加 ${money(g)}。`,'good');return G('上市順利，帳面價值上升。')}const l=Math.round(p.val*.15);p.val-=l;return B(`上市後股價走弱，估值減少 ${money(l)}。`)}),
+E.push({id:'pj_ipo',min:25,max:100,w:4,if:()=>pjHeld().some(k=>!S.pj[k].pub),run:()=>{const k=pick(pjHeld().filter(k=>!S.pj[k].pub)),p=S.pj[k],c=PJ[k];return {t:`${c.n}的經營團隊提議公開上市，市場評價看起來不錯。`,c:[
+ ch('支持上市',()=>{if(Math.random()<.75){const g=Math.round(p.val*.3);p.val+=g;p.pub=1;log(`${c.n}上市，估值增加 ${money(g)}。`,'good');return G('上市順利，帳面價值上升；之後可以用接近市價賣出。')}const l=Math.round(p.val*.15);p.val-=l;return B(`上市後股價走弱，估值減少 ${money(l)}。`)}),
  ch('反對，維持私有',()=>N('團隊雖然失望，但尊重你的決定。'))]}}});
 E.push({id:'pj_ma',min:25,max:100,w:3,if:()=>pjHeld().length>0,run:()=>{const k=pick(pjHeld()),p=S.pj[k],c=PJ[k];return {t:`有大型企業想併購${c.n}，開價約為目前估值的 1.4 倍（現金）。`,c:[
  ch('接受併購，全數套現',()=>{const v=Math.round(p.val*1.4);S.money+=v;log(`${c.n}被併購，你拿到 ${money(v)}。`,'good');delete S.pj[k];if(S.pjHeir)delete S.pjHeir[k];return G(`拿到 ${money(v)} 現金。`)}),
@@ -10890,6 +10890,32 @@ polHTML=function(){
   const blk=`<div class="item"><b>${CNS[cn].n}福利（遊戲設定）</b><div class="sub">失業給付：${c.uy?`約年薪 ${Math.round(c.ue*100)}%，最長 ${c.uy} 年`:'無'}<br>兒童津貼：每名未成年子女約 ${money(Math.round(c.cb*w))}／年（最多計 3 人）<br>老年年金：約 ${money(Math.round(c.pn*w))}／年（居留滿 10 年）<br>${esc(c.note)}</div></div>`;
   return h.replace('<div class="item"><b>同性婚姻</b>',blk+'<div class="item"><b>同性婚姻</b>');
  }catch(e){return h}
+};
+/* 海外居住成本（房租）依各國差異 */
+const RENTF={US:1.0,JP:.85,KR:.9,CA:1.05,AU:1.1,GB:1.1,DE:.9,SG:1.25};
+const _lc104=livingCost;
+livingCost=function(){const v=_lc104.apply(this,arguments);try{if(S.cn&&S.cn!=='TW'&&RENTF[S.cn])return Math.round(v*RENTF[S.cn])}catch(e){}return v};
+/* 聯合政府：議會制國家的最高職位可能需組聯合政府，施政效果打折且有垮台風險 */
+const PARL=['GB','DE','JP','CA','AU'];
+const _pr104=polRun;
+polRun=function(lv,bud,party){
+ const r=_pr104.apply(this,arguments);
+ try{const p=polInit();
+  if(lv===5&&PARL.includes(S.cn)&&p.office&&p.office.lv===5&&p.office.y0===calYear()&&Math.random()<.55){p.office.coal=1;log('國會沒有單一政黨過半，你與其他政黨組成聯合政府；施政效果打折，聯盟也可能破局。','')}
+ }catch(e){}
+ return r;
+};
+const _ea104=elAct;
+elAct=function(k){
+ const p=polInit(),m0=Object.assign({},elMod()),r=_ea104.apply(this,arguments);
+ try{if(p.office&&p.office.coal){const m=elMod();m.w=m0.w+(m.w-m0.w)*.7;m.h=m0.h+(m.h-m0.h)*.7}}catch(e){}
+ return r;
+};
+const _y104b=yearly;
+yearly=function(){
+ const r=_y104b.apply(this,arguments);
+ try{const p=S.pol;if(p&&p.office&&p.office.coal&&Math.random()<.1){log('聯合政府破局，你的內閣提前下台。','bad');chg('happy',-8);p.office=null;elReset()}}catch(e){}
+ return r;
 };
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){

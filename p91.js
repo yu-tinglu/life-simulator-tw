@@ -57,7 +57,7 @@ const _y91=yearly;
 yearly=function(){_y91.apply(this,arguments);try{elYear()}catch(e){}};
 function elHTML(){
  const p=polInit(),y=calYear(),rep=polRep();
- let h=`<h3>政治與選舉</h3><div class="sub">依台灣制度簡化：地方選舉每 4 年（2026、2030…），全國選舉每 4 年（2028、2032…）。其他國家沿用相同的年份循環與職位層級，職稱、薪津與經費依該國薪資水準換算，皆為概略值。</div>`;
+ let h=`<h3>政治與選舉</h3><div class="sub">各國依自己的選舉年與任期簡化（例如美國地方每 2 年、英國首相任期 5 年），職位層級相同，職稱、薪津與經費依該國薪資水準換算，皆為概略值。</div>`;
  h+=`<div class="item">聲望：<b>${rep}</b>／100　目前職位：<b>${p.office?PL(p.office.lv).n+'（任期至 '+p.office.end+' 年）':'無'}</b><div class="sub">聲望來自財富、職位、慈善與從政經歷。</div></div>`;
  if(S.ab&&!S.ab.nat)return h+`<div class="item">你是移居者，需具有該國公民身分才能參選（可在「政治與選舉」申請歸化）。</div><button class="btn" data-a="pol:x">← 返回</button>`;
  const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PL(lv).n}${bad?'（'+bad+'）':'・民調勝率約 '+polEst(lv)+'%'}`]});
