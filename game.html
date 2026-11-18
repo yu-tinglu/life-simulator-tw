@@ -10917,6 +10917,25 @@ yearly=function(){
  try{const p=S.pol;if(p&&p.office&&p.office.coal&&Math.random()<.1){log('聯合政府破局，你的內閣提前下台。','bad');chg('happy',-8);p.office=null;elReset()}}catch(e){}
  return r;
 };
+/* 海外房市：各國自己的景氣循環與長期趨勢（遊戲設定值，疊加在薪資成長之上）*/
+const HTR={JP:-.006,CN:-.02,KR:.004,US:.004,CA:.004,AU:.005,GB:0,DE:-.002,SG:.004,CH:.003,TH:.002,AE:.006};
+function hcyc(k){
+ const y=calYear();if(!S.hcyc)S.hcyc={};let c=S.hcyc[k];
+ if(!c){c=S.hcyc[k]={y:y-1,x:0}}
+ while(c.y<y){c.x=c.x*.65+nrm()*.03;c.y++}
+ return c.x;
+}
+const _hv104=hvYear;
+hvYear=function(h){
+ const v=_hv104.apply(this,arguments);
+ if(!h.cn)return v;
+ try{
+  let adj=(HTR[h.cn]||0)+hcyc(h.cn);
+  const base=wTW(h.cn)*(FRAT[h.cn]||9);if(base>0&&v/Math.max(1,fxn(h.cn))*fxn(h.cn)>base*2.2)adj-=.03;
+  adj=Math.max(-.12,Math.min(.12,adj));
+  h.vl=(h.vl||v/fxn(h.cn))*(1+adj);return Math.round(v*(1+adj));
+ }catch(e){return v}
+};
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
