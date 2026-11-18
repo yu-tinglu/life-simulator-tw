@@ -26,11 +26,13 @@ render=function(){
    const lines=kids.filter(c=>c.classList&&c.classList.contains('ln')),others=kids.filter(c=>!(c.classList&&c.classList.contains('ln')));
    others.forEach(c=>body.appendChild(c));
    const only=!!(lsGet(PREFK,{}).hl);
-   const hl=lines.filter(l=>TLKEY.test(l.textContent||'')).slice(0,3);
+   const hlMain=lines.filter(l=>TLKEY.test(l.textContent||'')).slice(0,3),hlSet=new Set(),hl0=[];
+   {let inH=false;const fx=/^(影響：|你的錢不夠|（)/;lines.forEach(l=>{const t=l.textContent||'';if(hlMain.includes(l)){hlSet.add(l);hl0.push(l);inH=true}else if(fx.test(t)&&inH){hlSet.add(l);hl0.push(l)}else inH=false})}
+   const hl=hlMain;
    if(hl.length){
     const hk='h'+age,hh=document.createElement('div'),hb=document.createElement('div');
     hh.className='cgh';hh.innerHTML=`<b>重點</b>（${hl.length}）`;
-    hl.forEach(l=>{const c=l.cloneNode(true);hb.appendChild(c)});
+    hl0.forEach(l=>{const c=l.cloneNode(true);hb.appendChild(c)});
     const ho2=()=>view.fo[hk]==null?true:view.fo[hk];
     const ap2=()=>{hb.style.display=ho2()?'':'none'};
     hh.onclick=()=>{view.fo[hk]=!ho2();ap2()};ap2();body.appendChild(hh);body.appendChild(hb);
@@ -42,8 +44,9 @@ render=function(){
     else{fb.className='ln';fb.style.opacity='.6';fb.textContent='這一年沒有特別事件，數值變化來自成長與日常起伏。'}
     body.appendChild(fb);
    }
+   hlSet.forEach(l=>{if(l.parentNode)l.parentNode.removeChild(l)});
    const groups={};
-   let pc='其他';lines.forEach(l=>{const t=l.textContent||'';let c=/^(影響：|你的錢不夠|（)/.test(t)?pc:lgCat(t);pc=c;(groups[c]=groups[c]||[]).push(l)});
+   let pc='其他';lines.forEach(l=>{const t=l.textContent||'';let c=/^(影響：|你的錢不夠|（)/.test(t)?pc:lgCat(t);pc=c;if(hlSet.has(l))return;(groups[c]=groups[c]||[]).push(l)});
    const order=['家庭與感情','事業與學業','健康','生活與社會','財務','世界與經濟','其他'];
    order.forEach(name=>{
     const arr=groups[name];if(!arr||!arr.length)return;

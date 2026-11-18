@@ -81,6 +81,7 @@ function edEnroll(kind){
  const job=!!S.job;
  if(kind==='ms'||kind==='phd'){
   const need=kind==='ms'?4:5;if(S.edu!==need)return B(kind==='ms'?'需要大學學歷（尚未取得碩士）。':'需要碩士學歷（尚未取得博士）。');
+  if(job&&S.job.years<(kind==='ms'?2:3))return B(`在職專班通常要求 ${kind==='ms'?2:3} 年以上工作經驗（你目前 ${S.job.years} 年）。`);
   const tu=kind==='ms'?(job?120000:60000):(job?90000:30000),yrs=kind==='ms'?(job?3:2):(job?6:4);
   if(S.money<tu)return B('第一年學費不夠：'+money(tu));
   enroll(kind==='ms'?'碩士':'博士',yrs,tu,S.prestige);if(job)S.ptw=1;S.stress=cl(S.stress+(job?3:0));
@@ -98,19 +99,19 @@ finishMajor=function(ctx,m,t){
   if(ctx.open){S.tuition=Math.round(S.tuition*.35);S.schoolEnd=S.age+m[6]+2;if(S.major)S.major.tier='空中大學'}
   else{S.tuition=Math.round(S.tuition*.8);S.schoolEnd=S.age+m[6]+1;if(S.major&&t)S.major.tier=t.n+'進修部'}}}catch(e){}
  return r};
-const _y118=yearly;yearly=function(){_y118();if(S&&!S.school)S.ptw=0};
+const _y118=yearly;yearly=function(){_y118();if(S&&!S.school)S.ptw=0;try{if(S&&S.ptw&&S.school&&S.job){S.stress=cl(S.stress+2);if(chance(.25)&&S.job.perf>20){S.job.perf=cl(S.job.perf-3);log('白天上班、晚上上課，兩邊都有點吃力，工作表現略有下滑。','bad')}}}catch(e){}};
 function eduHTML(){
  const b=edBlock(),job=!!S.job;let h=`<h3>學歷與進修</h3><div class="item"><b>目前學歷：${EDU[S.edu]}${S.eq?'（同等學力）':''}</b>${S.school?`<div class="sub">${S.school}在學中${S.ptw?'（在職進修）':''}，預計 ${S.schoolEnd} 歲畢業。</div>`:''}</div>`;
  if(b&&S.school)return h+`<div class="sub">在學期間不能再報名其他學制；畢業或輟學後才能報名。</div><button class="btn" data-a="back">← 返回</button>`;
  if(S.edu<3&&S.age>=15){
-  h+='<div class="sec op">同等學力測驗</div><div class="sub">每科各一題，答對 3 題以上通過。題目依會考、學測、統測的題型與程度自編，不是歷屆試題原文。報名費約 '+money(px(1500))+'，每年限報名一次。</div>';
+  h+='<div class="sec op">同等學力測驗</div><div class="sub">每科各一題，答對 3 題以上通過。題目依會考、學測、統測的題型與程度自編，不是歷屆試題原文。報名費約 '+money(px(1500))+'，每年限報名一次。有工作也可以報名，不需要辭職。</div>';
   if(S.edu<2)h+=`<button class="btn" data-a="ed:eq:2">國中同等學力測驗<small>會考題型・國文、英文、數學、社會、自然各一題</small></button>`;
   else{
    h+=`<button class="btn" data-a="ed:eq:g">高中同等學力（普通科）<small>學測題型・國文、英文、數學、社會、自然各一題</small></button>`;
    h+=`<div class="sub" style="margin-top:8px">高職同等學力（統測題型）：國文、英文、數學加上所選群別的兩科專業科目</div><div class="frm"><label for="ed_grp">選擇群別</label><select id="ed_grp">${Object.keys(EQG).map(g=>`<option value="${g}">${g}（${Object.keys(EQG[g]).join('、')}）</option>`).join('')}</select><div class="acts"><button class="btn" data-a="ed:eq:v">報名統測題型</button></div></div>`}
  }
  if(S.edu>=3){
-  h+=`<div class="sec op">${job?'在職進修':'重回校園'}</div><div class="sub">${job?'邊工作邊讀書：學費較低、壓力會增加。':'目前沒有工作，可全職重回校園。'}取得同等學力者也能報名。</div>`;
+  h+=`<div class="sec op">${job?'在職進修':'重回校園'}</div><div class="sub">${job?'邊工作邊讀書：學費較低、壓力會增加。':'目前沒有工作，可全職重回校園。'}取得同等學力者也能報名。上班族不需要辭職；在職專班通常要求 2 年以上工作經驗。</div>`;
   if(S.edu===3||S.edu===4&&!S.major)h+=`<button class="btn" data-a="ed:in:${job?'uni':'fu'}">${job?'大學進修部（夜間・假日）':'重考大學（全職就讀）'}<small>${job?'學費約日間部八折，學制多一年':'依目前成績選科系與學校'}</small></button>`;
   if(S.edu===3||S.edu===4&&!S.major)h+=`<button class="btn" data-a="ed:in:open">空中大學<small>學費約三成五，修業年限較長</small></button>`;
   if(S.edu===4)h+=`<button class="btn" data-a="ed:in:ms">${job?'碩士在職專班（3 年）':'報考研究所（2 年）'}<small>學費約 ${money(job?120000:60000)} 起／年（遊戲設定）</small></button>`;
