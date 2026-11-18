@@ -11001,7 +11001,7 @@ polRun=(function(prev){return function(lv,bud,party){
  try{const p=polInit(),o=p.office;
   if(o&&o.y0===calYear()&&o.lv===lv){o.lean=view.polLean||'0';
    if(lv===5&&PARL.includes(S.cn)&&o.coal){const cf=o.coal;o.coal=0;
-    ask('國會沒有單一政黨過半，要與誰組成聯合政府？',PARTNERS.map(x=>x[0]),i=>{const q=PARTNERS[i]||PARTNERS[0];o.coal=1;o.cq=q[1];o.cr=q[2];log(`你與${q[0]}組成聯合政府（施政效果 ${Math.round(q[1]*100)}%，每年破局風險 ${Math.round(q[2]*100)}%）。`,'')})}}
+    ask('國會沒有單一政黨過半，要與誰組成聯合政府？',PARTNERS.map(x=>`${x[0]}・施政${Math.round(x[1]*100)}%・年風險${Math.round(x[2]*100)}%`),i=>{const q=PARTNERS[i]||PARTNERS[0];o.coal=1;o.cq=q[1];o.cr=q[2];log(`你與${q[0]}組成聯合政府（施政效果 ${Math.round(q[1]*100)}%，每年破局風險 ${Math.round(q[2]*100)}%）。`,'')})}}
  }catch(e){}
  return r;
 }})(polRun);
