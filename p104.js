@@ -56,7 +56,7 @@ elAct=function(k){
 const _y104b=yearly;
 yearly=function(){
  const r=_y104b.apply(this,arguments);
- try{const p=S.pol;if(p&&p.office&&p.office.coal&&Math.random()<.1){log('聯合政府破局，你的內閣提前下台。','bad');chg('happy',-8);p.office=null;elReset()}}catch(e){}
+ try{const p=S.pol;if(p&&p.office&&p.office.coal&&!p.office.cr&&Math.random()<.1){log('聯合政府破局，你的內閣提前下台。','bad');chg('happy',-8);p.office=null;elReset()}}catch(e){}
  return r;
 };
 /* 海外房市：各國自己的景氣循環與長期趨勢（遊戲設定值，疊加在薪資成長之上）*/
