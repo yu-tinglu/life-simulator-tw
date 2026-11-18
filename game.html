@@ -10493,6 +10493,13 @@ render=function(){
     const ap2=()=>{hb.style.display=ho2()?'':'none'};
     hh.onclick=()=>{view.fo[hk]=!ho2();ap2()};ap2();body.appendChild(hh);body.appendChild(hb);
    }
+   if(only&&!hl.length){
+    const fb=document.createElement('div');
+    const pick=lines.filter(l=>!/^(影響：|你的錢不夠|（)/.test(l.textContent||'')).slice(0,2);
+    if(pick.length)pick.forEach(l=>fb.appendChild(l.cloneNode(true)));
+    else{fb.className='ln';fb.style.opacity='.6';fb.textContent='這一年平平淡淡，沒有特別的事。'}
+    body.appendChild(fb);
+   }
    const groups={};
    let pc='其他';lines.forEach(l=>{const t=l.textContent||'';let c=/^(影響：|你的錢不夠|（)/.test(t)?pc:lgCat(t);pc=c;(groups[c]=groups[c]||[]).push(l)});
    const order=['家庭與感情','事業與學業','健康','生活與社會','財務','世界與經濟','其他'];
