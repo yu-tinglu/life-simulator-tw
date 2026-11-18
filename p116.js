@@ -2,7 +2,7 @@
 const MCATX=[
  ['人物與成長',['lf:stat','lf:skill','lf:av','lf:art','lf:mind','lf:health']],
  ['家庭與感情',['lf:tree','lf:cg']],
- ['學業與事業',['lf:cook','lf:wk']],
+ ['學業與事業',['lf:edu','lf:cook','lf:wk']],
  ['財務資訊',['lf:si','lf:ch','open:eco']],
  ['社會與世界',['lf:pol','lf:eth','lf:rg','lf:wd']],
  ['紀錄與傳承',['lf:tl','lf:rev','lf:ach','lf:dx','lf:sv','open:lg']],
