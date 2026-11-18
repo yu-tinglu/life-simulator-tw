@@ -9927,14 +9927,14 @@ const _ss88=showStart;
 showStart=function(){_ss88();try{$('startBody').insertAdjacentHTML('beforeend','<div class="sub" style="margin-top:14px;text-align:center;opacity:.7;font-size:11px">© 2026 yu-tinglu　人生模擬器　版權所有<br>未經授權，請勿轉載、改作或作商業使用</div>')}catch(e){}};
 // 富豪專案：大型投資與事業（太空、電動車、AI、媒體、基金會等）
 const PJ={
- space:{n:'太空運輸與衛星',min:2e8,mu:.02,sd:.22,jp:[.05,2.5,5],cr:[.09,.35],up:0,hp:1,d:'火箭、衛星網路。長期燒錢，偶爾發射失敗，成功時價值大幅跳升。'},
- ev:{n:'電動車與電池',min:1e8,mu:.04,sd:.18,jp:[.04,2,3.5],cr:[.06,.3],up:0,hp:1,d:'量產、電池與充電網。中高風險，景氣與競爭影響大。'},
- ai:{n:'人工智慧研究院',min:1e8,mu:.05,sd:.28,jp:[.06,2,6],cr:[.08,.4],up:0,hp:1,d:'訓練模型、算力與人才。報酬波動極大。'},
- fus:{n:'核融合與新能源',min:2e8,mu:0,sd:.28,jp:[.03,5,10],cr:[.1,.4],up:0,hp:1,d:'技術尚未成熟，多數年份沒有進展，成功則回報極高。'},
+ space:{n:'太空運輸與衛星',min:2e8,mu:.015,sd:.2,jp:[.03,2,4],cr:[.09,.35],up:0,hp:1,d:'火箭、衛星網路。長期燒錢，偶爾發射失敗，成功時價值大幅跳升。'},
+ ev:{n:'電動車與電池',min:1e8,mu:.03,sd:.17,jp:[.025,1.8,2.5],cr:[.06,.3],up:0,hp:1,d:'量產、電池與充電網。中高風險，景氣與競爭影響大。'},
+ ai:{n:'人工智慧研究院',min:1e8,mu:.03,sd:.25,jp:[.04,2,4.5],cr:[.08,.4],up:0,hp:1,d:'訓練模型、算力與人才。報酬波動極大。'},
+ fus:{n:'核融合與新能源',min:2e8,mu:-.005,sd:.25,jp:[.02,4,7],cr:[.1,.4],up:0,hp:1,d:'技術尚未成熟，多數年份沒有進展，成功則回報極高。'},
  media:{n:'媒體與社群平台',min:5e7,mu:-.02,sd:.14,jp:[.02,1.8,2.5],cr:[.05,.25],up:0,hp:2,st:1,d:'買下平台或媒體，影響力大，但常虧損且爭議多。'},
- vc:{n:'創投基金',min:3e7,mu:.07,sd:.17,jp:[.04,1.8,3],cr:[.04,.2],up:.005,hp:0,d:'分散投資新創，每年管理費約 0.5%。'},
- art:{n:'藝術與收藏',min:1e7,mu:.04,sd:.07,jp:[.02,1.4,1.8],cr:[.02,.12],up:.006,hp:1,d:'畫作、古董與名錶，保管保險約每年 0.6%。'},
- team:{n:'職業球隊',min:2e8,mu:.05,sd:.06,jp:[.02,1.3,1.6],cr:[.02,.1],up:.01,hp:2,d:'球隊估值穩定上升，維運每年約 1%，球迷與成績讓人開心。'},
+ vc:{n:'創投基金',min:3e7,mu:.04,sd:.16,jp:[.02,1.6,2.2],cr:[.04,.2],up:.005,hp:0,d:'分散投資新創，每年管理費約 0.5%。'},
+ art:{n:'藝術與收藏',min:1e7,mu:.03,sd:.07,jp:[.02,1.4,1.8],cr:[.02,.12],up:.006,hp:1,d:'畫作、古董與名錶，保管保險約每年 0.6%。'},
+ team:{n:'職業球隊',min:2e8,mu:.045,sd:.06,jp:[.02,1.3,1.6],cr:[.02,.1],up:.01,hp:2,d:'球隊估值穩定上升，維運每年約 1%，球迷與成績讓人開心。'},
  isle:{n:'私人島嶼與度假村',min:3e7,mu:.02,sd:.05,jp:[0,1,1],cr:[.02,.1],up:.02,hp:2,d:'維護費高（約 2%），但生活品質與心情加分。'},
  fnd:{n:'慈善基金會',min:1e7,mu:0,sd:0,jp:[0,1,1],cr:[0,0],up:0,hp:2,give:.05,d:'每年捐出基金約 5%，不求回報，心情與名聲提升。'}
 };
@@ -10020,7 +10020,7 @@ function polInit(){if(!S.pol)S.pol={rep:0,office:null,hist:[],ly:{},party:'ind'}
 function polRep(){const p=polInit();let nw=0;try{nw=Math.max(0,netWorth())}catch(e){}return Math.min(100,Math.round(p.rep+Math.min(25,Math.max(0,Math.log10(Math.max(1,nw/1e6))*7))+(S.job&&S.job.lv?Math.min(12,S.job.lv*2):0)+((S.flags&&S.flags.donor)?Math.min(10,S.flags.donor):0)))}
 function polOk(lv){
  const c=PL(lv),p=polInit(),y=calYear();
- if(S.ab)return '需具有該國公民身分才能參選（遊戲目前沒有歸化流程）';
+ if(S.ab&&!S.ab.nat)return '需具有該國公民身分才能參選（可在「政治與選舉」申請歸化）';
  if(S.age<c.age)return `需年滿 ${c.age} 歲`;
  if(S.jail)return '服刑中';
  if((y-2026)%4!==0&&c.ty==='L')return `地方選舉年才有（${y+(4-((y-2026)%4+4)%4)%4} 年）`;
@@ -10041,7 +10041,7 @@ function polRun(lv,bud,party){
  const wave=R(-8,8);let pb=pt[2]+(party==='rul'?wave:party==='opp'?-wave:party==='thd'?R(-3,5):0);
  if(party==='ind'&&lv>=3)pb-=10;
  const inc=p.office&&p.office.lv===lv?8:0;
- const sc=36+polRep()*.35+((S.smarts||50)-50)*.1+b[3]+pb+inc+R(-10,10);
+ const sc=36+polRep()*.35+((S.smarts||50)-50)*.1+b[3]+pb+inc+R(-10,10)+(typeof polAdj==='function'?polAdj(lv):0);
  const won=sc>c.diff;
  p.hist.push({y,lv,won,party});
  if(won){p.rep=Math.min(100,p.rep+10);if(!(p.office&&p.office.lv===lv))elReset();p.office={lv,y0:y,end:y+4};chg('happy',12);S.stress=cl(S.stress+6);log(`${y} 年，你競選${c.n}並當選！（花費 ${money(cost)}）`,'good');return G(`恭喜當選${c.n}！任期 4 年，每年薪津約 ${money(c.sal)}。`)}
@@ -10061,7 +10061,7 @@ function elHTML(){
  const p=polInit(),y=calYear(),rep=polRep();
  let h=`<h3>政治與選舉</h3><div class="sub">依台灣制度簡化：地方選舉每 4 年（2026、2030…），全國選舉每 4 年（2028、2032…）。其他國家沿用相同的年份循環與職位層級，職稱、薪津與經費依該國薪資水準換算，皆為概略值。</div>`;
  h+=`<div class="item">聲望：<b>${rep}</b>／100　目前職位：<b>${p.office?PL(p.office.lv).n+'（任期至 '+p.office.end+' 年）':'無'}</b><div class="sub">聲望來自財富、職位、慈善與從政經歷。</div></div>`;
- if(S.ab)return h+`<div class="item">你是移居者，需具有該國公民身分才能參選（遊戲目前沒有歸化流程）。</div><button class="btn" data-a="pol:x">← 返回</button>`;
+ if(S.ab&&!S.ab.nat)return h+`<div class="item">你是移居者，需具有該國公民身分才能參選（可在「政治與選舉」申請歸化）。</div><button class="btn" data-a="pol:x">← 返回</button>`;
  const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PL(lv).n}・${PL(lv).d}${bad?'（'+bad+'）':'・可參選'}`]});
  if(p.office){const done=p.acted===y;h+='<div class="sec">施政（每年一項）</div><div class="sub">施政會影響全國的薪資成長與房價，任期結束後效果會消失。目前：薪資成長 '+((elMod().w*100).toFixed(1))+'%、房價成長 '+((elMod().h*100).toFixed(1))+'%。</div><select id="pol_a">'+PACT.filter(x=>x[2]<=p.office.lv).map(x=>`<option value="${x[0]}">${x[1]}：${x[3]}</option>`).join('')+'</select><button class="btn p" data-a="pol:act" '+(done?'disabled':'')+'>'+(done?'今年已施政':'推動這項施政')+'</button>'}
  h+='<div class="sec">登記參選</div>'+frmHTML('pol',{sl:'選舉職位',opts,amt:false,btns:[]})
@@ -10166,6 +10166,121 @@ E.push({id:'kd_gk',min:55,max:95,w:4,if:()=>S.kids.some(k=>k.rm&&k.rm.gk.length)
 E.push({id:'kd_gsch',min:60,max:95,w:3,if:()=>S.kids.some(k=>k.rm&&k.rm.gk.some(g=>g.age>=6&&g.age<=22)),run:()=>{const k=pick(S.kids.filter(x=>x.rm&&x.rm.gk.some(g=>g.age>=6&&g.age<=22))),g=pick(k.rm.gk.filter(x=>x.age>=6&&x.age<=22));return {t:`孫${g.sx==='男'?'子':'女'}${g.n}想學才藝，學費要 NT$${(60000).toLocaleString()}。`,c:[
  ch('幫他出學費',()=>{if(S.money<6e4)return B('錢不夠。');S.money-=6e4;g.rel=cl((g.rel||70)+6);chg('happy',3);return G(`${g.n}開心地跑來抱你。`)}),
  ch('讓爸媽決定',()=>N('你把決定留給父母。'))]}}});
+// 優化：孫子女遺產、歸化、海外投資稅、選舉深化、活動下拉、玩法導覽
+/* 1. 遺產留給孫子女 */
+const _ec94=estateCalc;
+estateCalc=function(dry){
+ const r=_ec94(dry);
+ try{
+  const pc=(S.gpct||0)/100;if(!pc)return r;
+  let tot=0;const gl=[];
+  for(const k of S.kids){const n=k.rm&&k.rm.gk?k.rm.gk.length:0;if(!n||!r.parts[k.id])continue;const a=Math.round(r.parts[k.id]*pc);r.parts[k.id]-=a;tot+=a;k.rm.gk.forEach(g=>gl.push({g,a:Math.round(a/n)}))}
+  if(tot){r.gk=gl;r.gkTot=tot;if(!dry)gl.forEach(x=>{x.g.m=(x.g.m||0)+x.a})}
+ }catch(e){}
+ return r;
+};
+const _el94=estateLines;
+estateLines=function(r){let h=_el94(r);if(r&&r.gkTot)h+=`<div class="item">遺贈孫子女：${money(r.gkTot)}（已從子女應得份額中扣除；隔代繼承加徵等細節未模擬）</div>`;return h};
+const _lg94=legacyHTML;
+legacyHTML=function(){
+ const h=_lg94();if(!S.kids.some(k=>k.rm&&k.rm.gk&&k.rm.gk.length))return h;
+ return h+`<div class="sec">孫子女的遺贈</div>`+frmHTML('gw',{sl:`從每位子女的遺產份額中，撥給其子女的比例（現為 ${S.gpct||0}%）`,opts:[['0','不撥（0%）'],['10','10%'],['20','20%'],['30','30%']],amt:false,btns:[['go','設定','p']]});
+};
+/* 歸化 + 選舉深化 + 海外投資稅 + 活動下拉 + 導覽，處理 */
+const _hd94=handle;
+handle=function(a){
+ if(typeof a==='string'&&S){
+  const rf=()=>{render();try{showSheet(view.tab,view.sub)}catch(e){}};
+  if(a==='frmgo:gw:go'){const g=frmGet('gw');S.gpct=+g.s||0;view.msg=G(S.gpct?`已設定：每位子女份額的 ${S.gpct}% 撥給其子女。`:'已取消撥給孫子女。');rf();return}
+  if(a==='frmgo:ac:go'){const g=frmGet('ac');if(g.s){return _hd94('act:'+g.s)}return}
+  if(a==='pol:nat'){
+   const need=natNeed();if(need)view.msg=B(need);
+   else{if(S.money<15e4)view.msg=B('申請歸化需要約 NT$150,000 規費與文件費。');else{S.money-=15e4;S.ab.nat=1;log(`你取得了${CNS[S.cn].n}國籍。`,'good');chg('happy',8);view.msg=G('歸化成功！現在可以參選了。')}}
+   view.polOn=1;render();try{showSheet('act')}catch(e){}return;
+  }
+  if(a==='pol:go'){try{view.polX={i:document.getElementById('pol_i').value,h:document.getElementById('pol_h').value}}catch(e){view.polX=null}}
+ }
+ return _hd94(a);
+};
+function natNeed(){
+ if(!S.ab)return '你本來就是這個國家的公民。';
+ if(S.ab.nat)return '已經取得國籍。';
+ if(S.ab.visa!=='pr')return '需先取得永久居留。';
+ const need=Math.max(5,(CNS[S.cn]&&CNS[S.cn].pr)||5);
+ if((S.ab.yrs||0)<need)return `需居留滿 ${need} 年（目前 ${S.ab.yrs||0} 年）。`;
+ return '';
+}
+const HOT=['經濟與就業','社會福利','治安與交通','教育與育兒','環境與能源','住宅與物價'];
+function polAdj(lv){
+ const p=polInit(),y=calYear();let adj=0;const x=view.polX;
+ if(!p.hot||p.hot.y!==y)p.hot={y,i:Math.floor(Math.random()*HOT.length)};
+ if(x){
+  if(+x.i===p.hot.i){adj+=5;}
+  const c=PL(lv);
+  if(x.h==='2'&&S.money>=c.cost*.3){S.money-=Math.round(c.cost*.3);adj+=5}
+  else if(x.h==='1'&&S.money>=c.cost*.1){S.money-=Math.round(c.cost*.1);adj+=2}
+ }
+ if(lv>=3){const d=Math.round(((S.smarts||50)-50)/10+R(-3,3));adj+=d;log(`選前辯論會：你的表現${d>=2?'亮眼':d<=-2?'失常':'普通'}。`,d>=2?'good':d<=-2?'bad':'');}
+ return adj;
+}
+const _eh94=elHTML;
+elHTML=function(){
+ let h=_eh94();const p=polInit(),y=calYear();
+ if(!p.hot||p.hot.y!==y)p.hot={y,i:Math.floor(Math.random()*HOT.length)};
+ if(S.ab&&!S.ab.nat){
+  const n=natNeed();h=h.replace('<button class="btn" data-a="pol:x">','<div class="sec">歸化</div><div class="sub">取得永久居留並居住滿年限後，可以申請歸化，費用約 NT$150,000。'+(n?'目前：'+esc(n):'你已符合條件。')+'</div><button class="btn" data-a="pol:nat" '+(n?'disabled':'')+'>申請歸化</button><button class="btn" data-a="pol:x">');
+ }
+ const add=`<div class="sub">今年選民最關心：<b>${HOT[p.hot.i]}</b>（政見對上議題加分；高層級選舉會有辯論）</div><label for="pol_i">主打政見</label><select id="pol_i">${HOT.map((t,i)=>`<option value="${i}">${t}</option>`).join('')}</select><label for="pol_h">助選團隊</label><select id="pol_h"><option value="0">不聘請（志工）</option><option value="1">一般助選員（經費約 10%）</option><option value="2">專業競選團隊（經費約 30%）</option></select>`;
+ return h.replace('<button class="btn p" data-a="pol:go">',add+'<button class="btn p" data-a="pol:go">');
+};
+E.push({id:'el_disaster',min:23,max:100,w:6,if:()=>S.pol&&S.pol.office,run:()=>{const p=S.pol;return {t:`轄區發生${pick(['颱風','地震','豪雨淹水'])}，災情嚴重，各界看著你怎麼處理。`,c:[
+ ch('親赴現場指揮救災',()=>{p.rep=Math.min(100,p.rep+6);S.stress=cl(S.stress+6);return G('救災有效率，民眾肯定你。')}),
+ ch('派員處理，自己在辦公室協調',()=>{p.rep=Math.min(100,p.rep+1);return N('處理得中規中矩。')}),
+ ch('照原訂行程出國考察',()=>{p.rep=Math.max(0,p.rep-9);chg('happy',-4);return B('被媒體痛批失職。')})]}}});
+E.push({id:'el_scandal',min:23,max:100,w:5,if:()=>S.pol&&S.pol.office,run:()=>{const p=S.pol;return {t:'你的親信被爆出涉及弊案，媒體每天追問。',c:[
+ ch('立刻切割並配合調查',()=>{p.rep=Math.max(0,p.rep-2);S.stress=cl(S.stress+4);return N('風波很快平息，聲望只小幅受損。')}),
+ ch('公開護航',()=>{if(Math.random()<.5){p.rep=Math.max(0,p.rep-12);return B('事證浮現，你被指包庇，聲望大跌。')}return N('風波暫時過去，但你捏了把冷汗。')})]}}});
+E.push({id:'el_crisis',min:23,max:100,w:5,if:()=>S.pol&&S.pol.office&&S.pol.office.lv>=3,run:()=>{const p=S.pol,m=elMod();return {t:'國際局勢與景氣轉差，企業與勞工都要求政府出手。',c:[
+ ch('擴大紓困與補貼',()=>{m.w=Math.max(-.02,Math.min(.02,m.w+.003));p.rep=Math.min(100,p.rep+3);return G('景氣穩住了，但預算吃緊。')}),
+ ch('維持預算，靠市場調整',()=>{p.rep=Math.max(0,p.rep-3);return N('受到批評冷漠，但財政穩健。')})]}}});
+E.push({id:'el_price',min:23,max:100,w:4,if:()=>S.pol&&S.pol.office&&S.pol.office.lv>=2,run:()=>{const p=S.pol;return {t:'民生物價上漲，民眾要求政府出面。',c:[
+ ch('凍漲公共服務費用',()=>{p.rep=Math.min(100,p.rep+4);return G('民眾叫好，但政府財政壓力增加。')}),
+ ch('呼籲業者自律',()=>{p.rep=Math.max(0,p.rep-1);return N('效果有限。')})]}}});
+/* 3. 海外居住時的投資所得稅（簡化） */
+const _y94=yearly;
+yearly=function(){
+ _y94.apply(this,arguments);
+ try{
+  if(S&&!S.dead&&S.cn&&S.cn!=='TW'&&typeof pfSum==='function'){
+   const base=pfSum(),rate=((CNS[S.cn]&&CNS[S.cn].tax)||.2)*.7;
+   if(base>0){const t=Math.round(base*.025*rate);if(t>=1000){S.money-=t;log(`${CNS[S.cn].n}的投資股息所得稅 ${money(t)}（以投資組合約 2.5% 股息率估算）。`,'')}}
+  }
+ }catch(e){}
+};
+/* 5. 活動改下拉 */
+const _ac94=actHTML;
+actHTML=function(){
+ const h=_ac94();if(view.polOn)return h;
+ const re=/<button class="btn" data-a="act:([^"]+)"\s*(disabled)?\s*>([\s\S]*?)<small>([\s\S]*?)<\/small><\/button>/g,all=[];let m;
+ while((m=re.exec(h)))all.push({id:m[1],dis:!!m[2],l:m[3],s:m[4]});
+ if(all.length<6)return h;
+ const ok=all.filter(x=>!x.dis),no=all.filter(x=>x.dis);
+ const first=h.search(/<button class="btn" data-a="act:/);
+ let dn=false,out=h.replace(re,()=>{if(dn)return '';dn=true;return '@@AC@@'});
+ const strip=t=>String(t).replace(/<[^>]*>/g,'');
+ const blk=(ok.length?frmHTML('ac',{sl:'選擇活動',opts:ok.map(x=>[x.id,strip(x.l)+'・'+strip(x.s)]),amt:false,btns:[['go','執行','p']]}):'<div class="sub">目前沒有可做的活動。</div>')+(no.length?`<div class="sub">今年已做或條件不足：${no.map(x=>esc(strip(x.l))).join('、')}</div>`:'');
+ return out.replace('@@AC@@',blk);
+};
+/* 7. 玩法導覽 */
+const GUIDE=['按「下一年」讓時間前進；每年會出現事件，選擇會影響人生。','「資產」頁：存款、投資、房產、大型投資與事業，所有金額都能直接輸入。','「活動」頁：每年可做的活動、政治與選舉；用下拉選單選擇後按執行。','「家庭」頁：伴侶、孩子與孫子女；可贈與、資助、規劃遺囑與信託。','「今年建議」會依你的狀況提示該做什麼，不必全部照做。','設定裡可以下載存檔、換手機時匯入，也能看版權、資料來源與法規。','這是模擬遊戲：數字是簡化模型，不構成任何專業建議。'];
+const _lh94=lifeHTML;
+lifeHTML=function(){if(view.lsub==='guide')return `<h3>玩法導覽</h3><div class="item">${GUIDE.map(x=>`<div class="sub" style="margin:6px 0">${esc(x)}</div>`).join('')}</div><button class="btn" data-a="lf:set:legalx">← 返回設定</button>`;return _lh94()};
+const _sh94=setHTML;
+setHTML=function(){return _sh94()+`<button class="btn" data-a="lf:set:guide">玩法導覽</button>`};
+const _lf94=lfHandle;
+lfHandle=function(x,y,z,u){if(x==='set'&&y==='guide'){view.lsub='guide';return null}return _lf94(x,y,z,u)};
+const _ng94=newGame;
+newGame=function(){const r=_ng94.apply(this,arguments);try{if(!localStorage.getItem('lifesim_tour')){localStorage.setItem('lifesim_tour','1');log('提示：設定裡有「玩法導覽」，簡單說明各頁面怎麼用。','')}}catch(e){}return r};
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
