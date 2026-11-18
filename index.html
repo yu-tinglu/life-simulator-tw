@@ -11488,7 +11488,7 @@ function rstMenu(id,add){
 }
 function rstStaff(d){
  const r=S.rst;if(!r)return B('你還沒有店。');
- if(d>0){if(r.staff>=5)return B('人手已滿。');r.staff++;return G('你多請了一位廚房夥伴。')}
+ if(d>0){if(r.staff>=[2,4,5][r.t])return B('人手已滿（這個規模最多 '+[2,4,5][r.t]+' 人）。');r.staff++;return G('你多請了一位廚房夥伴。')}
  if(r.staff<=0)return B('已經沒有員工了。');r.staff--;return N('你資遣了一位員工。');
 }
 function rstReno(){
@@ -11503,7 +11503,7 @@ function rstYear(){
  if(!menuN){r.rep=Math.max(0,r.rep-6);r.p=-Math.round(T[5]*f*.5);S.money+=r.p;try{log(`「${r.n}」今年沒有像樣的菜單，生意冷清，虧損 ${money(-r.p)}。`,'bad')}catch(e){}return}
  const div=Math.min(1.1,.7+menuN*.1),fame=((S.rcp&&S.rcp.fame)||0)/200;
  const cov=T[3]*(.5+(r.rep+fame*30)/100)*(.6+q/150)*div*Math.min(1.6,.8+r.staff*.2)*(ckIsChef()||ckInit().sk>=50?1:.9)*(.9+Math.random()*.2);
- const rev=Math.round(cov*T[4]*f),cost=Math.round(rev*.55*ingIdx()+T[5]*f+r.staff*400000*f);
+ const rev=Math.round(cov*T[4]*f),cost=Math.round(rev*.55*ingIdx()+T[5]*f+r.staff*Math.max(T[5]*.25,350000)*f);
  r.p=rev-cost;S.money+=r.p;r.rep=Math.max(0,Math.min(100,r.rep+Math.round((q-50)/8+(Math.random()-.5)*6)));
  S.stress=cl(S.stress+3);
  try{const rc=ckInit();if(r.t===2&&r.rep>=70)rc.fame=Math.min(100,(rc.fame||0)+2);else if(r.t===1&&r.rep>=80)rc.fame=Math.min(100,(rc.fame||0)+1)}catch(e){}
