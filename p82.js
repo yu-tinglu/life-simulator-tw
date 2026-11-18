@@ -16,7 +16,7 @@ const FREG={
  AE:{fee:.05,ltv:.5,spr:.05,tx:0,y:.065,cg:0},MX:{fee:.07,ltv:.5,spr:.09,tx:.003,y:.06,cg:.25}
 };
 const FDEF={fee:.06,ltv:.5,spr:.06,tx:.006,y:.045,cg:.2};
-const FRAT={JP:16,KR:14,US:6,CA:9,AU:10,GB:10,DE:9,SG:16,IN:12,CN:14,CH:11,NZ:9,TH:10,MY:8,PH:12,VN:15,ID:9,AE:6,MX:8};
+const FRAT={JP:16,KR:20,US:6,CA:9,AU:10,GB:12,DE:9,SG:16,IN:12,CN:14,CH:11,NZ:9,TH:10,MY:8,PH:12,VN:15,ID:9,AE:6,MX:8};
 const fxn=k=>(S.fx&&S.fx[k])||fxr(k);
 const fReg=k=>Object.assign({},FDEF,FREG[k]||{});
 function fAllowed(k){const r=fReg(k);if(!r.ban)return true;const ab=S.ab;return !!(S.cn===k&&ab&&r.ok.includes(ab.visa))}
