@@ -39,7 +39,7 @@ render=function(){
     const fb=document.createElement('div');
     const pick=lines.filter(l=>!/^(影響：|你的錢不夠|（)/.test(l.textContent||'')).slice(0,2);
     if(pick.length)pick.forEach(l=>fb.appendChild(l.cloneNode(true)));
-    else{fb.className='ln';fb.style.opacity='.6';fb.textContent='這一年平平淡淡，沒有特別的事。'}
+    else{fb.className='ln';fb.style.opacity='.6';fb.textContent='這一年沒有特別事件，數值變化來自成長與日常起伏。'}
     body.appendChild(fb);
    }
    const groups={};
@@ -50,7 +50,7 @@ render=function(){
     const gk='g'+age+name,ho=document.createElement('div'),gb=document.createElement('div');
     ho.className='cgh';ho.innerHTML=`<b>${name}</b>（${arr.length}）`;
     arr.forEach(l=>gb.appendChild(l));
-    const def=name!=='世界與經濟'&&name!=='財務'&&last;
+    const def=last&&name===order.find(n=>groups[n]&&groups[n].length&&n!=='世界與經濟'&&n!=='財務');
     const isOpen=()=>view.fo[gk]==null?def:view.fo[gk];
     const ap=()=>{gb.style.display=isOpen()?'':'none';ho.style.opacity=isOpen()?'1':'.75'};
     ho.onclick=()=>{view.fo[gk]=!isOpen();ap()};ap();
