@@ -123,7 +123,7 @@ function handle(a){
  else if(S.dead)return;
  else if(t==='lv'){view._fresh=0;r=lvHandle(x,y,z)}
  else if(t==='rom'){view._fresh=1;view.tab='rel';r=romHandle(x,y,z);sub=view.rsub||null}
- else if(t==='lf'){view.tab='life';view.lsub=x;r=lfHandle(x,y,z)}
+ else if(t==='lf'){view.tab='life';view.lsub=x;r=lfHandle(x,y,z,u)}
  else if(t==='act'){const o=ACTS.find(q=>q.id===x);if(o&&canAct(o)&&!S.acts[x]&&(!o.cost||S.money>=o.cost)){S.acts[x]=1;if(o.cost)S.money-=o.cost;r=o.run();log(r[0],r[1])}}
  else if(t==='job')r=applyJob(+x);
  else if(t==='quit'&&S.job&&!S.job.founder){log(`你辭去了${S.job.t}。`);r=N('你辭職了。');S.job=null}

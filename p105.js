@@ -88,20 +88,6 @@ cxOf=function(k){
  if(!l||k!==S.cn)return c;
  const f=1-.15*l;return Object.assign({},c,{ue:c.ue*f,cb:c.cb*f,pn:c.pn*f});
 };
-/* 7. 無障礙：大字體、高對比 */
-function a11yApply(){try{const p=lsGet(PREFK,{});document.documentElement.style.zoom=p.big?'1.14':'';document.body.classList.toggle('hc',!!p.hc)}catch(e){}}
-try{const st=document.createElement('style');st.textContent='body.hc{--ink:#000;--mute:#3a342c;--line:#b7a98f}body.hc .sub{color:#2b2620}';document.head.appendChild(st)}catch(e){}
-a11yApply();
-const _sh105=setHTML;
-setHTML=function(){
- const p=lsGet(PREFK,{}),t=(f,n)=>`<div class="sec">${n}</div><div class="seg" style="margin:6px 0"><button class="${p[f]?'on':''}" data-a="lf:set:a11y:${f}:1">開</button><button class="${p[f]?'':'on'}" data-a="lf:set:a11y:${f}:0">關</button></div>`;
- return _sh105().replace('<div class="sec">存檔匯出／匯入</div>',t('big','大字體')+t('hc','高對比')+'<div class="sec">存檔匯出／匯入</div>');
-};
-const _lf105=lfHandle;
-lfHandle=function(x,y,z,u,w){
- if(x==='set'&&y==='a11y'){const p=lsGet(PREFK,{});p[z]=u==='1';lsSet(PREFK,p);a11yApply();return null}
- return _lf105(x,y,z,u,w);
-};
 /* 8. 新手清單（放在玩法導覽最上面）*/
 function starterList(){
  const L=[['按「年齡 +1」讓時間前進',S.age>=1],['看一次年度事件並做出選擇',S.age>=2],['上學讀書（出生後的前幾年自動進行）',S.age>=7],['18 歲後找一份工作',!!S.job],['在「資產」頁存錢或買第一項投資',(S.money||0)>0&&S.age>=20],['試試「活動」頁的任一項活動',S.age>=15]];
