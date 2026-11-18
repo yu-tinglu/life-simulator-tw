@@ -16,8 +16,8 @@ const LGL={
  ]
 };
 function legalHTML(){
- const lst=a=>a.map(x=>`<li>${esc(x)}</li>`).join(''),grp=g=>g.map(([t,a])=>`<details class="note"><summary>${esc(t)}</summary><ul style="margin:6px 0 6px 18px">${lst(a)}</ul></details>`).join('');
- return `<h3>版權、資料來源與法規</h3><div class="sec">版權與聲明</div><div class="item">${LGL.cp.map((x,i)=>i?`<div class="sub" style="margin-top:6px">${esc(x)}</div>`:`<b>${esc(x)}</b>`).join('')}</div><div class="sec">資料來源</div>${grp(LGL.src)}<div class="sec">參考法規</div>${grp(LGL.law)}<button class="btn" data-a="lf:set:legalx">← 返回設定</button>`;
+ const lst=a=>a.map(x=>`<li>${esc(x)}</li>`).join(''),grp=g=>g.map(([t,a])=>`<details style="margin:8px 0"><summary style="cursor:pointer">${esc(t)}</summary><ul style="margin:6px 0 6px 18px">${lst(a)}</ul></details>`).join('');
+ return `<h3>版權、資料來源與法規</h3><div class="sec op">版權與聲明</div><div class="item">${LGL.cp.map((x,i)=>i?`<div class="sub" style="margin-top:6px">${esc(x)}</div>`:`<b>${esc(x)}</b>`).join('')}</div><div class="sec op">資料來源</div>${grp(LGL.src)}<div class="sec op">參考法規</div>${grp(LGL.law)}<button class="btn" data-a="lf:set:legalx">← 返回設定</button>`;
 }
 const _lh88=lifeHTML;
 lifeHTML=function(){if(view.lsub==='legal')return legalHTML();return _lh88()};

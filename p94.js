@@ -16,7 +16,7 @@ estateLines=function(r){let h=_el94(r);if(r&&r.gkTot)h+=`<div class="item">遺�
 const _lg94=legacyHTML;
 legacyHTML=function(){
  const h=_lg94();if(!S.kids.some(k=>k.rm&&k.rm.gk&&k.rm.gk.length))return h;
- return h+`<div class="sec">孫子女的遺贈</div>`+frmHTML('gw',{sl:`從每位子女的遺產份額中，撥給其子女的比例（現為 ${S.gpct||0}%）`,opts:[['0','不撥（0%）'],['10','10%'],['20','20%'],['30','30%']],amt:false,btns:[['go','設定','p']]});
+ return h+`<div class="sec op">孫子女的遺贈</div>`+frmHTML('gw',{sl:`從每位子女的遺產份額中，撥給其子女的比例（現為 ${S.gpct||0}%）`,opts:[['0','不撥（0%）'],['10','10%'],['20','20%'],['30','30%']],amt:false,btns:[['go','設定','p']]});
 };
 /* 歸化 + 選舉深化 + 海外投資稅 + 活動下拉 + 導覽，處理 */
 const _hd94=handle;
@@ -60,7 +60,7 @@ elHTML=function(){
  let h=_eh94();const p=polInit(),y=calYear();
  if(!p.hot||p.hot.y!==y)p.hot={y,i:Math.floor(Math.random()*HOT.length)};
  if(S.ab&&!S.ab.nat){
-  const n=natNeed();h=h.replace('<button class="btn" data-a="pol:x">','<div class="sec">歸化</div><div class="sub">取得永久居留並居住滿年限後，可以申請歸化，費用約 NT$150,000。'+(n?'目前：'+esc(n):'你已符合條件。')+'</div><button class="btn" data-a="pol:nat" '+(n?'disabled':'')+'>申請歸化</button><button class="btn" data-a="pol:x">');
+  const n=natNeed();h=h.replace('<button class="btn" data-a="pol:x">','<div class="sec op">歸化</div><div class="sub">取得永久居留並居住滿年限後，可以申請歸化，費用約 NT$150,000。'+(n?'目前：'+esc(n):'你已符合條件。')+'</div><button class="btn" data-a="pol:nat" '+(n?'disabled':'')+'>申請歸化</button><button class="btn" data-a="pol:x">');
  }
  const add=`<div class="sub">今年選民最關心：<b>${HOT[p.hot.i]}</b>（政見對上議題加分；高層級選舉會有辯論）</div><label for="pol_i">主打政見</label><select id="pol_i">${HOT.map((t,i)=>`<option value="${i}">${t}</option>`).join('')}</select><label for="pol_h">助選團隊</label><select id="pol_h"><option value="0">不聘請（志工）</option><option value="1">一般助選員（經費約 10%）</option><option value="2">專業競選團隊（經費約 30%）</option></select>`;
  return h.replace('<button class="btn p" data-a="pol:go">',add+'<button class="btn p" data-a="pol:go">');

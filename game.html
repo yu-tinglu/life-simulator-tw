@@ -7618,7 +7618,7 @@ function secCollapse(){
    sec.parentNode.insertBefore(grp,arr[0]);arr.forEach(x=>grp.appendChild(x));
    sec.classList.add('cz');
    const apply=c=>{grp.style.display=c?'none':'';sec.classList.toggle('cl',c)};
-   const cur=()=>view.col[key]==null?true:!!view.col[key];
+   const cur=()=>view.col[key]==null?!sec.classList.contains('op'):!!view.col[key];
    apply(cur());
    sec.onclick=()=>{view.col[key]=!cur();apply(view.col[key])};
   });
@@ -9906,8 +9906,8 @@ const LGL={
  ]
 };
 function legalHTML(){
- const lst=a=>a.map(x=>`<li>${esc(x)}</li>`).join(''),grp=g=>g.map(([t,a])=>`<details class="note"><summary>${esc(t)}</summary><ul style="margin:6px 0 6px 18px">${lst(a)}</ul></details>`).join('');
- return `<h3>版權、資料來源與法規</h3><div class="sec">版權與聲明</div><div class="item">${LGL.cp.map((x,i)=>i?`<div class="sub" style="margin-top:6px">${esc(x)}</div>`:`<b>${esc(x)}</b>`).join('')}</div><div class="sec">資料來源</div>${grp(LGL.src)}<div class="sec">參考法規</div>${grp(LGL.law)}<button class="btn" data-a="lf:set:legalx">← 返回設定</button>`;
+ const lst=a=>a.map(x=>`<li>${esc(x)}</li>`).join(''),grp=g=>g.map(([t,a])=>`<details style="margin:8px 0"><summary style="cursor:pointer">${esc(t)}</summary><ul style="margin:6px 0 6px 18px">${lst(a)}</ul></details>`).join('');
+ return `<h3>版權、資料來源與法規</h3><div class="sec op">版權與聲明</div><div class="item">${LGL.cp.map((x,i)=>i?`<div class="sub" style="margin-top:6px">${esc(x)}</div>`:`<b>${esc(x)}</b>`).join('')}</div><div class="sec op">資料來源</div>${grp(LGL.src)}<div class="sec op">參考法規</div>${grp(LGL.law)}<button class="btn" data-a="lf:set:legalx">← 返回設定</button>`;
 }
 const _lh88=lifeHTML;
 lifeHTML=function(){if(view.lsub==='legal')return legalHTML();return _lh88()};
@@ -9961,7 +9961,7 @@ const _y90=yearly;
 yearly=function(){_y90.apply(this,arguments);try{pjYear()}catch(e){}};
 const _ec90=estateCalc;
 estateCalc=function(dry){
- const v=Math.round(pjTotal()*.7);
+ const hr=S.pjHeir||{};const v=Math.round(Object.keys(S.pj||{}).reduce((t,k)=>t+S.pj[k].val*((hr[k]&&S.kids.some(x=>String(x.id)===String(hr[k])))?.9:.7),0));
  if(!v)return _ec90(dry);
  S.money+=v;
  if(dry){try{return _ec90(dry)}finally{S.money-=v}}
@@ -9970,8 +9970,8 @@ estateCalc=function(dry){
 function pjHTML(){
  const P=pjGet();let h=`<h3>大型投資與事業</h3><div class="sub">現金 ${money(S.money)}・專案合計 ${money(pjTotal())}（已計入淨資產）。專案估值每年波動，賣出時約打 85 折；去世時以 7 折變現後繼承。</div>`;
  const held=PJK.filter(k=>P[k]&&P[k].val>0);
- if(held.length)h+='<div class="sec">持有中</div>'+held.map(k=>`<div class="item row"><div style="flex:1"><b>${PJ[k].n}</b>・${money(P[k].val)}<div class="sub">累計投入 ${money(P[k].inv)}・${P[k].val>=P[k].inv?'帳面獲利 '+money(P[k].val-P[k].inv):'帳面虧損 '+money(P[k].inv-P[k].val)}</div></div><button class="mini" data-a="pj:sell:${k}">賣出</button></div>`).join('');
- h+='<div class="sec">新增或加碼</div><div class="sub">'+PJK.map(k=>`<b>${PJ[k].n}</b>（${money(PJ[k].min)} 起）：${PJ[k].d}`).join('<br>')+'</div>';
+ if(held.length)h+='<div class="sec op">持有中</div>'+held.map(k=>`<div class="item row"><div style="flex:1"><b>${PJ[k].n}</b>・${money(P[k].val)}<div class="sub">累計投入 ${money(P[k].inv)}・${P[k].val>=P[k].inv?'帳面獲利 '+money(P[k].val-P[k].inv):'帳面虧損 '+money(P[k].inv-P[k].val)}</div></div><button class="mini" data-a="pj:sell:${k}">賣出</button></div>`).join('');
+ h+='<div class="sec op">新增或加碼</div><details><summary class="sub">各項目說明（點開）</summary><div class="sub">'+PJK.map(k=>`<b>${PJ[k].n}</b>（${money(PJ[k].min)} 起）：${PJ[k].d}`).join('<br>')+'</div></details>';
  h+=frmHTML('pj',{sl:'項目',opts:PJK.map(k=>[k,`${PJ[k].n}・最低 ${money(PJ[k].min)}`]),def:'100000000',al:'投入金額（新台幣，可輸入 5億、2億）',chips:[1e7,5e7,1e8,5e8,1e9],btns:[['go','投入','p']]});
  return h+`<button class="btn" data-a="pj:x">← 返回</button>`;
 }
@@ -10042,10 +10042,10 @@ function polRun(lv,bud,party){
  if(party==='ind'&&lv>=3)pb-=10;
  const inc=p.office&&p.office.lv===lv?8:0;
  const sc=36+polRep()*.35+((S.smarts||50)-50)*.1+b[3]+pb+inc+R(-10,10)+(typeof polAdj==='function'?polAdj(lv):0);
- const won=sc>c.diff;
- p.hist.push({y,lv,won,party});
- if(won){p.rep=Math.min(100,p.rep+10);if(!(p.office&&p.office.lv===lv))elReset();p.office={lv,y0:y,end:y+4};chg('happy',12);S.stress=cl(S.stress+6);log(`${y} 年，你競選${c.n}並當選！（花費 ${money(cost)}）`,'good');return G(`恭喜當選${c.n}！任期 4 年，每年薪津約 ${money(c.sal)}。`)}
- p.rep=Math.max(0,p.rep-2);chg('happy',-8);S.stress=cl(S.stress+5);log(`${y} 年，你競選${c.n}落選。（花費 ${money(cost)}）`,'bad');
+ const won=sc>c.diff,share=Math.max(18,Math.min(72,Math.round(40+(sc-c.diff)*.7)));
+ p.hist.push({y,lv,won,party,share});
+ if(won){p.rep=Math.min(100,p.rep+10);if(!(p.office&&p.office.lv===lv))elReset();p.office={lv,y0:y,end:y+4};chg('happy',12);S.stress=cl(S.stress+6);log(`${y} 年，你競選${c.n}並當選！得票率約 ${share}%。（花費 ${money(cost)}）`,'good');return G(`恭喜當選${c.n}！任期 4 年，每年薪津約 ${money(c.sal)}。`)}
+ p.rep=Math.max(0,p.rep-2);chg('happy',-8);S.stress=cl(S.stress+5);log(`${y} 年，你競選${c.n}落選，得票率約 ${share}%。（花費 ${money(cost)}）`,'bad');
  return B(`很可惜，這次落選了。花費 ${money(cost)}。`);
 }
 function elYear(){
@@ -10062,12 +10062,12 @@ function elHTML(){
  let h=`<h3>政治與選舉</h3><div class="sub">依台灣制度簡化：地方選舉每 4 年（2026、2030…），全國選舉每 4 年（2028、2032…）。其他國家沿用相同的年份循環與職位層級，職稱、薪津與經費依該國薪資水準換算，皆為概略值。</div>`;
  h+=`<div class="item">聲望：<b>${rep}</b>／100　目前職位：<b>${p.office?PL(p.office.lv).n+'（任期至 '+p.office.end+' 年）':'無'}</b><div class="sub">聲望來自財富、職位、慈善與從政經歷。</div></div>`;
  if(S.ab&&!S.ab.nat)return h+`<div class="item">你是移居者，需具有該國公民身分才能參選（可在「政治與選舉」申請歸化）。</div><button class="btn" data-a="pol:x">← 返回</button>`;
- const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PL(lv).n}・${PL(lv).d}${bad?'（'+bad+'）':'・可參選'}`]});
- if(p.office){const done=p.acted===y;h+='<div class="sec">施政（每年一項）</div><div class="sub">施政會影響全國的薪資成長與房價，任期結束後效果會消失。目前：薪資成長 '+((elMod().w*100).toFixed(1))+'%、房價成長 '+((elMod().h*100).toFixed(1))+'%。</div><select id="pol_a">'+PACT.filter(x=>x[2]<=p.office.lv).map(x=>`<option value="${x[0]}">${x[1]}：${x[3]}</option>`).join('')+'</select><button class="btn p" data-a="pol:act" '+(done?'disabled':'')+'>'+(done?'今年已施政':'推動這項施政')+'</button>'}
- h+='<div class="sec">登記參選</div>'+frmHTML('pol',{sl:'選舉職位',opts,amt:false,btns:[]})
-  +`<label for="pol_p">推薦政黨</label><select id="pol_p">${PPT.map(x=>`<option value="${x[0]}">${x[1]}${x[0]==='ind'?'（高層級較吃虧）':''}</option>`).join('')}</select>`
-  +`<label for="pol_b">競選預算</label><select id="pol_b">${PBUD.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select><div class="sub">里長約 30 萬、議員 300 萬、立委 2,000 萬、縣市長 5,000 萬、總統 3 億（標準預算；精簡減半、大選戰加倍）。</div><button class="btn p" data-a="pol:go">登記參選</button>`;
- if(p.hist.length)h+='<div class="sec">參選紀錄</div>'+p.hist.slice(-8).reverse().map(x=>`<div class="item">${x.y} 年・${PL(x.lv).n}・${(PPT.find(q=>q[0]===x.party)||PPT[3])[1]}・<b>${x.won?'當選':'落選'}</b></div>`).join('');
+ const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PL(lv).n}${bad?'（'+bad+'）':'・民調勝率約 '+polEst(lv)+'%'}`]});
+ if(p.office){const done=p.acted===y;h+='<div class="sec op">施政（每年一項）</div><div class="sub">施政會影響全國的薪資成長與房價，任期結束後效果會消失。目前：薪資成長 '+((elMod().w*100).toFixed(1))+'%、房價成長 '+((elMod().h*100).toFixed(1))+'%。</div><select id="pol_a">'+PACT.filter(x=>x[2]<=p.office.lv).map(x=>`<option value="${x[0]}">${x[1]}：${x[3]}</option>`).join('')+'</select><button class="btn p" data-a="pol:act" '+(done?'disabled':'')+'>'+(done?'今年已施政':'推動這項施政')+'</button>'}
+ h+='<div class="sec op">登記參選</div>'+frmHTML('pol',{sl:'選舉職位',opts,amt:false,btns:[]})
+  +`<div class="frm"><label for="pol_p">推薦政黨</label><select id="pol_p">${PPT.map(x=>`<option value="${x[0]}">${x[1]}${x[0]==='ind'?'（高層級較吃虧）':''}</option>`).join('')}</select>`
+  +`<label for="pol_b">競選預算</label><select id="pol_b">${PBUD.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select><div class="sub">里長約 30 萬、議員 300 萬、立委 2,000 萬、縣市長 5,000 萬、總統 3 億（標準預算；精簡減半、大選戰加倍）。</div><button class="btn p" data-a="pol:go">登記參選</button></div>`;
+ if(p.hist.length)h+='<div class="sec op">參選紀錄</div>'+p.hist.slice(-8).reverse().map(x=>`<div class="item">${x.y} 年・${PL(x.lv).n}・${(PPT.find(q=>q[0]===x.party)||PPT[3])[1]}・<b>${x.won?'當選':'落選'}</b>${x.share?'・得票率 '+x.share+'%':''}</div>`).join('');
  return h+`<button class="btn" data-a="pol:x">← 返回</button>`;
 }
 const _ac91=actHTML;
@@ -10075,7 +10075,7 @@ actHTML=function(){
  if(view.polOn)return elHTML();
  const h=_ac91();if(S.age<23)return h;
  const b=`<button class="btn" data-a="pol:o">政治與選舉<small>里長、議員、立委、縣市長、總統・${S.pol&&S.pol.office?'現任'+PL(S.pol.office.lv).n:'聲望 '+polRep()}</small></button>`;
- const i=h.indexOf('</div>');return i<0?h+b:h.slice(0,i+6)+b+h.slice(i+6);
+ return h.includes('<div class="frm">')||true?h+b:h;
 };
 const _hd91=handle;
 handle=function(a){
@@ -10139,7 +10139,7 @@ kidHTML=function(i){
  let h=_kh93(i);const k=S.kids[i];if(!k||!k.rm||!k.rm.gk.length)return h;
  k.rm.gk.forEach(g=>{if(!g.id){g.id='g'+Date.now()%1e7+Math.floor(Math.random()*1e3);g.rel=g.rel||70;g.m=g.m||0}});
  const opts=k.rm.gk.map(g=>[g.id,`${g.n}（${g.age} 歲）`]);
- const blk=`<div class="sec">贈與孫子女（隔代贈與，同樣依贈與稅規定）</div>`+frmHTML('gg'+i,{sl:'受贈人',opts,def:'500000',chips:[200000,500000,1000000,5000000],al:'贈與現金（新台幣）',btns:[['go','贈與','p']]});
+ const blk=`<div class="sec op">贈與孫子女（隔代贈與，同樣依贈與稅規定）</div>`+frmHTML('gg'+i,{sl:'受贈人',opts,def:'500000',chips:[200000,500000,1000000,5000000],al:'贈與現金（新台幣）',btns:[['go','贈與','p']]});
  return h.replace(/(<button class="btn" data-a="back">← 返回<\/button>)$/,blk+'$1');
 };
 const _hd93=handle;
@@ -10184,7 +10184,7 @@ estateLines=function(r){let h=_el94(r);if(r&&r.gkTot)h+=`<div class="item">遺�
 const _lg94=legacyHTML;
 legacyHTML=function(){
  const h=_lg94();if(!S.kids.some(k=>k.rm&&k.rm.gk&&k.rm.gk.length))return h;
- return h+`<div class="sec">孫子女的遺贈</div>`+frmHTML('gw',{sl:`從每位子女的遺產份額中，撥給其子女的比例（現為 ${S.gpct||0}%）`,opts:[['0','不撥（0%）'],['10','10%'],['20','20%'],['30','30%']],amt:false,btns:[['go','設定','p']]});
+ return h+`<div class="sec op">孫子女的遺贈</div>`+frmHTML('gw',{sl:`從每位子女的遺產份額中，撥給其子女的比例（現為 ${S.gpct||0}%）`,opts:[['0','不撥（0%）'],['10','10%'],['20','20%'],['30','30%']],amt:false,btns:[['go','設定','p']]});
 };
 /* 歸化 + 選舉深化 + 海外投資稅 + 活動下拉 + 導覽，處理 */
 const _hd94=handle;
@@ -10228,7 +10228,7 @@ elHTML=function(){
  let h=_eh94();const p=polInit(),y=calYear();
  if(!p.hot||p.hot.y!==y)p.hot={y,i:Math.floor(Math.random()*HOT.length)};
  if(S.ab&&!S.ab.nat){
-  const n=natNeed();h=h.replace('<button class="btn" data-a="pol:x">','<div class="sec">歸化</div><div class="sub">取得永久居留並居住滿年限後，可以申請歸化，費用約 NT$150,000。'+(n?'目前：'+esc(n):'你已符合條件。')+'</div><button class="btn" data-a="pol:nat" '+(n?'disabled':'')+'>申請歸化</button><button class="btn" data-a="pol:x">');
+  const n=natNeed();h=h.replace('<button class="btn" data-a="pol:x">','<div class="sec op">歸化</div><div class="sub">取得永久居留並居住滿年限後，可以申請歸化，費用約 NT$150,000。'+(n?'目前：'+esc(n):'你已符合條件。')+'</div><button class="btn" data-a="pol:nat" '+(n?'disabled':'')+'>申請歸化</button><button class="btn" data-a="pol:x">');
  }
  const add=`<div class="sub">今年選民最關心：<b>${HOT[p.hot.i]}</b>（政見對上議題加分；高層級選舉會有辯論）</div><label for="pol_i">主打政見</label><select id="pol_i">${HOT.map((t,i)=>`<option value="${i}">${t}</option>`).join('')}</select><label for="pol_h">助選團隊</label><select id="pol_h"><option value="0">不聘請（志工）</option><option value="1">一般助選員（經費約 10%）</option><option value="2">專業競選團隊（經費約 30%）</option></select>`;
  return h.replace('<button class="btn p" data-a="pol:go">',add+'<button class="btn p" data-a="pol:go">');
@@ -10281,6 +10281,68 @@ const _lf94=lfHandle;
 lfHandle=function(x,y,z,u){if(x==='set'&&y==='guide'){view.lsub='guide';return null}return _lf94(x,y,z,u)};
 const _ng94=newGame;
 newGame=function(){const r=_ng94.apply(this,arguments);try{if(!localStorage.getItem('lifesim_tour')){localStorage.setItem('lifesim_tour','1');log('提示：設定裡有「玩法導覽」，簡單說明各頁面怎麼用。','')}}catch(e){}return r};
+// 民調、專案事件、專案接班、頁面提示、成就
+function polEst(lv){
+ try{const c=PL(lv),p=polInit(),inc=p.office&&p.office.lv===lv?8:0;const est=36+polRep()*.35+((S.smarts||50)-50)*.1+6+7+inc;return Math.max(1,Math.min(99,Math.round(100/(1+Math.exp(-(est-c.diff)/6)))))}catch(e){return 0}
+}
+/* 專案事件 */
+const pjHeld=()=>PJK.filter(k=>S.pj&&S.pj[k]&&S.pj[k].val>=5e7&&['space','ev','ai','fus','media','vc'].includes(k));
+E.push({id:'pj_ipo',min:25,max:100,w:4,if:()=>pjHeld().length>0,run:()=>{const k=pick(pjHeld()),p=S.pj[k],c=PJ[k];return {t:`${c.n}的經營團隊提議公開上市，市場評價看起來不錯。`,c:[
+ ch('支持上市',()=>{if(Math.random()<.75){const g=Math.round(p.val*.3);p.val+=g;log(`${c.n}上市，估值增加 ${money(g)}。`,'good');return G('上市順利，帳面價值上升。')}const l=Math.round(p.val*.15);p.val-=l;return B(`上市後股價走弱，估值減少 ${money(l)}。`)}),
+ ch('反對，維持私有',()=>N('團隊雖然失望，但尊重你的決定。'))]}}});
+E.push({id:'pj_ma',min:25,max:100,w:3,if:()=>pjHeld().length>0,run:()=>{const k=pick(pjHeld()),p=S.pj[k],c=PJ[k];return {t:`有大型企業想併購${c.n}，開價約為目前估值的 1.4 倍（現金）。`,c:[
+ ch('接受併購，全數套現',()=>{const v=Math.round(p.val*1.4);S.money+=v;log(`${c.n}被併購，你拿到 ${money(v)}。`,'good');delete S.pj[k];if(S.pjHeir)delete S.pjHeir[k];return G(`拿到 ${money(v)} 現金。`)}),
+ ch('拒絕，繼續持有',()=>{chg('happy',1);return N('你相信它還有成長空間。')})]}}});
+E.push({id:'pj_board',min:25,max:100,w:3,if:()=>pjHeld().length>0,run:()=>{const k=pick(pjHeld()),p=S.pj[k],c=PJ[k];return {t:`${c.n}的董事會想增資，你若不跟進，持股會被稀釋。`,c:[
+ ch('跟進增資（約估值的 10%）',()=>{const a=Math.round(p.val*.1);if(S.money<a)return B('你的現金不夠。');S.money-=a;p.val+=a;p.inv+=a;return G(`你投入 ${money(a)}，保住持股比例。`)}),
+ ch('不跟進，接受稀釋',()=>{const l=Math.round(p.val*.08);p.val-=l;return N(`持股被稀釋，估值減少 ${money(l)}。`)})]}}});
+/* 專案接班 */
+const _ph95=pjHTML;
+pjHTML=function(){
+ let h=_ph95();const held=PJK.filter(k=>S.pj&&S.pj[k]&&S.pj[k].val>0);
+ if(!held.length||!S.kids.length)return h;
+ const hr=S.pjHeir||{},opts=[['none','取消指定']];
+ held.forEach(k=>S.kids.forEach(x=>opts.push([k+'|'+x.id,`${PJ[k].n} → ${x.n}`])));
+ const cur=held.filter(k=>hr[k]).map(k=>{const x=S.kids.find(q=>String(q.id)===String(hr[k]));return x?`${PJ[k].n}：${x.n}`:''}).filter(Boolean).join('、');
+ const blk=`<div class="sec op">專案接班人</div><div class="sub">指定後，你去世時該專案以 9 折價值轉給家族（未指定為 7 折變現）。${cur?'目前：'+esc(cur):''}</div>`+frmHTML('ph',{sl:'指定專案與接班人',opts,amt:false,btns:[['go','設定','p']]});
+ return h.replace(/(<button class="btn" data-a="pj:x">)/,blk+'$1');
+};
+const _hd95=handle;
+handle=function(a){
+ if(a==='frmgo:ph:go'&&S){
+  const g=frmGet('ph');S.pjHeir=S.pjHeir||{};
+  if(g.s==='none')S.pjHeir={};else{const [k,id]=String(g.s).split('|');S.pjHeir[k]=id}
+  view.msg=G('已更新專案接班設定。');render();try{showSheet('ast')}catch(e){}return;
+ }
+ return _hd95(a);
+};
+/* 頁面第一次進入的小提示 */
+const TIPS={act:'活動頁：用下拉選擇活動後按「執行」；「政治與選舉」在下方。',ast:'資產頁：存款、投資、房產與「大型投資與事業」都在這裡，金額可直接輸入。',rel:'家庭頁：點孩子可贈與、規劃教育；孫子女也能贈與。',job:'職業頁：找工作、創業；創業後可選擇資金與股權玩法。',life:'人生頁：設定裡有玩法導覽、存檔下載與版權資料。',cn:'移民頁：可在不同國家居住、買房、換匯。'};
+const _ss95=showSheet;
+showSheet=function(tab,sub){
+ const r=_ss95(tab,sub);
+ try{
+  const seen=JSON.parse(localStorage.getItem('lifesim_tips')||'{}');
+  if(TIPS[tab]&&!seen[tab]&&!sub&&!view.lsub){
+   const b=document.getElementById('sheetBody');
+   if(b&&b.insertAdjacentHTML){const h3=b.querySelector&&b.querySelector('h3');(h3||b).insertAdjacentHTML(h3?'afterend':'afterbegin',`<div class="item" id="tip95" style="display:flex;gap:8px;align-items:center"><div class="sub" style="flex:1">${TIPS[tab]}</div><button class="mini" id="tipx95">知道了</button></div>`);
+    const x=document.getElementById('tipx95');if(x)x.onclick=()=>{try{seen[tab]=1;localStorage.setItem('lifesim_tips',JSON.stringify(seen))}catch(e){}const t=document.getElementById('tip95');if(t)t.remove()}}
+  }
+ }catch(e){}
+ return r;
+};
+/* 成就 */
+ACH.push(
+ ['el_win','當選公職',()=>!!(S.pol&&S.pol.hist.some(h=>h.won))],
+ ['el_mayor','當選縣市長或更高職位',()=>!!(S.pol&&S.pol.hist.some(h=>h.won&&h.lv>=4))],
+ ['el_pres','當選最高首長（總統／總理）',()=>!!(S.pol&&S.pol.hist.some(h=>h.won&&h.lv>=5))],
+ ['el_nat','歸化取得外國國籍',()=>!!(S.ab&&S.ab.nat)],
+ ['pj_1','投入第一個大型專案',()=>!!(S.pj&&Object.keys(S.pj).length)],
+ ['pj_big','專案合計價值超過 10 億',()=>pjTotal()>=1e9],
+ ['pj_fnd','成立慈善基金會',()=>!!(S.pj&&S.pj.fnd)],
+ ['gk_1','抱孫',()=>S.kids.some(k=>k.rm&&k.rm.gk&&k.rm.gk.length>0)],
+ ['gk_3','三代同堂：孫子女達 3 位',()=>S.kids.reduce((a,k)=>a+(k.rm&&k.rm.gk?k.rm.gk.length:0),0)>=3]
+);
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();

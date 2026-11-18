@@ -37,10 +37,10 @@ function polRun(lv,bud,party){
  if(party==='ind'&&lv>=3)pb-=10;
  const inc=p.office&&p.office.lv===lv?8:0;
  const sc=36+polRep()*.35+((S.smarts||50)-50)*.1+b[3]+pb+inc+R(-10,10)+(typeof polAdj==='function'?polAdj(lv):0);
- const won=sc>c.diff;
- p.hist.push({y,lv,won,party});
- if(won){p.rep=Math.min(100,p.rep+10);if(!(p.office&&p.office.lv===lv))elReset();p.office={lv,y0:y,end:y+4};chg('happy',12);S.stress=cl(S.stress+6);log(`${y} 年，你競選${c.n}並當選！（花費 ${money(cost)}）`,'good');return G(`恭喜當選${c.n}！任期 4 年，每年薪津約 ${money(c.sal)}。`)}
- p.rep=Math.max(0,p.rep-2);chg('happy',-8);S.stress=cl(S.stress+5);log(`${y} 年，你競選${c.n}落選。（花費 ${money(cost)}）`,'bad');
+ const won=sc>c.diff,share=Math.max(18,Math.min(72,Math.round(40+(sc-c.diff)*.7)));
+ p.hist.push({y,lv,won,party,share});
+ if(won){p.rep=Math.min(100,p.rep+10);if(!(p.office&&p.office.lv===lv))elReset();p.office={lv,y0:y,end:y+4};chg('happy',12);S.stress=cl(S.stress+6);log(`${y} 年，你競選${c.n}並當選！得票率約 ${share}%。（花費 ${money(cost)}）`,'good');return G(`恭喜當選${c.n}！任期 4 年，每年薪津約 ${money(c.sal)}。`)}
+ p.rep=Math.max(0,p.rep-2);chg('happy',-8);S.stress=cl(S.stress+5);log(`${y} 年，你競選${c.n}落選，得票率約 ${share}%。（花費 ${money(cost)}）`,'bad');
  return B(`很可惜，這次落選了。花費 ${money(cost)}。`);
 }
 function elYear(){
@@ -57,12 +57,12 @@ function elHTML(){
  let h=`<h3>政治與選舉</h3><div class="sub">依台灣制度簡化：地方選舉每 4 年（2026、2030…），全國選舉每 4 年（2028、2032…）。其他國家沿用相同的年份循環與職位層級，職稱、薪津與經費依該國薪資水準換算，皆為概略值。</div>`;
  h+=`<div class="item">聲望：<b>${rep}</b>／100　目前職位：<b>${p.office?PL(p.office.lv).n+'（任期至 '+p.office.end+' 年）':'無'}</b><div class="sub">聲望來自財富、職位、慈善與從政經歷。</div></div>`;
  if(S.ab&&!S.ab.nat)return h+`<div class="item">你是移居者，需具有該國公民身分才能參選（可在「政治與選舉」申請歸化）。</div><button class="btn" data-a="pol:x">← 返回</button>`;
- const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PL(lv).n}・${PL(lv).d}${bad?'（'+bad+'）':'・可參選'}`]});
- if(p.office){const done=p.acted===y;h+='<div class="sec">施政（每年一項）</div><div class="sub">施政會影響全國的薪資成長與房價，任期結束後效果會消失。目前：薪資成長 '+((elMod().w*100).toFixed(1))+'%、房價成長 '+((elMod().h*100).toFixed(1))+'%。</div><select id="pol_a">'+PACT.filter(x=>x[2]<=p.office.lv).map(x=>`<option value="${x[0]}">${x[1]}：${x[3]}</option>`).join('')+'</select><button class="btn p" data-a="pol:act" '+(done?'disabled':'')+'>'+(done?'今年已施政':'推動這項施政')+'</button>'}
- h+='<div class="sec">登記參選</div>'+frmHTML('pol',{sl:'選舉職位',opts,amt:false,btns:[]})
-  +`<label for="pol_p">推薦政黨</label><select id="pol_p">${PPT.map(x=>`<option value="${x[0]}">${x[1]}${x[0]==='ind'?'（高層級較吃虧）':''}</option>`).join('')}</select>`
-  +`<label for="pol_b">競選預算</label><select id="pol_b">${PBUD.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select><div class="sub">里長約 30 萬、議員 300 萬、立委 2,000 萬、縣市長 5,000 萬、總統 3 億（標準預算；精簡減半、大選戰加倍）。</div><button class="btn p" data-a="pol:go">登記參選</button>`;
- if(p.hist.length)h+='<div class="sec">參選紀錄</div>'+p.hist.slice(-8).reverse().map(x=>`<div class="item">${x.y} 年・${PL(x.lv).n}・${(PPT.find(q=>q[0]===x.party)||PPT[3])[1]}・<b>${x.won?'當選':'落選'}</b></div>`).join('');
+ const opts=[1,2,3,4,5].map(lv=>{const bad=polOk(lv);return [String(lv),`${PL(lv).n}${bad?'（'+bad+'）':'・民調勝率約 '+polEst(lv)+'%'}`]});
+ if(p.office){const done=p.acted===y;h+='<div class="sec op">施政（每年一項）</div><div class="sub">施政會影響全國的薪資成長與房價，任期結束後效果會消失。目前：薪資成長 '+((elMod().w*100).toFixed(1))+'%、房價成長 '+((elMod().h*100).toFixed(1))+'%。</div><select id="pol_a">'+PACT.filter(x=>x[2]<=p.office.lv).map(x=>`<option value="${x[0]}">${x[1]}：${x[3]}</option>`).join('')+'</select><button class="btn p" data-a="pol:act" '+(done?'disabled':'')+'>'+(done?'今年已施政':'推動這項施政')+'</button>'}
+ h+='<div class="sec op">登記參選</div>'+frmHTML('pol',{sl:'選舉職位',opts,amt:false,btns:[]})
+  +`<div class="frm"><label for="pol_p">推薦政黨</label><select id="pol_p">${PPT.map(x=>`<option value="${x[0]}">${x[1]}${x[0]==='ind'?'（高層級較吃虧）':''}</option>`).join('')}</select>`
+  +`<label for="pol_b">競選預算</label><select id="pol_b">${PBUD.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select><div class="sub">里長約 30 萬、議員 300 萬、立委 2,000 萬、縣市長 5,000 萬、總統 3 億（標準預算；精簡減半、大選戰加倍）。</div><button class="btn p" data-a="pol:go">登記參選</button></div>`;
+ if(p.hist.length)h+='<div class="sec op">參選紀錄</div>'+p.hist.slice(-8).reverse().map(x=>`<div class="item">${x.y} 年・${PL(x.lv).n}・${(PPT.find(q=>q[0]===x.party)||PPT[3])[1]}・<b>${x.won?'當選':'落選'}</b>${x.share?'・得票率 '+x.share+'%':''}</div>`).join('');
  return h+`<button class="btn" data-a="pol:x">← 返回</button>`;
 }
 const _ac91=actHTML;
@@ -70,7 +70,7 @@ actHTML=function(){
  if(view.polOn)return elHTML();
  const h=_ac91();if(S.age<23)return h;
  const b=`<button class="btn" data-a="pol:o">政治與選舉<small>里長、議員、立委、縣市長、總統・${S.pol&&S.pol.office?'現任'+PL(S.pol.office.lv).n:'聲望 '+polRep()}</small></button>`;
- const i=h.indexOf('</div>');return i<0?h+b:h.slice(0,i+6)+b+h.slice(i+6);
+ return h.includes('<div class="frm">')||true?h+b:h;
 };
 const _hd91=handle;
 handle=function(a){

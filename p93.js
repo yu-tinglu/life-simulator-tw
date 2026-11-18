@@ -4,7 +4,7 @@ kidHTML=function(i){
  let h=_kh93(i);const k=S.kids[i];if(!k||!k.rm||!k.rm.gk.length)return h;
  k.rm.gk.forEach(g=>{if(!g.id){g.id='g'+Date.now()%1e7+Math.floor(Math.random()*1e3);g.rel=g.rel||70;g.m=g.m||0}});
  const opts=k.rm.gk.map(g=>[g.id,`${g.n}（${g.age} 歲）`]);
- const blk=`<div class="sec">贈與孫子女（隔代贈與，同樣依贈與稅規定）</div>`+frmHTML('gg'+i,{sl:'受贈人',opts,def:'500000',chips:[200000,500000,1000000,5000000],al:'贈與現金（新台幣）',btns:[['go','贈與','p']]});
+ const blk=`<div class="sec op">贈與孫子女（隔代贈與，同樣依贈與稅規定）</div>`+frmHTML('gg'+i,{sl:'受贈人',opts,def:'500000',chips:[200000,500000,1000000,5000000],al:'贈與現金（新台幣）',btns:[['go','贈與','p']]});
  return h.replace(/(<button class="btn" data-a="back">← 返回<\/button>)$/,blk+'$1');
 };
 const _hd93=handle;

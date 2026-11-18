@@ -34,7 +34,7 @@ const _y90=yearly;
 yearly=function(){_y90.apply(this,arguments);try{pjYear()}catch(e){}};
 const _ec90=estateCalc;
 estateCalc=function(dry){
- const v=Math.round(pjTotal()*.7);
+ const hr=S.pjHeir||{};const v=Math.round(Object.keys(S.pj||{}).reduce((t,k)=>t+S.pj[k].val*((hr[k]&&S.kids.some(x=>String(x.id)===String(hr[k])))?.9:.7),0));
  if(!v)return _ec90(dry);
  S.money+=v;
  if(dry){try{return _ec90(dry)}finally{S.money-=v}}
@@ -43,8 +43,8 @@ estateCalc=function(dry){
 function pjHTML(){
  const P=pjGet();let h=`<h3>大型投資與事業</h3><div class="sub">現金 ${money(S.money)}・專案合計 ${money(pjTotal())}（已計入淨資產）。專案估值每年波動，賣出時約打 85 折；去世時以 7 折變現後繼承。</div>`;
  const held=PJK.filter(k=>P[k]&&P[k].val>0);
- if(held.length)h+='<div class="sec">持有中</div>'+held.map(k=>`<div class="item row"><div style="flex:1"><b>${PJ[k].n}</b>・${money(P[k].val)}<div class="sub">累計投入 ${money(P[k].inv)}・${P[k].val>=P[k].inv?'帳面獲利 '+money(P[k].val-P[k].inv):'帳面虧損 '+money(P[k].inv-P[k].val)}</div></div><button class="mini" data-a="pj:sell:${k}">賣出</button></div>`).join('');
- h+='<div class="sec">新增或加碼</div><div class="sub">'+PJK.map(k=>`<b>${PJ[k].n}</b>（${money(PJ[k].min)} 起）：${PJ[k].d}`).join('<br>')+'</div>';
+ if(held.length)h+='<div class="sec op">持有中</div>'+held.map(k=>`<div class="item row"><div style="flex:1"><b>${PJ[k].n}</b>・${money(P[k].val)}<div class="sub">累計投入 ${money(P[k].inv)}・${P[k].val>=P[k].inv?'帳面獲利 '+money(P[k].val-P[k].inv):'帳面虧損 '+money(P[k].inv-P[k].val)}</div></div><button class="mini" data-a="pj:sell:${k}">賣出</button></div>`).join('');
+ h+='<div class="sec op">新增或加碼</div><details><summary class="sub">各項目說明（點開）</summary><div class="sub">'+PJK.map(k=>`<b>${PJ[k].n}</b>（${money(PJ[k].min)} 起）：${PJ[k].d}`).join('<br>')+'</div></details>';
  h+=frmHTML('pj',{sl:'項目',opts:PJK.map(k=>[k,`${PJ[k].n}・最低 ${money(PJ[k].min)}`]),def:'100000000',al:'投入金額（新台幣，可輸入 5億、2億）',chips:[1e7,5e7,1e8,5e8,1e9],btns:[['go','投入','p']]});
  return h+`<button class="btn" data-a="pj:x">← 返回</button>`;
 }
