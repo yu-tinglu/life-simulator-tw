@@ -57,9 +57,9 @@ E.push({id:'npc_mentor_old',min:48,max:85,w:3,if:()=>npcInit().mentor&&!npcInit(
 E.push({id:'npc_rival_re',min:40,max:80,w:3,if:()=>npcInit().rival&&!npcInit().rival.done&&calYear()-npcInit().rival.y>=15,run:()=>{const r=npcInit().rival,up=chance(.5);return {t:up?`你在一場場合遇到老對手${r.n}，對方現在事業比你還成功，主動走過來打招呼。`:`你聽說老對手${r.n}這幾年過得不太順，在街上偶然碰到。`,c:[
  ch(up?'真心恭喜，聊起當年':'請他吃頓飯，聊聊近況',()=>{r.done=1;chg('happy',4);S.friends.length<14&&S.friends.push({n:r.n,sx:'男',rel:55,tru:50,kind:'老對手',tr:pick(FTR),loan:0});return G(`你們笑著談起當年的較勁，成了不打不相識的朋友。`)}),
  ch('點頭示意就離開',()=>{r.done=1;return N(`你們互相點了頭，各自走開。`)})]}}});
-E.push({id:'npc_friend_news',min:30,max:85,w:5,if:()=>S.friends&&S.friends.some(f=>f.rel>=50&&!f.sib),run:()=>{const f=pick(S.friends.filter(x=>x.rel>=50&&!x.sib)),st=pick(['結婚了','生了孩子','升了職','搬到國外','生了一場病','開了自己的小店']);return {t:`多年的朋友${f.n}傳來消息：他最近${st}。`,c:[
+E.push({id:'npc_friend_news',min:30,max:85,w:5,if:()=>S.friends&&S.friends.some(f=>f.rel>=50&&!f.sib),run:()=>{const f=pick(S.friends.filter(x=>x.rel>=50&&!x.sib)),st=pick(['結婚了','生了孩子','升了職','搬到國外','生了一場病','開了自己的小店']);return {t:`多年的朋友${f.n}傳來消息：${f.sx==='女'?'她':'他'}最近${st}。`,c:[
  ch('打電話過去關心',()=>{f.rel=cl(f.rel+6);f.tru=cl(f.tru+3);chg('happy',3);return G(`你們聊了很久，像回到從前。`)}),
- ch('傳訊息祝福',()=>{f.rel=cl(f.rel+2);return N('你傳了訊息，他很快回覆了。')}),
+ ch('傳訊息祝福',()=>{f.rel=cl(f.rel+2);return N('你傳了訊息，對方很快回覆了。')}),
  ch('忙，沒回',()=>{f.rel=cl(f.rel-5);return B('你想著晚點回，後來就忘了。')})]}}});
 /* 3. 因果事件：呼應過去的選擇 */
 E.push({id:'cause_karma_hi',min:50,max:90,w:3,if:()=>S.karma>=70,run:()=>({t:'一位陌生人在路上認出你，說多年前你幫過他的忙，他一直記得。',c:[

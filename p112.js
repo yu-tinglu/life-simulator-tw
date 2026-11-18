@@ -35,14 +35,14 @@ function wkCollab(a,b,title){
 }
 function wkContest(id){
  const a=ARTALL[id];if(!a||!(S.art&&S.art[id]>=15))return B('這項才藝程度要 15 以上才能報名。');
- if(S.acts&&S.acts.wkc)return B('今年已經參加過比賽了。');S.acts=S.acts||{};S.acts.wkc=1;
+ S.acts=S.acts||{};if(S.acts['wkc'+id])return B('這個項目今年已經參加過比賽了。');S.acts['wkc'+id]=1;
  const best=wkInit().filter(w=>w.art===id).sort((x,y)=>y.q-x.q)[0],p=Math.max(.05,Math.min(.65,S.art[id]/160+(best?best.q/400:0)+fmGet()/500));
  if(Math.random()<p){const pz=Math.round(40000*(1+S.art[id]/50)*ckF());S.money+=pz;fmAdd(2);S.art[id]=Math.min(100,S.art[id]+2);chg('happy',8);const m=`你參加${a.n}比賽拿到名次，獎金 ${money(pz)}，知名度小幅上升。`;log(m,'good');return G(m)}
  S.art[id]=Math.min(100,S.art[id]+1);chg('happy',-2);return N(`你參加了${a.n}比賽，沒有得名，但學到很多。`);
 }
 function wkHTML(){
  const arts=wkArts(),W=wkInit(),all=Object.keys(S.art||{}).filter(k=>ARTALL[k]&&S.art[k]>=15);
- let h=`<h3>創作與作品</h3><div class="item"><b>知名度 ${fmGet()}（${fmLabel()}）</b>・作品 ${W.length} 件<div class="sub">今年還能創作 ${wkLeft()} 次${S.acts&&S.acts.wkc?'・比賽已報名':'・可報名 1 場比賽'}。知名度與食譜系統共用。</div></div>`;
+ let h=`<h3>創作與作品</h3><div class="item"><b>知名度 ${fmGet()}（${fmLabel()}）</b>・作品 ${W.length} 件<div class="sub">今年還能創作 ${wkLeft()} 次・每個項目每年可參賽 1 場。知名度與食譜系統共用。</div></div>`;
  if(!all.length&&!ckInit().sk)return h+'<div class="sub">先到「才藝與課程」學一門才藝（程度 20 以上才能創作）。</div><button class="btn" data-a="back">← 返回</button>';
  if(arts.length){
   h+='<div class="sec op">創作</div><div class="frm"><label for="wk_a">才藝</label><select id="wk_a">'+arts.map(k=>`<option value="${k}">${esc(ARTALL[k].n)}（${S.art[k]}）</option>`).join('')+`</select><label for="wk_t">作品名稱（可留空）</label><input id="wk_t" type="text" maxlength="14" placeholder="例如：夏天的雨"><div class="acts"><button class="btn p" data-a="frmgo:wkc:c">創作並發表</button></div></div>`;

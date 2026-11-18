@@ -33,7 +33,8 @@ function rstYear(){
  if(!menuN){r.rep=Math.max(0,r.rep-6);r.p=-Math.round(T[5]*f*.5);S.money+=r.p;try{log(`「${r.n}」今年沒有像樣的菜單，生意冷清，虧損 ${money(-r.p)}。`,'bad')}catch(e){}return}
  const div=Math.min(1.1,.7+menuN*.1),fame=((S.rcp&&S.rcp.fame)||0)/200;
  const cov=T[3]*(.5+(r.rep+fame*30)/100)*(.6+q/150)*div*Math.min(1.6,.8+r.staff*.2)*(ckIsChef()||ckInit().sk>=50?1:.9)*(.9+Math.random()*.2);
- const rev=Math.round(cov*T[4]*f),cost=Math.round(rev*.55*ingIdx()+T[5]*f+r.staff*Math.max(T[5]*.25,350000)*f);
+ const LC=(typeof rstLoc==='function')?rstLoc():[0,0,1,1,1],sea=.9+Math.random()*(r.loc===3?.3:.2),cmp=Math.max(.6,1-.07*(r.comp||0));
+ const rev=Math.round(cov*LC[2]*sea*cmp*T[4]*LC[4]*f),cost=Math.round(rev*.55*ingIdx()+T[5]*LC[3]*f+r.staff*Math.max(T[5]*.25,350000)*f);
  r.p=rev-cost;S.money+=r.p;r.rep=Math.max(0,Math.min(100,r.rep+Math.round((q-50)/8+(Math.random()-.5)*6)));
  S.stress=cl(S.stress+3);
  try{const rc=ckInit();if(r.t===2&&r.rep>=70)rc.fame=Math.min(100,(rc.fame||0)+2);else if(r.t===1&&r.rep>=80)rc.fame=Math.min(100,(rc.fame||0)+1)}catch(e){}
@@ -49,7 +50,7 @@ function appTake(){
 function appTeach(i,id){
  const r=ckInit(),a=appInit()[+i];if(!a)return B('請選徒弟。');if(!r.known[id])return B('你自己要先會。');if(ckLeft()<=0)return B('今年的次數用完了。');
  if(a.known.includes(id))return B('他已經會這道菜了。');ckUse();a.known.push(id);a.sk=Math.min(100,a.sk+8);r.sk=Math.min(100,r.sk+1);
- const d=ckRecipe(id);return G(`你把「${d.n}」教給${a.n}，他學得很認真。`);
+ const d=ckRecipe(id);return G(`你把「${d.n}」教給${a.n}，對方學得很認真。`);
 }
 function appYear(){
  const r=S.rcp;if(!r||!r.apps)return;
@@ -144,7 +145,7 @@ E.push({id:'ck_senior',min:16,max:40,w:3,if:()=>{try{const r=ckInit();return r.s
  ch('客氣謝絕',()=>N('你覺得自己還沒準備好。'))]}}});
 E.push({id:'ck_teachkid',min:25,max:60,w:3,if:()=>{try{return ckInit().sk>=30&&S.kids&&S.kids.some(k=>k.age>=8&&k.age<=18)}catch(e){return false}},run:()=>{const k=pick(S.kids.filter(x=>x.age>=8&&x.age<=18)),r=ckInit(),s=ckSigs(1)[0];return {t:`${k.n}站在廚房門口，問你可不可以教他做菜。`,c:[
  ch('一起下廚',()=>{k.rel=Math.min(100,(k.rel||50)+6);k.ck=(k.ck||0)+15;chg('happy',4);return G(`${k.n}笨手笨腳，但笑得很開心${s?`，還想學「${s.rec.n}」`:''}。`)}),
- ch('等你長大再說',()=>{k.rel=Math.max(0,(k.rel||50)-2);return N('他有點失望地走開了。')})]}}});
+ ch('等你長大再說',()=>{k.rel=Math.max(0,(k.rel||50)-2);return N('對方有點失望地走開了。')})]}}});
 E.push({id:'ck_tv',min:30,max:70,w:3,if:()=>{try{const r=ckInit();return (r.fame||0)>=25&&r.sk>=60}catch(e){return false}},run:()=>({t:'電視台的美食節目來邀請你上節目示範拿手菜。',c:[
  ch('接受邀請',()=>{const r=ckInit(),inc=Math.round(60000*ckF());S.money+=inc;r.fame=Math.min(100,r.fame+8);chg('happy',5);S.stress=cl(S.stress+3);return G(`節目播出後反應很好，你拿到酬勞 ${money(inc)}，知名度大增。`)}),
  ch('婉拒，專心經營生活',()=>N('你覺得安靜過日子比較自在。'))]})});

@@ -11225,9 +11225,9 @@ E.push({id:'npc_mentor_old',min:48,max:85,w:3,if:()=>npcInit().mentor&&!npcInit(
 E.push({id:'npc_rival_re',min:40,max:80,w:3,if:()=>npcInit().rival&&!npcInit().rival.done&&calYear()-npcInit().rival.y>=15,run:()=>{const r=npcInit().rival,up=chance(.5);return {t:up?`你在一場場合遇到老對手${r.n}，對方現在事業比你還成功，主動走過來打招呼。`:`你聽說老對手${r.n}這幾年過得不太順，在街上偶然碰到。`,c:[
  ch(up?'真心恭喜，聊起當年':'請他吃頓飯，聊聊近況',()=>{r.done=1;chg('happy',4);S.friends.length<14&&S.friends.push({n:r.n,sx:'男',rel:55,tru:50,kind:'老對手',tr:pick(FTR),loan:0});return G(`你們笑著談起當年的較勁，成了不打不相識的朋友。`)}),
  ch('點頭示意就離開',()=>{r.done=1;return N(`你們互相點了頭，各自走開。`)})]}}});
-E.push({id:'npc_friend_news',min:30,max:85,w:5,if:()=>S.friends&&S.friends.some(f=>f.rel>=50&&!f.sib),run:()=>{const f=pick(S.friends.filter(x=>x.rel>=50&&!x.sib)),st=pick(['結婚了','生了孩子','升了職','搬到國外','生了一場病','開了自己的小店']);return {t:`多年的朋友${f.n}傳來消息：他最近${st}。`,c:[
+E.push({id:'npc_friend_news',min:30,max:85,w:5,if:()=>S.friends&&S.friends.some(f=>f.rel>=50&&!f.sib),run:()=>{const f=pick(S.friends.filter(x=>x.rel>=50&&!x.sib)),st=pick(['結婚了','生了孩子','升了職','搬到國外','生了一場病','開了自己的小店']);return {t:`多年的朋友${f.n}傳來消息：${f.sx==='女'?'她':'他'}最近${st}。`,c:[
  ch('打電話過去關心',()=>{f.rel=cl(f.rel+6);f.tru=cl(f.tru+3);chg('happy',3);return G(`你們聊了很久，像回到從前。`)}),
- ch('傳訊息祝福',()=>{f.rel=cl(f.rel+2);return N('你傳了訊息，他很快回覆了。')}),
+ ch('傳訊息祝福',()=>{f.rel=cl(f.rel+2);return N('你傳了訊息，對方很快回覆了。')}),
  ch('忙，沒回',()=>{f.rel=cl(f.rel-5);return B('你想著晚點回，後來就忘了。')})]}}});
 /* 3. 因果事件：呼應過去的選擇 */
 E.push({id:'cause_karma_hi',min:50,max:90,w:3,if:()=>S.karma>=70,run:()=>({t:'一位陌生人在路上認出你，說多年前你幫過他的忙，他一直記得。',c:[
@@ -11503,7 +11503,8 @@ function rstYear(){
  if(!menuN){r.rep=Math.max(0,r.rep-6);r.p=-Math.round(T[5]*f*.5);S.money+=r.p;try{log(`「${r.n}」今年沒有像樣的菜單，生意冷清，虧損 ${money(-r.p)}。`,'bad')}catch(e){}return}
  const div=Math.min(1.1,.7+menuN*.1),fame=((S.rcp&&S.rcp.fame)||0)/200;
  const cov=T[3]*(.5+(r.rep+fame*30)/100)*(.6+q/150)*div*Math.min(1.6,.8+r.staff*.2)*(ckIsChef()||ckInit().sk>=50?1:.9)*(.9+Math.random()*.2);
- const rev=Math.round(cov*T[4]*f),cost=Math.round(rev*.55*ingIdx()+T[5]*f+r.staff*Math.max(T[5]*.25,350000)*f);
+ const LC=(typeof rstLoc==='function')?rstLoc():[0,0,1,1,1],sea=.9+Math.random()*(r.loc===3?.3:.2),cmp=Math.max(.6,1-.07*(r.comp||0));
+ const rev=Math.round(cov*LC[2]*sea*cmp*T[4]*LC[4]*f),cost=Math.round(rev*.55*ingIdx()+T[5]*LC[3]*f+r.staff*Math.max(T[5]*.25,350000)*f);
  r.p=rev-cost;S.money+=r.p;r.rep=Math.max(0,Math.min(100,r.rep+Math.round((q-50)/8+(Math.random()-.5)*6)));
  S.stress=cl(S.stress+3);
  try{const rc=ckInit();if(r.t===2&&r.rep>=70)rc.fame=Math.min(100,(rc.fame||0)+2);else if(r.t===1&&r.rep>=80)rc.fame=Math.min(100,(rc.fame||0)+1)}catch(e){}
@@ -11519,7 +11520,7 @@ function appTake(){
 function appTeach(i,id){
  const r=ckInit(),a=appInit()[+i];if(!a)return B('請選徒弟。');if(!r.known[id])return B('你自己要先會。');if(ckLeft()<=0)return B('今年的次數用完了。');
  if(a.known.includes(id))return B('他已經會這道菜了。');ckUse();a.known.push(id);a.sk=Math.min(100,a.sk+8);r.sk=Math.min(100,r.sk+1);
- const d=ckRecipe(id);return G(`你把「${d.n}」教給${a.n}，他學得很認真。`);
+ const d=ckRecipe(id);return G(`你把「${d.n}」教給${a.n}，對方學得很認真。`);
 }
 function appYear(){
  const r=S.rcp;if(!r||!r.apps)return;
@@ -11614,7 +11615,7 @@ E.push({id:'ck_senior',min:16,max:40,w:3,if:()=>{try{const r=ckInit();return r.s
  ch('客氣謝絕',()=>N('你覺得自己還沒準備好。'))]}}});
 E.push({id:'ck_teachkid',min:25,max:60,w:3,if:()=>{try{return ckInit().sk>=30&&S.kids&&S.kids.some(k=>k.age>=8&&k.age<=18)}catch(e){return false}},run:()=>{const k=pick(S.kids.filter(x=>x.age>=8&&x.age<=18)),r=ckInit(),s=ckSigs(1)[0];return {t:`${k.n}站在廚房門口，問你可不可以教他做菜。`,c:[
  ch('一起下廚',()=>{k.rel=Math.min(100,(k.rel||50)+6);k.ck=(k.ck||0)+15;chg('happy',4);return G(`${k.n}笨手笨腳，但笑得很開心${s?`，還想學「${s.rec.n}」`:''}。`)}),
- ch('等你長大再說',()=>{k.rel=Math.max(0,(k.rel||50)-2);return N('他有點失望地走開了。')})]}}});
+ ch('等你長大再說',()=>{k.rel=Math.max(0,(k.rel||50)-2);return N('對方有點失望地走開了。')})]}}});
 E.push({id:'ck_tv',min:30,max:70,w:3,if:()=>{try{const r=ckInit();return (r.fame||0)>=25&&r.sk>=60}catch(e){return false}},run:()=>({t:'電視台的美食節目來邀請你上節目示範拿手菜。',c:[
  ch('接受邀請',()=>{const r=ckInit(),inc=Math.round(60000*ckF());S.money+=inc;r.fame=Math.min(100,r.fame+8);chg('happy',5);S.stress=cl(S.stress+3);return G(`節目播出後反應很好，你拿到酬勞 ${money(inc)}，知名度大增。`)}),
  ch('婉拒，專心經營生活',()=>N('你覺得安靜過日子比較自在。'))]})});
@@ -11660,14 +11661,14 @@ function wkCollab(a,b,title){
 }
 function wkContest(id){
  const a=ARTALL[id];if(!a||!(S.art&&S.art[id]>=15))return B('這項才藝程度要 15 以上才能報名。');
- if(S.acts&&S.acts.wkc)return B('今年已經參加過比賽了。');S.acts=S.acts||{};S.acts.wkc=1;
+ S.acts=S.acts||{};if(S.acts['wkc'+id])return B('這個項目今年已經參加過比賽了。');S.acts['wkc'+id]=1;
  const best=wkInit().filter(w=>w.art===id).sort((x,y)=>y.q-x.q)[0],p=Math.max(.05,Math.min(.65,S.art[id]/160+(best?best.q/400:0)+fmGet()/500));
  if(Math.random()<p){const pz=Math.round(40000*(1+S.art[id]/50)*ckF());S.money+=pz;fmAdd(2);S.art[id]=Math.min(100,S.art[id]+2);chg('happy',8);const m=`你參加${a.n}比賽拿到名次，獎金 ${money(pz)}，知名度小幅上升。`;log(m,'good');return G(m)}
  S.art[id]=Math.min(100,S.art[id]+1);chg('happy',-2);return N(`你參加了${a.n}比賽，沒有得名，但學到很多。`);
 }
 function wkHTML(){
  const arts=wkArts(),W=wkInit(),all=Object.keys(S.art||{}).filter(k=>ARTALL[k]&&S.art[k]>=15);
- let h=`<h3>創作與作品</h3><div class="item"><b>知名度 ${fmGet()}（${fmLabel()}）</b>・作品 ${W.length} 件<div class="sub">今年還能創作 ${wkLeft()} 次${S.acts&&S.acts.wkc?'・比賽已報名':'・可報名 1 場比賽'}。知名度與食譜系統共用。</div></div>`;
+ let h=`<h3>創作與作品</h3><div class="item"><b>知名度 ${fmGet()}（${fmLabel()}）</b>・作品 ${W.length} 件<div class="sub">今年還能創作 ${wkLeft()} 次・每個項目每年可參賽 1 場。知名度與食譜系統共用。</div></div>`;
  if(!all.length&&!ckInit().sk)return h+'<div class="sub">先到「才藝與課程」學一門才藝（程度 20 以上才能創作）。</div><button class="btn" data-a="back">← 返回</button>';
  if(arts.length){
   h+='<div class="sec op">創作</div><div class="frm"><label for="wk_a">才藝</label><select id="wk_a">'+arts.map(k=>`<option value="${k}">${esc(ARTALL[k].n)}（${S.art[k]}）</option>`).join('')+`</select><label for="wk_t">作品名稱（可留空）</label><input id="wk_t" type="text" maxlength="14" placeholder="例如：夏天的雨"><div class="acts"><button class="btn p" data-a="frmgo:wkc:c">創作並發表</button></div></div>`;
@@ -11756,6 +11757,129 @@ yearly=function(){
   for(const [k,t,msg] of NFH){if(!S.nf[k]&&t()){S.nf[k]=1;log(msg,'');break}}}}catch(e){}
  return r;
 };
+/* ---- p114：餐廳深化（選址、競爭、分店、傳承）、競技生涯（運動與棋藝）、公司與房產事件鏈（遊戲設定）---- */
+/* 1. 餐廳深化 */
+const RLOC=[['0','夜市',1.1,.85,.9],['1','商圈',1,1,1],['2','鄉下',.75,.5,.92],['3','觀光區',1.15,1.4,1.1]];
+function rstLoc(){const s=S.rst;return RLOC[(s&&s.loc!=null?s.loc:1)]||RLOC[1]}
+const _ry114=rstYear;
+rstYear=function(){
+ const s=S.rst;if(!s){return _ry114.apply(this,arguments)}
+ s.comp=s.comp||0;s.br=s.br||0;
+ _ry114.apply(this,arguments);
+ try{
+  if(s.br>0){const bp=Math.round(s.p*.5*s.br);S.money+=bp;s.p+=bp;s.rep=Math.max(0,s.rep-(s.staff>=s.br+1?0:s.br));S.stress=cl(S.stress+2*s.br);try{log(`${s.br} 間分店合計${bp>=0?'多賺':'多虧'} ${money(Math.abs(bp))}。`,bp>=0?'good':'bad')}catch(e){}}
+  if(Math.random()<.18&&s.comp<3){s.comp++;log('附近開了一家新餐廳，開始分走一些客人。','')}
+  else if(s.comp>0&&Math.random()<.2){s.comp--;log('附近一家競爭對手收攤了。','')}
+ }catch(e){}
+};
+function rstMove(l){
+ const s=S.rst;if(!s)return B('你還沒有店。');const L=RLOC[+l];if(!L)return B('請選位置。');if((s.loc==null?1:s.loc)===+l)return B('已經在這個位置了。');
+ const c=Math.round(s.inv*.15);if(S.money<c)return B(`搬遷約需 ${money(c)}。`);
+ S.money-=c;s.inv+=c;s.loc=+l;s.rep=Math.max(0,s.rep-12);return G(`你把店搬到${L[1]}，花費 ${money(c)}，人氣掉了一些，要重新累積。`);
+}
+function rstBranch(){
+ const s=S.rst;if(!s)return B('你還沒有店。');if((s.br||0)>=3)return B('最多 3 間分店。');
+ if(s.rep<55)return B('人氣要 55 以上才有條件開分店。');if(s.p<=0)return B('去年沒有獲利，先把本店經營好。');
+ const c=Math.round(RTIER[s.t][2]*.6*ckF());if(S.money<c)return B(`開分店約需 ${money(c)}。`);
+ S.money-=c;s.inv+=c;s.br=(s.br||0)+1;return G(`第 ${s.br} 間分店開張，花費 ${money(c)}。`);
+}
+const _rc114=cookHTML;
+cookHTML=function(){
+ let h=_rc114();
+ if(S.rst){const s=S.rst,L=rstLoc();
+  const blk=`<div class="item"><b>經營狀況</b><div class="sub">位置：${L[1]}・競爭對手 ${s.comp||0} 家・分店 ${s.br||0} 間</div></div><div class="frm"><label for="rs_l">搬遷到</label><select id="rs_l">${RLOC.map(x=>`<option value="${x[0]}" ${+x[0]===(s.loc==null?1:s.loc)?'selected':''}>${x[1]}</option>`).join('')}</select><div class="acts"><button class="btn" data-a="frmgo:rsx:m">搬遷</button><button class="btn" data-a="frmgo:rsx:b">開分店</button></div></div>`;
+  h=h.replace('<button class="btn" data-a="back">← 返回</button>',blk+'<button class="btn" data-a="back">← 返回</button>');
+ }
+ return h;
+};
+const _hd114=handle;
+handle=function(a){
+ if(typeof a==='string'&&a.startsWith('frmgo:rsx:')){
+  const x=a.split(':')[2],v=i=>{try{return document.getElementById(i).value}catch(e){return ''}};
+  view.msg=x==='m'?rstMove(v('rs_l')):rstBranch();view.lsub='cook';render();try{showSheet('life')}catch(e){}return;
+ }
+ return _hd114(a);
+};
+E.push({id:'rst_comp',min:22,max:75,w:3,if:()=>S.rst&&(S.rst.comp||0)>=1,run:()=>({t:'隔壁新開的餐廳打出開幕特價，你店裡的客人明顯變少了。',c:[
+ ch('推出限定新菜，不打價格戰',()=>{S.rst.rep=Math.min(100,S.rst.rep+4);S.stress=cl(S.stress+3);return N('熟客記得你的味道，慢慢回來了。')}),
+ ch('跟著降價',()=>{S.money-=Math.round(RTIER[S.rst.t][4]*600*ckF());return B('客人是回來了，但利潤薄了一圈。')}),
+ ch('先觀察，不理會',()=>{S.rst.rep=Math.max(0,S.rst.rep-3);return N('你決定靜觀其變。')})]})});
+E.push({id:'rst_season',min:22,max:75,w:2,if:()=>S.rst&&S.rst.loc===3,run:()=>({t:'觀光旺季到了，店門口排起了隊，廚房忙得人仰馬翻。',c:[
+ ch('加開人手，把握旺季',()=>{const c=Math.round(100000*ckF());S.money-=c;const g=Math.round(RTIER[S.rst.t][4]*1200*ckF());S.money+=g;S.stress=cl(S.stress+4);return G(`旺季的收入多了約 ${money(g-c)}，大家都累壞了。`)}),
+ ch('維持原本節奏',()=>{S.stress=cl(S.stress+1);return N('你不想把團隊操壞，照常營業。')})]})});
+const _as114=applySuccession;
+applySuccession=function(r,k){
+ const old=S.rst;_as114.apply(this,arguments);
+ try{if(old){S.rst=Object.assign({},old,{fam:1,rep:Math.round(old.rep*.8),staff:Math.min(old.staff,2),br:Math.floor((old.br||0)/2),comp:old.comp||0,p:0});log(`你繼承了家裡的「${old.n}」，老客人還記得上一代的味道。`,'good')}}catch(e){}
+};
+/* 2. 競技生涯 */
+const SPR={mar:['入門','初段','二段','三段','國手','職業'],ball:['校隊','縣市隊','全國賽','國家隊','職業聯賽','職業聯賽'],swim:['校隊','縣市隊','全國賽','國家隊','職業','職業'],chess:['級位','初段','二段','三段','職業初段','職業高段']};
+function spKind(id){const a=ARTALL[id];if(!a)return null;if(id==='chess')return 'chess';if(id==='ball')return 'ball';if(id==='swim')return 'swim';return a.c==='mar'?'mar':null}
+function spInit(){if(!S.sp)S.sp={};return S.sp}
+function spOf(id){const s=spInit();return s[id]||(s[id]={rk:0,pts:0,pro:0,coach:0})}
+function spName(id){const k=spKind(id),s=spOf(id);return (SPR[k]||SPR.mar)[Math.min(s.rk,5)]}
+function spWin(id){
+ const s=spOf(id),need=[2,2,2,3,3,99][Math.min(s.rk,5)];s.pts++;
+ if(s.pts>=need&&s.rk<5){s.rk++;s.pts=0;const m=`你在${ARTALL[id].n}晉升為「${spName(id)}」。`;try{log(m,'good')}catch(e){}chg('happy',6);fmAdd(2)}
+}
+const _wc114=wkContest;
+wkContest=function(id){
+ const res=_wc114.apply(this,arguments);
+ try{if(spKind(id)&&Array.isArray(res)){if(res[1]==='good')spWin(id)}}catch(e){}
+ return res;
+};
+const _wh114=wkHTML;
+wkHTML=function(){
+ let h=_wh114();
+ try{const ks=Object.keys(S.sp||{}).filter(k=>S.art&&S.art[k]>0&&ARTALL[k]);
+  if(ks.length){const blk='<div class="sec">競技生涯</div>'+ks.map(k=>`<div class="item"><b>${esc(ARTALL[k].n)}：${esc(spName(k))}</b><div class="sub">累積勝場 ${spOf(k).pts}${spOf(k).pro?'・職業選手':''}${spOf(k).coach?'・開班授課中':''}</div></div>`).join('');
+   h=h.replace('<button class="btn" data-a="back">← 返回</button>',blk+'<button class="btn" data-a="back">← 返回</button>')}}catch(e){}
+ return h;
+};
+const spA=()=>Object.keys(S.art||{}).filter(k=>spKind(k)&&S.art[k]>=20);
+E.push({id:'sp_pro',min:18,max:34,w:4,if:()=>spA().some(k=>spOf(k).rk>=4&&!spOf(k).pro),run:()=>{const k=spA().find(x=>spOf(x).rk>=4&&!spOf(x).pro);return {t:`你的${ARTALL[k].n}已經打進${spName(k)}的水準，職業隊伸出了橄欖枝。`,c:[
+ ch('簽約，成為職業選手',()=>{spOf(k).pro=1;fmAdd(5);chg('happy',8);S.stress=cl(S.stress+5);return G('你簽下了職業合約，生活從此圍著訓練與比賽轉。')}),
+ ch('繼續當業餘，兼顧本業',()=>N('你覺得安穩的生活更重要。'))]}}});
+E.push({id:'sp_retire',min:36,max:48,w:5,if:()=>spA().some(k=>spOf(k).pro&&!spOf(k).retired),run:()=>{const k=spA().find(x=>spOf(x).pro&&!spOf(x).retired);return {t:`職業${ARTALL[k].n}的體能開始跟不上，你想著該不該退役了。`,c:[
+ ch('風光退役，轉任教練',()=>{const s=spOf(k);s.pro=0;s.retired=1;s.coach=1;chg('happy',3);return G('你辦了退役儀式，轉任教練，把經驗傳給年輕人。')}),
+ ch('再拚一季',()=>{chg('health',-4);S.stress=cl(S.stress+4);return N('身體發出警訊，但你還想再試一次。')})]}}});
+E.push({id:'sp_coach',min:28,max:70,w:3,if:()=>spA().some(k=>spOf(k).rk>=2&&!spOf(k).coach&&!spOf(k).pro),run:()=>{const k=spA().find(x=>spOf(x).rk>=2&&!spOf(x).coach&&!spOf(x).pro);return {t:`社區有人希望你開班教${ARTALL[k].n}，說你的${spName(k)}實力值得傳授。`,c:[
+ ch('開班授課',()=>{spOf(k).coach=1;chg('happy',4);return G('第一堂課，教室裡坐滿了期待的眼神。')}),
+ ch('目前沒有餘裕',()=>N('你說等時間更充裕再說。'))]}}});
+E.push({id:'sp_student',min:30,max:80,w:3,if:()=>spA().some(k=>spOf(k).coach),run:()=>{const k=spA().find(x=>spOf(x).coach);const sx=pick(['男','女']),n=fullName(sx),p=sx==='女'?'她':'他';return {t:`你教過的學生${n}在${ARTALL[k].n}比賽中拿到名次，上台時特別提到你。`,c:[
+ ch('到現場為他加油',()=>{fmAdd(2);chg('happy',6);return G(`你在台下紅了眼眶，${p}把獎牌舉向你的方向。`)}),
+ ch('傳訊息祝賀',()=>{chg('happy',3);return N('你傳了訊息，對方很快回覆道謝。')})]}}});
+const _y114=yearly;
+yearly=function(){
+ const r=_y114.apply(this,arguments);
+ try{if(S&&!S.dead&&S.sp){for(const k in S.sp){const s=S.sp[k];
+  if(s.pro&&S.age<=45){S.money+=Math.round(250000*Math.max(1,s.rk-3)*ckF()*(1+fmGet()/100));if(Math.random()<.12){chg('health',-3);try{log(`訓練中受了傷，休養了好一陣子。`,'bad')}catch(e){}}}
+  if(s.coach)S.money+=Math.round((S.art&&S.art[k]||30)*1800*ckF())}}}catch(e){}
+ return r;
+};
+const _as114b=applySuccession;
+applySuccession=function(r,k){const old=S.sp;_as114b.apply(this,arguments);try{if(old){S.sp={};for(const id in old){S.sp[id]={rk:Math.max(0,old[id].rk-2),pts:0,pro:0,coach:0}}}}catch(e){}};
+/* 3. 公司與房產事件鏈 */
+const cEvx=(id,min,max,w,cond,run)=>E.push({id,min,max,w,if:()=>{try{return cond()}catch(e){return false}},run});
+cEvx('co_partner',26,65,3,()=>S.co&&!S.cofl,()=>{S.cofl=1;const sx=pick(['男','女']),n=fullName(sx);return {t:`創業初期一起打拚的夥伴${n}說，自己有了新的人生規劃，想談談離開的事。`,c:[
+ ch('尊重他，好聚好散',()=>{chg('happy',-2);S.karma=Math.min(100,S.karma+3);return N(`你們喝了一杯，說好以後還是朋友。`)}),
+ ch('挽留，承諾更多分紅',()=>{S.money-=Math.round(300000*ckF());S.stress=cl(S.stress+2);return N(`${n}答應再留一年，你多付出了一些代價。`)}),
+ ch('談得不愉快，不歡而散',()=>{S.karma=Math.max(0,S.karma-4);chg('happy',-5);return B('這段關係結束得不太漂亮。')})]}});
+cEvx('co_loyal',30,75,3,()=>S.co&&S.coHist>=0,()=>{const sx=pick(['男','女']),n=fullName(sx),p=sx==='女'?'她':'他';return {t:`在公司待了十幾年的老員工${n}來找你，說家裡需要用錢，想談談薪資。`,c:[
+ ch('幫他加薪',()=>{S.money-=Math.round(120000*ckF());chg('happy',3);S.karma=Math.min(100,S.karma+2);return G(`${p}很感動，說會繼續陪公司走下去。`)}),
+ ch('說明公司的狀況',()=>N(`${p}理解你的難處，但臉上有些失落。`)),
+ ch('請他自己想辦法',()=>{S.karma=Math.max(0,S.karma-3);return B(`${p}沒再多說，不久後遞了辭呈。`)})]}});
+cEvx('co_anniv',30,80,2,()=>S.co&&S.coHist>=0&&(S.age>=40),()=>({t:'公司成立滿十週年了，員工想辦個小小的慶祝。',c:[
+ ch('辦一場感恩聚餐',()=>{S.money-=Math.round(200000*ckF());chg('happy',6);fmAdd(1);return G('大家吃得開心，回顧這十年，心裡都有些感動。')}),
+ ch('發紅包代替',()=>{S.money-=Math.round(80000*ckF());chg('happy',3);return N('大家收下紅包，笑得很開心。')}),
+ ch('今年先不辦',()=>N('你說等公司更穩定再說。')) ]}));
+cEvx('hs_memory',40,90,3,()=>S.house&&S.age-(S.house.since||0)>=20&&!S.hsmem,()=>{S.hsmem=1;return {t:'你在這間房子住了二十年，牆上的刻痕、窗邊的角落，每一處都有故事。',c:[
+ ch('花點錢整修，繼續住下去',()=>{S.money-=Math.round(400000*ckF());chg('happy',5);return G('整修完的家煥然一新，卻保留了原本的味道。')}),
+ ch('拍些照片留作紀念',()=>{chg('happy',3);return N('你把照片收進相簿，想著以後會有人翻開來看。')}),
+ ch('不去想，日子照過',()=>N('你泡了壺茶，坐在熟悉的位置。'))]}});
+cEvx('hs_tenant_old',30,85,3,()=>S.props&&S.props.length&&S.age>=40,()=>({t:'長期租你房子的房客說，這幾年住得很安心，想問能不能續約並維持原本的租金。',c:[
+ ch('答應續約，租金不變',()=>{S.karma=Math.min(100,S.karma+3);chg('happy',3);return G('房客很開心，說會把房子照顧得很好。')}),
+ ch('調漲一點，但說明原因',()=>{S.money+=Math.round(60000*ckF());return N('房客理解，簽了新約。')})]}));
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
