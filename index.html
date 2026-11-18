@@ -10453,10 +10453,11 @@ moreHTML=function(){
 };
 // 年度紀錄：今年展開、舊年份收合、依類別分組
 const LGC=[
- ['世界與經濟',/世界新聞|央行|經濟成長|CPI|景氣|戰爭|疫情|政策|基本工資|普發|匯率|利率|通膨|房價指數|股市|油價|選舉結果|遊戲隨機事件/],
+ ['世界與經濟',/世界新聞|央行|經濟成長|CPI|景氣|戰爭|疫情|政策|基本工資|普發|匯率|利率|通膨|房價指數|股市|油價|選舉結果|遊戲隨機事件|全球風險|加密貨幣新聞|新聞|三級警/],
+ ['生活與社會',/颱風|廟|拜拜|普渡|桐花|祭|節|詐騙|簡訊|檢警|電話|代幣|購物|貓|發票|小吃|旅行|出國|搬家|鄰居|宗教|農曆|籤|親人|來電/],
  ['財務',/收入|支出|現金|淨資產|股利|薪|稅|貸款|投資|存款|利息|租金|房|買了|賣了|保險|基金|專案|年度收支|補貼|繳|費用|NT\$/],
- ['家庭與感情',/伴侶|結婚|孩子|孫|家人|父母|爸|媽|朋友|戀愛|約會|離婚|兄弟|姊妹|告白|分手|婚禮|親戚|寵物/],
- ['健康',/健康|生病|醫|病|手術|壓力|憂鬱|受傷|住院|運動|睡眠|癌|復健/],
+ ['家庭與感情',/伴侶|結婚|孩子|孫|家人|父母|爸|媽|朋友|戀愛|約會|離婚|兄弟|姊妹|告白|分手|婚禮|親戚|寵物|阿公|阿嬤|長輩|家族|同學|校風/],
+ ['健康',/健康|生病|醫|病|手術|壓力|憂鬱|受傷|住院|運動|睡眠|癌|復健|感冒|發燒|喉嚨|失能|提不起勁|擦撞|倒地|吃藥|長照|換季|倒下/],
  ['事業與學業',/公司|工作|職|升|學校|考|畢業|創業|股東|董事|客戶|老闆|同事|上班|成績|大學|選舉|參選|任期|施政/]
 ];
 function lgCat(t){for(const [n,re] of LGC)if(re.test(t))return n;return '其他'}
@@ -10477,9 +10478,19 @@ render=function(){
    const kids=[...el.children].filter(c=>c!==h4),body=document.createElement('div');
    const lines=kids.filter(c=>c.classList&&c.classList.contains('ln')),others=kids.filter(c=>!(c.classList&&c.classList.contains('ln')));
    others.forEach(c=>body.appendChild(c));
+   const only=!!(lsGet(PREFK,{}).hl);
+   const hl=lines.filter(l=>TLKEY.test(l.textContent||'')).slice(0,3);
+   if(hl.length){
+    const hk='h'+age,hh=document.createElement('div'),hb=document.createElement('div');
+    hh.className='cgh';hh.innerHTML=`<b>重點</b>（${hl.length}）`;
+    hl.forEach(l=>{const c=l.cloneNode(true);hb.appendChild(c)});
+    const ho2=()=>view.fo[hk]==null?true:view.fo[hk];
+    const ap2=()=>{hb.style.display=ho2()?'':'none'};
+    hh.onclick=()=>{view.fo[hk]=!ho2();ap2()};ap2();body.appendChild(hh);body.appendChild(hb);
+   }
    const groups={};
-   lines.forEach(l=>{const c=lgCat(l.textContent||'');(groups[c]=groups[c]||[]).push(l)});
-   const order=['家庭與感情','事業與學業','健康','財務','世界與經濟','其他'];
+   let pc='其他';lines.forEach(l=>{const t=l.textContent||'';let c=/^(影響：|你的錢不夠|（)/.test(t)?pc:lgCat(t);pc=c;(groups[c]=groups[c]||[]).push(l)});
+   const order=['家庭與感情','事業與學業','健康','生活與社會','財務','世界與經濟','其他'];
    order.forEach(name=>{
     const arr=groups[name];if(!arr||!arr.length)return;
     const gk='g'+age+name,ho=document.createElement('div'),gb=document.createElement('div');
@@ -10489,6 +10500,7 @@ render=function(){
     const isOpen=()=>view.fo[gk]==null?def:view.fo[gk];
     const ap=()=>{gb.style.display=isOpen()?'':'none';ho.style.opacity=isOpen()?'1':'.75'};
     ho.onclick=()=>{view.fo[gk]=!isOpen();ap()};ap();
+    if(only){ho.style.display='none';gb.style.display='none';ho.onclick=null}
     body.appendChild(ho);body.appendChild(gb);
    });
    el.appendChild(body);
@@ -10498,6 +10510,56 @@ render=function(){
    const apY=()=>{body.style.display=isY()?'':'none';h4.classList.toggle('op',isY())};
    h4.onclick=()=>{view.fo[yk]=!isY();apY()};apY();
   });
+ }catch(e){}
+};
+// 首頁提示收合、只看重點、搜尋歷史、舊紀錄壓縮
+(function(){
+ try{const st=document.createElement('style');st.textContent='.hbadge{grid-column:1/-1;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--acc) 12%,var(--card));color:var(--acc);cursor:pointer;width:fit-content;margin-top:2px}.hbadge+span,.hint.hc span{display:none}.hint.ho span{display:block}.fbar{display:flex;gap:8px;align-items:center;margin:6px 0;font-size:12px;color:var(--mut,#8a7f72)}';document.head.appendChild(st)}catch(e){}
+})();
+const _r100=render;
+render=function(){
+ _r100();
+ try{
+  if(!S)return;view.hh=view.hh||{o:false};
+  document.querySelectorAll('.hint').forEach(el=>{
+   if(el.dataset.p100)return;el.dataset.p100='1';
+   const n=el.querySelectorAll('span').length;if(!n)return;
+   el.classList.add(view.hh.o?'ho':'hc');
+   const b=document.createElement('div');b.className='hbadge';b.textContent=(view.hh.o?'收起提示':'提示 '+n+' 則')+'';
+   b.onclick=()=>{view.hh.o=!view.hh.o;el.classList.toggle('ho',view.hh.o);el.classList.toggle('hc',!view.hh.o);b.textContent=view.hh.o?'收起提示':'提示 '+n+' 則'};
+   el.insertBefore(b,el.firstChild);
+  });
+  const f=$('feed');
+  if(f&&f.insertAdjacentHTML&&!document.getElementById('fbar')){
+   const on=!!lsGet(PREFK,{}).hl;
+   f.insertAdjacentHTML('afterbegin',`<div class="fbar" id="fbar"><button class="mini" id="hlTog">只看重點：${on?'開':'關'}</button><span>重大事件、財務與世界消息可在各年度展開</span></div>`);
+   const t=document.getElementById('hlTog');
+   if(t)t.onclick=()=>{const p=lsGet(PREFK,{});p.hl=!p.hl;lsSet(PREFK,p);render()};
+  }
+ }catch(e){}
+};
+/* 搜尋也找歷史紀錄 */
+function moreSearch(v){
+ const q=String(v||'').trim();
+ document.querySelectorAll('.tile').forEach(t=>{t.style.display=!q||t.textContent.indexOf(q)>=0?'':'none'});
+ document.querySelectorAll('.cgrp').forEach(g=>{const h=g.previousElementSibling;g.style.display=(q||!(h&&h.classList.contains('cl')))?'':'none'});
+ const inp=document.getElementById('tq');if(!inp)return;
+ let box=document.getElementById('hq');
+ if(!box){box=document.createElement('div');box.id='hq';inp.insertAdjacentElement('afterend',box)}
+ if(!q){box.innerHTML='';return}
+ const out=[];
+ for(let i=S.log.length-1;i>=0&&out.length<25;i--){const L=S.log[i];for(const l of L.lines){if((l.t||'').indexOf(q)>=0){out.push(`<div class="ln ${l.c}"><b>${L.age} 歲</b>　${esc(l.t)}</div>`);if(out.length>=25)break}}}
+ box.innerHTML=out.length?`<div class="sec op">人生紀錄（${out.length}${out.length>=25?'+':''}）</div>`+out.join(''):'';
+}
+const _mh100=moreHTML;
+moreHTML=function(){return _mh100().replace(/oninput="[^"]*"/,'oninput="moreSearch(this.value)"').replace('搜尋功能（例如：房、股、宗教）','搜尋功能或人生紀錄（例如：房、股、結婚）')};
+/* 舊紀錄壓縮：超過 40 年前的年份只留重點 */
+const _y100=yearly;
+yearly=function(){
+ _y100.apply(this,arguments);
+ try{
+  if(!S||!S.log||S.log.length<45)return;
+  for(let i=0;i<S.log.length-40;i++){const L=S.log[i];if(L.cz)continue;L.cz=1;if(L.lines.length>4){const keep=L.lines.filter(l=>TLKEY.test(l.t||'')).slice(0,3);L.lines=keep.length?keep:L.lines.slice(0,2)}}
  }catch(e){}
 };
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
