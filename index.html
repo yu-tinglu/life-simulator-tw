@@ -8966,7 +8966,7 @@ pbFix=function(p){
 /* 男性頭像不再出現長髮／雙馬尾等髮型（使用者自選髮型不受影響） */
 const _avS73=avSVG;
 avSVG=function(a,size){
- try{const g=a&&a.g;if(g&&g.hs!=null&&a.sx!=='女'&&[2,3,6,7,8,9].includes(g.hs)){const sh=[0,1,5,11];a=Object.assign({},a,{g:Object.assign({},g,{hs:sh[g.hs%sh.length]})})}}catch(e){}
+ try{const g=a&&a.g;if(g&&g.hs!=null&&a.sx!=='女'&&[2,3,4,6,7,8,9].includes(g.hs)){const sh=[0,1,5,11];a=Object.assign({},a,{g:Object.assign({},g,{hs:sh[g.hs%sh.length]})})}}catch(e){}
  return _avS73(a,size);
 };
 /* 馬來姓名：男性用 bin、女性用 binti */
@@ -10038,7 +10038,7 @@ function polRun(lv,bud,party){
  if((party==='rul'||party==='opp')&&lv>=3){const pp=Math.min(.92,.3+polRep()/150+(p.office&&p.office.lv===lv?.2:0));if(Math.random()>pp){chg('happy',-3);log(`${y} 年，你在黨內初選敗給其他人，沒有取得提名。`,'bad');return B('黨內初選落敗，沒有取得提名，也沒有花到競選經費。可以改以其他身分參選明年的選舉。')}}
  S.money-=cost;
  const pt=PPT.find(x=>x[0]===party)||PPT[3];
- const wave=R(-8,8);let pb=pt[2]+(party==='rul'?wave:party==='opp'?-wave:party==='thd'?R(-3,5):0);
+ const wave=(typeof polWave==="function"?polWave():R(-8,8));let pb=pt[2]+(party==='rul'?wave:party==='opp'?-wave:party==='thd'?R(-3,5):0);
  if(party==='ind'&&lv>=3)pb-=10;
  const inc=p.office&&p.office.lv===lv?8:0;
  const sc=36+polRep()*.35+((S.smarts||50)-50)*.1+b[3]+pb+inc+R(-10,10)+(typeof polAdj==='function'?polAdj(lv):0);
@@ -10343,6 +10343,105 @@ ACH.push(
  ['gk_1','抱孫',()=>S.kids.some(k=>k.rm&&k.rm.gk&&k.rm.gk.length>0)],
  ['gk_3','三代同堂：孫子女達 3 位',()=>S.kids.reduce((a,k)=>a+(k.rm&&k.rm.gk?k.rm.gk.length:0),0)>=3]
 );
+// 圖示化與精簡文字
+const AIC=[
+ [/銀行|存款|定存|活存/,'bank'],[/匯|外幣/,'swap'],[/股票|投資組合|基金|投資|創投/,'chartup'],[/房|屋|住宅|宅/,'house'],[/貸款|還款|借/,'coin'],[/稅/,'clip'],
+ [/遺囑|信託|遺產|傳承|繼承|接班/,'scale'],[/贈與|送禮|禮物/,'gift'],[/孩|子女|孫|領養|教養/,'baby'],[/伴侶|戀愛|約會|告白|結婚|婚/,'heart'],[/朋友|人脈|社交/,'friends'],
+ [/公司|創業|工作|職業|求職|轉職|升遷|薪/,'briefcase'],[/學校|升學|補習|教育|留學|學歷/,'school'],[/健康|醫|看診|復健|體檢/,'stetho'],[/旅行|出國|機票|簽證|移居|移民|搬到/,'plane'],
+ [/選舉|政治|參選|施政|罷免/,'scale'],[/設定|存檔/,'gear'],[/法規|法條|版權|資料來源|導覽/,'clip'],[/成就|結局|獎/,'trophy'],[/國家|海外|國外/,'globe'],
+ [/運動|健身|跑步|游泳/,'run'],[/才藝|藝術|收藏/,'palette'],[/休閒|咖啡|旅宿|按摩/,'cup'],[/比賽|球隊|競賽/,'trophy'],[/慈善|基金會|捐/,'dove'],
+ [/太空|火箭|衛星/,'rocket'],[/人工智慧|研究院|AI/,'brain'],[/能源|核融合|電/,'sun'],[/媒體|新聞|平台/,'news'],[/島|度假/,'wave'],[/車/,'moped'],
+ [/保險|保障/,'lock'],[/退休|年金|勞退/,'hourglass'],[/報表|損益|財報/,'chartbar'],[/宗教|信仰|祈/,'lotus'],[/兵役|軍/,'helmet'],[/犯罪|法院|訴訟|律師/,'scale'],
+ [/返回|關閉/,null]
+];
+function aiKey(t){for(const [re,k] of AIC)if(re.test(t))return k;return null}
+function autoIc(root){
+ try{
+  if(!root||!root.querySelectorAll)return;
+  const els=[...root.querySelectorAll('.btn,.sec')];if(root.matches&&root.matches('.btn,.sec'))els.push(root);
+  for(const el of els){
+   if(el.dataset.ai||el.querySelector('svg.ic')||el.closest('.seg,.chips,.tabs,.mini'))continue;
+   el.dataset.ai='1';
+   const lab=(el.firstChild&&el.firstChild.nodeType===3?el.firstChild.nodeValue:el.textContent||'').slice(0,40);
+   const k=aiKey(lab);if(!k)continue;
+   el.insertBefore(mkIcon(k),el.firstChild);
+  }
+ }catch(e){}
+}
+const _ic96=iconize;
+iconize=function(root){_ic96(root);autoIc(root)};
+/* 精簡文字 */
+(function(){
+ try{
+  const st=document.createElement('style');
+  st.textContent='body.lite .btn small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}';
+  document.head.appendChild(st);
+ }catch(e){}
+})();
+function liteApply(){try{const p=lsGet(PREFK,{});document.body.classList.toggle('lite',p.lite!==false)}catch(e){}}
+liteApply();
+const _sh96=setHTML;
+setHTML=function(){
+ const p=lsGet(PREFK,{}),on=p.lite!==false;
+ return _sh96().replace('<div class="sec">存檔匯出／匯入</div>',`<div class="sec">精簡文字（按鈕說明只顯示一行）</div><div class="seg" style="margin:6px 0"><button class="${on?'on':''}" data-a="lf:set:lite:1">開</button><button class="${on?'':'on'}" data-a="lf:set:lite:0">關</button></div><div class="sec">存檔匯出／匯入</div>`);
+};
+const _lf96=lfHandle;
+lfHandle=function(x,y,z,u){
+ if(x==='set'&&y==='lite'){const p=lsGet(PREFK,{});p.lite=z==='1';lsSet(PREFK,p);liteApply();return null}
+ return _lf96(x,y,z,u);
+};
+// 政黨支持度、孫輩接班、新結局
+function polSupInit(){const p=polInit();if(!p.sup)p.sup={rul:50,opp:50};return p.sup}
+function polWave(){const s=polSupInit();return Math.max(-10,Math.min(10,(s.rul-s.opp)/3))+R(-3,3)}
+const _el97=elHTML;
+elHTML=function(){
+ let h=_el97();const s=polSupInit();
+ return h.replace('<div class="sec op">登記參選</div>',`<div class="item">政黨支持度：執政黨系 <b>${Math.round(s.rul)}%</b>・在野黨系 <b>${Math.round(s.opp)}%</b><div class="sub">支持度會隨任內施政與景氣起伏，影響下次選舉的政黨加成。</div></div><div class="sec op">登記參選</div>`);
+};
+const _y97=yearly;
+yearly=function(){
+ _y97.apply(this,arguments);
+ try{
+  if(!S||S.dead||!S.pol)return;
+  const s=polSupInit(),p=S.pol;
+  let d=R(-3,3);
+  if(p.office&&(p.party==='rul'||p.party==='opp')){const e=(polRep()-50)/25;d+=p.party==='rul'?e:-e}
+  const m=p.mod||{w:0,h:0};if(p.office&&(m.w>0)){d+=(p.party==='rul'?1:-1)*.5}
+  s.rul=Math.max(25,Math.min(75,s.rul+d+(50-s.rul)*.05));s.opp=100-s.rul;
+ }catch(e){}
+};
+/* 孫子女接班 */
+const _su97=startSuccession;
+startSuccession=function(){
+ _su97();
+ try{
+  const gks=[];S.kids.forEach(k=>{if(k.rm&&k.rm.gk)k.rm.gk.forEach(g=>gks.push({k,g}))});
+  const mb=document.getElementById('modalBody');
+  if(!gks.length||!mb||!document.getElementById('modal').classList.contains('on')||!mb.insertAdjacentHTML)return;
+  mb.insertAdjacentHTML('beforeend',`<div class="sec op">或由孫子女繼續（簡化：家族樹會把你視為其父母）</div>`+gks.map((x,i)=>`<button class="btn" data-g="${i}">${esc(x.g.n)}・${x.g.age} 歲<small>${esc(x.k.n)}的孩子</small></button>`).join(''));
+  mb.addEventListener('click',function f(e){
+   const b=e.target.closest&&e.target.closest('[data-g]');if(!b)return;
+   mb.removeEventListener('click',f);mb.onclick=null;$('modal').classList.remove('on');
+   const x=gks[+b.dataset.g],r=S.estate,kk=newKid(x.g.sx,x.g.n);
+   kk.age=x.g.age;kk.rel=x.g.rel||70;kk.m=x.g.m||0;kk.done=kk.age>=6?1:0;kk.nx=kk.age<6?'es':null;kk.edu=kk.age>=18?3:kk.age>=12?2:kk.age>=6?1:0;
+   r.parts[kk.id]=(r.parts[x.k.id]||0);r.parts[x.k.id]=0;
+   S.kids.push(kk);applySuccession(r,kk);
+  });
+ }catch(e){}
+};
+/* 新結局 */
+const _et97=endTitle;
+endTitle=function(){
+ try{
+  const h=(S.pol&&S.pol.hist)||[];
+  if(h.some(x=>x.won&&x.lv>=4))return '⚖ 政治家';
+  if(S.pj&&S.pj.fnd&&(S.flags.donor||0)>=8)return '🕊 慈善家';
+  if(pjTotal()>=1e9)return '🚀 投資家';
+  const gk=S.kids.reduce((a,k)=>a+(k.rm&&k.rm.gk?k.rm.gk.length:0),0);
+  if(gk>=3&&S.kids.length>=2)return '🌳 三代同堂';
+ }catch(e){}
+ return _et97();
+};
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();

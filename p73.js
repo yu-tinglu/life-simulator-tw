@@ -108,7 +108,7 @@ pbFix=function(p){
 /* 男性頭像不再出現長髮／雙馬尾等髮型（使用者自選髮型不受影響） */
 const _avS73=avSVG;
 avSVG=function(a,size){
- try{const g=a&&a.g;if(g&&g.hs!=null&&a.sx!=='女'&&[2,3,6,7,8,9].includes(g.hs)){const sh=[0,1,5,11];a=Object.assign({},a,{g:Object.assign({},g,{hs:sh[g.hs%sh.length]})})}}catch(e){}
+ try{const g=a&&a.g;if(g&&g.hs!=null&&a.sx!=='女'&&[2,3,4,6,7,8,9].includes(g.hs)){const sh=[0,1,5,11];a=Object.assign({},a,{g:Object.assign({},g,{hs:sh[g.hs%sh.length]})})}}catch(e){}
  return _avS73(a,size);
 };
 /* 馬來姓名：男性用 bin、女性用 binti */

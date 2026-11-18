@@ -33,7 +33,7 @@ function polRun(lv,bud,party){
  if((party==='rul'||party==='opp')&&lv>=3){const pp=Math.min(.92,.3+polRep()/150+(p.office&&p.office.lv===lv?.2:0));if(Math.random()>pp){chg('happy',-3);log(`${y} 年，你在黨內初選敗給其他人，沒有取得提名。`,'bad');return B('黨內初選落敗，沒有取得提名，也沒有花到競選經費。可以改以其他身分參選明年的選舉。')}}
  S.money-=cost;
  const pt=PPT.find(x=>x[0]===party)||PPT[3];
- const wave=R(-8,8);let pb=pt[2]+(party==='rul'?wave:party==='opp'?-wave:party==='thd'?R(-3,5):0);
+ const wave=(typeof polWave==="function"?polWave():R(-8,8));let pb=pt[2]+(party==='rul'?wave:party==='opp'?-wave:party==='thd'?R(-3,5):0);
  if(party==='ind'&&lv>=3)pb-=10;
  const inc=p.office&&p.office.lv===lv?8:0;
  const sc=36+polRep()*.35+((S.smarts||50)-50)*.1+b[3]+pb+inc+R(-10,10)+(typeof polAdj==='function'?polAdj(lv):0);
