@@ -1271,9 +1271,9 @@ function cnYearEnd(){
  if(emp&&['work','psw','whv','ipr'].includes(ab.visa))ab.wk++;
  ab.nojob=emp?0:ab.nojob+1;
  if(['pr','cit','ipr'].includes(ab.visa)){
-  if(!emp&&S.age<65&&ab.nu<2){ab.nu++;const b=Math.round(.25*wTW(S.cn));S.money+=b;log(`你領了${c.n}的失業給付 ${money(b)}。`)}
+  if(!emp&&S.age<65&&ab.nu<cxOf(S.cn).uy){ab.nu++;const b=Math.round(cxOf(S.cn).ue*wTW(S.cn));S.money+=b;log(`你領了${c.n}的失業給付 ${money(b)}。`)}
   if(emp)ab.nu=0;
-  if(S.age>=65&&ab.yrs>=10){S.money+=Math.round(.25*wTW(S.cn))}
+  if(S.age>=65&&ab.yrs>=10){S.money+=Math.round(cxOf(S.cn).pn*wTW(S.cn))}
   if(ab.visa==='ipr'){ab.left--;if(ab.left<=0){ab.visa='pr';log(`你的投資居留轉為${c.n}永久居留。`,'good')}}
  }else{
   if(S.age>=65){goHome('簽證不能養老，你決定回台灣。');return}
@@ -10020,13 +10020,16 @@ const PPT=[['rul','執政黨系',8],['opp','在野黨系',8],['thd','第三勢�
 const PBUD=[['0','精簡競選',.5,0],['1','標準競選',1,6],['2','大選戰',2,11]];
 function polInit(){if(!S.pol)S.pol={rep:0,office:null,hist:[],ly:{},party:'ind'};return S.pol}
 function polRep(){const p=polInit();let nw=0;try{nw=Math.max(0,netWorth())}catch(e){}return Math.min(100,Math.round(p.rep+Math.min(25,Math.max(0,Math.log10(Math.max(1,nw/1e6))*7))+(S.job&&S.job.lv?Math.min(12,S.job.lv*2):0)+((S.flags&&S.flags.donor)?Math.min(10,S.flags.donor):0)))}
+const ELC={TW:{L:[2026,4],N:[2028,4]},US:{L:[2026,2],N:[2028,4]},JP:{L:[2027,4],N:[2028,4]},KR:{L:[2026,4],N:[2028,4]},GB:{L:[2026,4],N:[2029,5]},DE:{L:[2026,5],N:[2029,4]},CA:{L:[2026,4],N:[2029,4]}};
+const ELT={US:{2:2,3:2,5:4},GB:{5:5,4:4},JP:{2:4,3:4},DE:{5:4}};
+function elCal(ty){const c=ELC[S&&S.cn]||ELC.TW;return c[ty==='L'?'L':'N']}
+function elTerm(lv){const t=ELT[S&&S.cn];return t&&t[lv]||4}
 function polOk(lv){
  const c=PL(lv),p=polInit(),y=calYear();
  if(S.ab&&!S.ab.nat)return '需具有該國公民身分才能參選（可在「政治與選舉」申請歸化）';
  if(S.age<c.age)return `需年滿 ${c.age} 歲`;
  if(S.jail)return '服刑中';
- if((y-2026)%4!==0&&c.ty==='L')return `地方選舉年才有（${y+(4-((y-2026)%4+4)%4)%4} 年）`;
- if(c.ty==='N'&&(y-2028)%4!==0)return `全國選舉年才有（${y+((2028-y)%4+4)%4} 年）`;
+ {const cy=elCal(c.ty);if((y-cy[0])%cy[1]!==0){let n=y;while((n-cy[0])%cy[1]!==0&&n<y+10)n++;return (c.ty==='L'?'地方':'全國')+`選舉年才有（${n} 年）`}}
  if(p.ly[y])return '今年已參選過一次';
  if(lv>=4){let n=0;for(let i=p.hist.length-1;i>=0;i--){const h=p.hist[i];if(h.lv===lv&&h.won)n++;else break}if(n>=2)return '已連任一屆，依制度不得再連任'}
  if(c.req&&!(p.hist.some(h=>h.won&&h.lv>=c.req)||polRep()>=70))return `需當選過${PL(c.req).n}以上，或聲望達 70`;
@@ -10046,7 +10049,7 @@ function polRun(lv,bud,party){
  const sc=36+polRep()*.35+((S.smarts||50)-50)*.1+b[3]+pb+inc+R(-10,10)+(typeof polAdj==='function'?polAdj(lv):0);
  const won=sc>c.diff,share=Math.max(18,Math.min(72,Math.round(40+(sc-c.diff)*.7)));
  p.hist.push({y,lv,won,party,share});
- if(won){p.rep=Math.min(100,p.rep+10);if(!(p.office&&p.office.lv===lv))elReset();p.office={lv,y0:y,end:y+4};chg('happy',12);S.stress=cl(S.stress+6);log(`${y} 年，你競選${c.n}並當選！得票率約 ${share}%。（花費 ${money(cost)}）`,'good');return G(`恭喜當選${c.n}！任期 4 年，每年薪津約 ${money(c.sal)}。`)}
+ if(won){p.rep=Math.min(100,p.rep+10);if(!(p.office&&p.office.lv===lv))elReset();p.office={lv,y0:y,end:y+elTerm(lv)};chg('happy',12);S.stress=cl(S.stress+6);log(`${y} 年，你競選${c.n}並當選！得票率約 ${share}%。（花費 ${money(cost)}）`,'good');return G(`恭喜當選${c.n}！任期 4 年，每年薪津約 ${money(c.sal)}。`)}
  p.rep=Math.max(0,p.rep-2);chg('happy',-8);S.stress=cl(S.stress+5);log(`${y} 年，你競選${c.n}落選，得票率約 ${share}%。（花費 ${money(cost)}）`,'bad');
  return B(`很可惜，這次落選了。花費 ${money(cost)}。`);
 }
@@ -10782,6 +10785,111 @@ showStory=function(){
    }catch(e){}
   };
  }catch(e){}
+};
+/* ---- p103：錯誤保護、存檔版本與多存檔、公司收購、家族檔案、離線安裝 ---- */
+const SV=2,ERRK='lifesim_err',SLOTN=3;
+function slotKeyX(i){return 'lifesim_slot_'+i}
+/* 錯誤保護：發生未預期錯誤時，先存檔並記錄 */
+let _errShown=0;
+function errLog(m){try{const a=JSON.parse(localStorage.getItem(ERRK)||'[]');a.push({t:new Date().toISOString().slice(0,16).replace('T',' '),m:String(m).slice(0,200),y:(typeof S!=='undefined'&&S&&S.age!=null)?S.age+'歲':''});localStorage.setItem(ERRK,JSON.stringify(a.slice(-10)))}catch(e){}}
+try{
+ window.addEventListener('error',e=>{errLog(e&&e.message||'error');try{if(S&&S.age!=null&&!S.dead)save()}catch(x){}if(!_errShown){_errShown=1;try{toast('發生小問題，已自動存檔；可在設定查看紀錄')}catch(x){}}});
+ window.addEventListener('unhandledrejection',e=>{errLog('promise: '+(e&&e.reason&&e.reason.message||e.reason||''))});
+}catch(e){}
+/* 存檔版本 */
+const _sv103=save;
+save=function(){try{if(S&&typeof S==='object')S.sv=SV}catch(e){}return _sv103.apply(this,arguments)};
+function migrate(o){
+ if(!o||o.sv>=SV)return o;
+ if(!o.flags)o.flags={};if(!o.evc)o.evc={};if(!o.gifts)o.gifts=[];if(!o.hist)o.hist=[];if(!o.kids)o.kids=[];if(!o.friends)o.friends=[];
+ o.sv=SV;return o;
+}
+const _ls103=loadSave;
+loadSave=function(){const o=_ls103.apply(this,arguments);try{return migrate(o)}catch(e){return o}};
+/* 多存檔（手動快照）*/
+function slotMetaX(i){try{const t=localStorage.getItem(slotKeyX(i));if(!t)return null;const o=JSON.parse(t);return o&&o.age!=null?o:null}catch(e){return null}}
+function slotSaveX(i){try{localStorage.setItem(slotKeyX(i),JSON.stringify(Object.assign({},S,{sv:SV})));return true}catch(e){return false}}
+function slotLoadX(i){try{const t=localStorage.getItem(slotKeyX(i));if(!t)return false;localStorage.setItem(SAVEKEY,t);setTimeout(()=>location.reload(),50);return true}catch(e){return false}}
+function slotHTMLX(){
+ let h='<div class="sec">存檔欄位（手動備份 3 個）</div>';
+ for(let i=1;i<=SLOTN;i++){const m=slotMetaX(i);
+  h+=`<div class="item"><b>欄位 ${i}</b><div class="sub">${m?esc(m.name||'')+'・'+m.age+' 歲・第 '+(m.gen||1)+' 代・現金 '+money(m.money||0):'（空）'}</div><div class="seg" style="margin:6px 0"><button data-a="lf:set:slot:s:${i}">存入目前</button>${m?`<button data-a="lf:set:slot:l:${i}">讀取</button>`:''}</div></div>`}
+ return h;
+}
+function errHTML(){
+ let a=[];try{a=JSON.parse(localStorage.getItem(ERRK)||'[]')}catch(e){}
+ if(!a.length)return '<div class="sec">錯誤紀錄</div><div class="sub">目前沒有紀錄。</div>';
+ return `<div class="sec">錯誤紀錄（${a.length}）</div><div class="sub">${a.slice(-5).map(x=>esc(x.t+' '+x.y+' '+x.m)).join('<br>')}</div><div class="seg" style="margin:6px 0"><button data-a="lf:set:errcopy">複製</button><button data-a="lf:set:errclr">清除</button></div>`;
+}
+const _sh103=setHTML;
+setHTML=function(){
+ return _sh103().replace('<div class="sec">存檔匯出／匯入</div>',slotHTMLX()+'<button class="btn" data-a="lf:set:arch">家族檔案（歷代財富與壽命）</button>'+errHTML()+'<div class="sec">存檔匯出／匯入</div>');
+};
+/* 家族檔案：歷代財富／壽命圖 */
+function archHTML(){
+ const hs=(S.hist||[]).map(x=>({g:x.gen,n:x.name,a:x.age,w:x.net||0}));
+ let nw=0;try{nw=netWorth()}catch(e){}
+ hs.push({g:S.gen||1,n:S.name,a:S.age,w:nw,cur:1});
+ if(hs.length<2)return `<h3>家族檔案</h3><div class="sub">第一代尚在世。傳承到下一代後，這裡會畫出歷代財富與壽命。</div><button class="btn" data-a="lf:set:legalx">← 返回設定</button>`;
+ const W=330,H=130,mx=Math.max(1,...hs.map(x=>Math.abs(x.w))),bw=Math.min(36,(W-20)/hs.length-8);
+ const bars=hs.map((x,i)=>{const bh=Math.round(Math.abs(x.w)/mx*(H-40)),px=14+i*((W-20)/hs.length),y=x.w>=0?H-22-bh:H-22;
+  return `<rect x="${px}" y="${y}" width="${bw}" height="${Math.max(1,bh)}" rx="3" fill="${x.cur?'var(--acc)':'var(--line,#c9b8a6)'}"/><text x="${px+bw/2}" y="${H-8}" font-size="10" text-anchor="middle" fill="currentColor">${x.g}代</text>`}).join('');
+ const best=hs.reduce((a,b)=>b.w>a.w?b:a),long=hs.reduce((a,b)=>b.a>a.a?b:a);
+ return `<h3>家族檔案</h3><div class="sec op">各代淨資產</div><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${bars}</svg><div class="item"><b>最富有</b>：第 ${best.g} 代 ${esc(best.n)}（${money(best.w)}）<br><b>最長壽</b>：第 ${long.g} 代 ${esc(long.n)}（${long.a} 歲）</div>${hs.map(x=>`<div class="sub">第 ${x.g} 代 ${esc(x.n)}・${x.a} 歲・${money(x.w)}${x.cur?'（目前）':''}</div>`).join('')}<button class="btn" data-a="lf:set:legalx">← 返回設定</button>`;
+}
+const _lh103=lifeHTML;
+lifeHTML=function(){if(view.lsub==='arch')return archHTML();return _lh103()};
+const _lf103=lfHandle;
+lfHandle=function(x,y,z,u){
+ if(x==='set'&&y==='arch'){view.lsub='arch';return null}
+ if(x==='set'&&y==='slot'){const i=+u;if(z==='s')toast(slotSaveX(i)?'已存入欄位 '+i:'儲存失敗（空間不足）');else if(z==='l'){if(slotLoadX(i))toast('讀取中…')}return null}
+ if(x==='set'&&y==='errcopy'){try{navigator.clipboard.writeText(localStorage.getItem(ERRK)||'[]');toast('已複製')}catch(e){toast('無法複製')}return null}
+ if(x==='set'&&y==='errclr'){try{localStorage.removeItem(ERRK)}catch(e){}return null}
+ return _lf103(x,y,z,u);
+};
+/* 公司收購事件 */
+E.push({id:'co_buyout',min:28,max:75,w:3,if:()=>S.co&&S.co.stage>=1&&coValue(S.co)>2e7,run:()=>{const co=S.co,own=co.fs/co.shares,get=Math.round(coValue(co)*1.3*own);return {t:`有大型集團想收購「${co.name}」，以估值約 1.3 倍開價，你可得約 ${money(get)}（現金，已含你的持股比例）。`,c:[
+ ch('接受收購',()=>{S.money+=get;S.co=null;S.job=null;S.coHist=(S.coHist||0)+1;view.csub=null;chg('happy',6);return G(`你賣掉了「${co.name}」，入袋 ${money(get)}。`)}),
+ ch('婉拒',()=>{chg('happy',2);return N('你婉拒了收購，繼續經營。')})]}}});
+/* 離線安裝（需 https 並有 manifest.json／sw.js；不可用時安靜略過）*/
+try{
+ if(typeof document!=='undefined'&&document.head&&!document.querySelector('link[rel=manifest]')){const l=document.createElement('link');l.rel='manifest';l.href='manifest.json';document.head.appendChild(l)}
+ if(typeof navigator!=='undefined'&&navigator.serviceWorker&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+}catch(e){}
+/* ---- p104：各國福利與制度參數（失業給付、兒童津貼、老年年金）---- 為遊戲設定值，約略參考 OECD 與各國官方制度，非精算 */
+// ue 失業給付（占當地平均薪資）、uy 最長領取年數、cb 每名未成年子女每年津貼、pn 老年年金（PR/公民滿 10 年）
+const CNX={
+ US:{ue:.30,uy:1,cb:.025,pn:.30,note:'失業保險約半年、聯邦兒童稅額抵減、社會安全年金'},
+ JP:{ue:.35,uy:1,cb:.035,pn:.35,note:'雇用保險、兒童手當、國民／厚生年金'},
+ KR:{ue:.35,uy:1,cb:.03,pn:.20,note:'雇用保險、育兒津貼、國民年金'},
+ CA:{ue:.35,uy:1,cb:.06,pn:.30,note:'就業保險、加拿大兒童福利金、OAS／CPP'},
+ AU:{ue:.30,uy:2,cb:.05,pn:.30,note:'JobSeeker、家庭稅福利、年齡年金'},
+ GB:{ue:.15,uy:1,cb:.035,pn:.27,note:'求職者津貼偏低、兒童福利金、國家年金'},
+ DE:{ue:.45,uy:1,cb:.055,pn:.40,note:'失業金 I（約六成淨薪）、兒童金、法定年金'},
+ SG:{ue:0,uy:0,cb:.03,pn:.15,note:'無失業保險、嬰兒花紅與兒童發展帳戶、公積金'}
+};
+const CXD={ue:.20,uy:1,cb:.01,pn:.20,note:'簡化參數'};
+function cxOf(k){return CNX[k]||CXD}
+const _y104=yearly;
+yearly=function(){
+ const r=_y104.apply(this,arguments);
+ try{
+  if(S&&!S.dead&&S.cn&&S.cn!=='TW'&&S.ab&&['pr','cit','ipr'].includes(S.ab.visa)){
+   const n=(S.kids||[]).filter(k=>k.age!=null&&k.age<18&&!k.dead).length;
+   if(n>0){const b=Math.round(cxOf(S.cn).cb*wTW(S.cn)*Math.min(n,3));if(b>0){try{ldset('兒童津貼')}catch(e){}S.money+=b;try{ldset(null)}catch(e){}}}
+  }
+ }catch(e){}
+ return r;
+};
+const _pol104=polHTML;
+polHTML=function(){
+ const h=_pol104();
+ try{
+  const cn=S.cn||'TW';if(cn==='TW')return h;
+  const c=cxOf(cn),w=wTW(cn);
+  const blk=`<div class="item"><b>${CNS[cn].n}福利（遊戲設定）</b><div class="sub">失業給付：${c.uy?`約年薪 ${Math.round(c.ue*100)}%，最長 ${c.uy} 年`:'無'}<br>兒童津貼：每名未成年子女約 ${money(Math.round(c.cb*w))}／年（最多計 3 人）<br>老年年金：約 ${money(Math.round(c.pn*w))}／年（居留滿 10 年）<br>${esc(c.note)}</div></div>`;
+  return h.replace('<div class="item"><b>同性婚姻</b>',blk+'<div class="item"><b>同性婚姻</b>');
+ }catch(e){return h}
 };
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){

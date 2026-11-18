@@ -103,9 +103,9 @@ function cnYearEnd(){
  if(emp&&['work','psw','whv','ipr'].includes(ab.visa))ab.wk++;
  ab.nojob=emp?0:ab.nojob+1;
  if(['pr','cit','ipr'].includes(ab.visa)){
-  if(!emp&&S.age<65&&ab.nu<2){ab.nu++;const b=Math.round(.25*wTW(S.cn));S.money+=b;log(`你領了${c.n}的失業給付 ${money(b)}。`)}
+  if(!emp&&S.age<65&&ab.nu<cxOf(S.cn).uy){ab.nu++;const b=Math.round(cxOf(S.cn).ue*wTW(S.cn));S.money+=b;log(`你領了${c.n}的失業給付 ${money(b)}。`)}
   if(emp)ab.nu=0;
-  if(S.age>=65&&ab.yrs>=10){S.money+=Math.round(.25*wTW(S.cn))}
+  if(S.age>=65&&ab.yrs>=10){S.money+=Math.round(cxOf(S.cn).pn*wTW(S.cn))}
   if(ab.visa==='ipr'){ab.left--;if(ab.left<=0){ab.visa='pr';log(`你的投資居留轉為${c.n}永久居留。`,'good')}}
  }else{
   if(S.age>=65){goHome('簽證不能養老，你決定回台灣。');return}

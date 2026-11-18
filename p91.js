@@ -13,13 +13,16 @@ const PPT=[['rul','執政黨系',8],['opp','在野黨系',8],['thd','第三勢�
 const PBUD=[['0','精簡競選',.5,0],['1','標準競選',1,6],['2','大選戰',2,11]];
 function polInit(){if(!S.pol)S.pol={rep:0,office:null,hist:[],ly:{},party:'ind'};return S.pol}
 function polRep(){const p=polInit();let nw=0;try{nw=Math.max(0,netWorth())}catch(e){}return Math.min(100,Math.round(p.rep+Math.min(25,Math.max(0,Math.log10(Math.max(1,nw/1e6))*7))+(S.job&&S.job.lv?Math.min(12,S.job.lv*2):0)+((S.flags&&S.flags.donor)?Math.min(10,S.flags.donor):0)))}
+const ELC={TW:{L:[2026,4],N:[2028,4]},US:{L:[2026,2],N:[2028,4]},JP:{L:[2027,4],N:[2028,4]},KR:{L:[2026,4],N:[2028,4]},GB:{L:[2026,4],N:[2029,5]},DE:{L:[2026,5],N:[2029,4]},CA:{L:[2026,4],N:[2029,4]}};
+const ELT={US:{2:2,3:2,5:4},GB:{5:5,4:4},JP:{2:4,3:4},DE:{5:4}};
+function elCal(ty){const c=ELC[S&&S.cn]||ELC.TW;return c[ty==='L'?'L':'N']}
+function elTerm(lv){const t=ELT[S&&S.cn];return t&&t[lv]||4}
 function polOk(lv){
  const c=PL(lv),p=polInit(),y=calYear();
  if(S.ab&&!S.ab.nat)return '需具有該國公民身分才能參選（可在「政治與選舉」申請歸化）';
  if(S.age<c.age)return `需年滿 ${c.age} 歲`;
  if(S.jail)return '服刑中';
- if((y-2026)%4!==0&&c.ty==='L')return `地方選舉年才有（${y+(4-((y-2026)%4+4)%4)%4} 年）`;
- if(c.ty==='N'&&(y-2028)%4!==0)return `全國選舉年才有（${y+((2028-y)%4+4)%4} 年）`;
+ {const cy=elCal(c.ty);if((y-cy[0])%cy[1]!==0){let n=y;while((n-cy[0])%cy[1]!==0&&n<y+10)n++;return (c.ty==='L'?'地方':'全國')+`選舉年才有（${n} 年）`}}
  if(p.ly[y])return '今年已參選過一次';
  if(lv>=4){let n=0;for(let i=p.hist.length-1;i>=0;i--){const h=p.hist[i];if(h.lv===lv&&h.won)n++;else break}if(n>=2)return '已連任一屆，依制度不得再連任'}
  if(c.req&&!(p.hist.some(h=>h.won&&h.lv>=c.req)||polRep()>=70))return `需當選過${PL(c.req).n}以上，或聲望達 70`;
@@ -39,7 +42,7 @@ function polRun(lv,bud,party){
  const sc=36+polRep()*.35+((S.smarts||50)-50)*.1+b[3]+pb+inc+R(-10,10)+(typeof polAdj==='function'?polAdj(lv):0);
  const won=sc>c.diff,share=Math.max(18,Math.min(72,Math.round(40+(sc-c.diff)*.7)));
  p.hist.push({y,lv,won,party,share});
- if(won){p.rep=Math.min(100,p.rep+10);if(!(p.office&&p.office.lv===lv))elReset();p.office={lv,y0:y,end:y+4};chg('happy',12);S.stress=cl(S.stress+6);log(`${y} 年，你競選${c.n}並當選！得票率約 ${share}%。（花費 ${money(cost)}）`,'good');return G(`恭喜當選${c.n}！任期 4 年，每年薪津約 ${money(c.sal)}。`)}
+ if(won){p.rep=Math.min(100,p.rep+10);if(!(p.office&&p.office.lv===lv))elReset();p.office={lv,y0:y,end:y+elTerm(lv)};chg('happy',12);S.stress=cl(S.stress+6);log(`${y} 年，你競選${c.n}並當選！得票率約 ${share}%。（花費 ${money(cost)}）`,'good');return G(`恭喜當選${c.n}！任期 4 年，每年薪津約 ${money(c.sal)}。`)}
  p.rep=Math.max(0,p.rep-2);chg('happy',-8);S.stress=cl(S.stress+5);log(`${y} 年，你競選${c.n}落選，得票率約 ${share}%。（花費 ${money(cost)}）`,'bad');
  return B(`很可惜，這次落選了。花費 ${money(cost)}。`);
 }
