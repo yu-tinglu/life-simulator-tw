@@ -11628,8 +11628,8 @@ UITILE['lf:wk']='star';
 const WKIND={mus:'音樂作品',dan:'編舞作品',cra:'美術作品',per:'作品',eat:'創意作品'};
 const WKSP={sing:'單曲',piano:'鋼琴曲',guitar:'吉他曲',violin:'小提琴曲',drum:'節奏作品',paint:'畫作',calli:'書法作品',craft:'手作作品',cult:'文創設計',flower:'花藝作品',photo:'攝影集',film:'短片',write:'小說',act:'劇本演出',bake:'甜點作品',barista:'特調飲品',dance:'編舞',ballroom:'編舞'};
 function wkInit(){if(!S.wk)S.wk=[];return S.wk}
-function fmGet(){return (ckInit().fame)||0}
-function fmAdd(n){const r=ckInit();r.fame=Math.max(0,Math.min(100,(r.fame||0)+n))}
+function fmGet(){return Math.round(ckInit().fame||0)}
+function fmAdd(n){const r=ckInit(),f=r.fame||0;r.fame=Math.max(0,Math.min(100,f+(n>0?n*(1-f/120):n)))}
 function fmLabel(){const f=fmGet();return f>=70?'名人':f>=40?'知名':f>=15?'小有名氣':'無名'}
 function wkArts(){return Object.keys(S.art||{}).filter(k=>ARTALL[k]&&S.art[k]>=20&&k!=='cook'&&ARTALL[k].c!=='mar'&&k!=='chess')}
 function wkUse(){S.acts=S.acts||{};S.acts.wk=(S.acts.wk||0)+1}
@@ -11643,8 +11643,8 @@ function wkCreate(id,title){
  const t=wkClean(title,`${S.name[0]}的${kind}${wkInit().length+1}`);
  if(wkInit().some(w=>w.t===t))return B('已經有同名的作品了。');
  wkUse();wkInit().push({id:'w'+Date.now().toString(36)+R(0,99),art:id,k:kind,t,q,y:calYear(),sold:0});
- S.art[id]=Math.min(100,lv+1);const inc=Math.round(q*q*6*ckF()),f=Math.round(q/20);S.money+=inc;fmAdd(f);chg('happy',3+Math.round(q/30));
- const m=`你完成了${kind}「${t}」（水準 ${q}），發表後收入 ${money(inc)}，知名度 +${f}。`;log(m,q>=60?'good':'');return q>=60?G(m):N(m);
+ S.art[id]=Math.min(100,lv+1);const inc=Math.round(q*q*6*ckF()),f=Math.pow(q/100,2)*5;S.money+=inc;fmAdd(f);chg('happy',3+Math.round(q/30));
+ const m=`你完成了${kind}「${t}」（水準 ${q}），發表後收入 ${money(inc)}，知名度 +${f.toFixed(1)}。`;log(m,q>=60?'good':'');return q>=60?G(m):N(m);
 }
 function wkCollab(a,b,title){
  if(a===b)return B('請選兩項不同的領域。');
@@ -11655,14 +11655,14 @@ function wkCollab(a,b,title){
  const q=Math.max(15,Math.min(100,Math.round((get(a)+get(b))*.3+(S.smarts||50)*.1+R(5,28)))),t=wkClean(title,`${nm(a)}×${nm(b)}聯名企劃`);
  if(wkInit().some(w=>w.t===t))return B('已經有同名的作品了。');
  wkUse();wkInit().push({id:'w'+Date.now().toString(36)+R(0,99),art:a,k:'跨界合作',t,q,y:calYear(),sold:0,co:b});
- const inc=Math.round(q*q*8*ckF()),f=Math.round(q/14);S.money+=inc;fmAdd(f);chg('happy',5);
- const m=`你把${nm(a)}和${nm(b)}結合，推出「${t}」（水準 ${q}），收入 ${money(inc)}，知名度 +${f}。`;log(m,'good');return G(m);
+ const inc=Math.round(q*q*8*ckF()),f=Math.pow(q/100,2)*7;S.money+=inc;fmAdd(f);chg('happy',5);
+ const m=`你把${nm(a)}和${nm(b)}結合，推出「${t}」（水準 ${q}），收入 ${money(inc)}，知名度 +${f.toFixed(1)}。`;log(m,'good');return G(m);
 }
 function wkContest(id){
  const a=ARTALL[id];if(!a||!(S.art&&S.art[id]>=15))return B('這項才藝程度要 15 以上才能報名。');
  if(S.acts&&S.acts.wkc)return B('今年已經參加過比賽了。');S.acts=S.acts||{};S.acts.wkc=1;
  const best=wkInit().filter(w=>w.art===id).sort((x,y)=>y.q-x.q)[0],p=Math.max(.05,Math.min(.65,S.art[id]/160+(best?best.q/400:0)+fmGet()/500));
- if(Math.random()<p){const pz=Math.round(40000*(1+S.art[id]/50)*ckF());S.money+=pz;fmAdd(4);S.art[id]=Math.min(100,S.art[id]+2);chg('happy',8);const m=`你參加${a.n}比賽拿到名次，獎金 ${money(pz)}，知名度 +4。`;log(m,'good');return G(m)}
+ if(Math.random()<p){const pz=Math.round(40000*(1+S.art[id]/50)*ckF());S.money+=pz;fmAdd(2);S.art[id]=Math.min(100,S.art[id]+2);chg('happy',8);const m=`你參加${a.n}比賽拿到名次，獎金 ${money(pz)}，知名度小幅上升。`;log(m,'good');return G(m)}
  S.art[id]=Math.min(100,S.art[id]+1);chg('happy',-2);return N(`你參加了${a.n}比賽，沒有得名，但學到很多。`);
 }
 function wkHTML(){
@@ -11700,11 +11700,12 @@ handle=function(a){
 const _y112=yearly;
 yearly=function(){
  const r=_y112.apply(this,arguments);
+ try{if(S&&!S.dead&&S.rcp&&S.rcp.fame>0)S.rcp.fame=Math.max(0,S.rcp.fame-S.rcp.fame/25)}catch(e){}
  try{if(S&&!S.dead&&S.wk&&S.wk.length){
   let roy=0;S.wk.forEach(w=>{if(w.q>=60){const age=calYear()-w.y,dec=Math.max(.2,1-age*.06);roy+=Math.round(w.q*w.q*.9*dec*ckF()*(w.fam?.3:1))}});
   if(roy>0){S.money+=roy;try{ldset('作品版稅')}catch(e){}try{ldset(null)}catch(e){}}
   const f=fmGet();if(f>=40&&S.age>=18){S.money+=Math.round(f*1500*ckF())}
-  if(f>0&&Math.random()<.35&&!S.wk.some(w=>w.y>=calYear()-3))fmAdd(-1);
+  
  }}catch(e){}
  return r;
 };
