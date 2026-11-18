@@ -114,7 +114,7 @@ const EMO={
 '🔍':'search','👀':'eye','🧬':'dna','✂':'scissors','✅':'checkc','✔':'check','❌':'crossc','🌀':'wind','👧':'kid','👦':'kid','🧑‍🎓':'cap','👩':'person','👨':'person','👩‍💼':'ptie','👨‍💼':'ptie','👵':'elder','👴':'elder',
 '⛓':'chain','🪖':'helmet','📥':'inbox','🚀':'rocket','⚖':'scale','🔒':'lock','⏳':'hourglass','🛵':'moped','🕶':'shades','🚭':'nosmoke','🔄':'refresh','🧶':'yarn','🎧':'headphones','▶':'play','⬜':'square','🔪':'warn'
 };
-const EMO_RE=/(\p{Regional_Indicator}{2}|(?:\p{Extended_Pictographic}|☰)(?:️|\u{1F3FB}-\u{1F3FF})?(?:‍\p{Extended_Pictographic}️?)*)/gu;
+const EMO_RE=/(\p{Regional_Indicator}{2}|(?:(?![©®™])\p{Extended_Pictographic}|☰)(?:️|\u{1F3FB}-\u{1F3FF})?(?:‍\p{Extended_Pictographic}️?)*)/gu;
 function icoKey(e){const k=e.replace(/️/g,'');return EMO[k]||EMO[k.replace(/‍.*$/,'')]||null}
 function mkIcon(id){const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('class','ic ic-'+id);s.setAttribute('viewBox','0 0 24 24');s.setAttribute('aria-hidden','true');s.innerHTML=IC[id]||IC.dot;return s}
 function stripEmoji(t){return String(t).replace(EMO_RE,'').replace(/\s{2,}/g,' ').trim()}
@@ -127,7 +127,7 @@ function iconize(root){
   parts.forEach((s,i)=>{
    if(i%2===0){if(s)fr.appendChild(document.createTextNode(s));return}
    if(/^\p{Regional_Indicator}/u.test(s)){const sp=document.createElement('span');sp.className='flag';sp.textContent=[...s].map(c=>String.fromCharCode(c.codePointAt(0)-0x1F1E6+65)).join('');fr.appendChild(sp);return}
-   const k=icoKey(s);if(k)fr.appendChild(mkIcon(k))
+   const k=icoKey(s);if(k)fr.appendChild(mkIcon(k));
   });
   t.parentNode.replaceChild(fr,t);
  }
