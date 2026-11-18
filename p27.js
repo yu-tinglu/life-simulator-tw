@@ -117,9 +117,11 @@ function fxApply(k,spec){
   }});
  return m;
 }
+const DSLT={};
+function dslTags(sp){const t=[],a=String(sp||'');if(/(^|\s)(m|sp)-\d/.test(a))t.push('花錢');else if(/(^|\s)(m|sp)\+\d/.test(a))t.push('有收入');if(/(^|\s)fam[+-]/.test(a))t.push('影響關係');if(/(^|\s)(quit|pf-)/.test(a))t.push('影響工作');return t.slice(0,2)}
 function cEv(k,id,min,max,w,text,opts,iff){
  E.push({id:k+'_'+id,min,max,w,if:()=>S.cn===k&&(!iff||iff()),run:()=>({t:typeof text==='function'?text():text,c:opts.map(o=>{
-  const p=o.split('|');return ch(p[0],()=>{const m=fxApply(k,p[1]);const tone={g:G,b:B,n:N}[p[2][0]]||N;return tone(p[2].slice(2)+(m?`（${m>0?'收入':'支出'} ${fmtL(k,Math.abs(m))}）`:''))})})})});
+  const p=o.split('|');try{DSLT[p[0]]=dslTags(p[1])}catch(e){}return ch(p[0],()=>{const m=fxApply(k,p[1]);const tone={g:G,b:B,n:N}[p[2][0]]||N;return tone(p[2].slice(2)+(m?`（${m>0?'收入':'支出'} ${fmtL(k,Math.abs(m))}）`:''))})})})});
 }
 const hasJob=()=>S.job&&!S.job.founder;
 /* ===== 通用：加班法規、各國醫療、新冠 ===== */

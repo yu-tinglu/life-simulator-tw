@@ -62,7 +62,7 @@ ask=function(text,labels,cb){
  try{
   const mb=document.getElementById('modalBody');if(!mb||!mb.querySelectorAll||!Array.isArray(labels))return r;
   mb.querySelectorAll('button.btn[data-i]').forEach(b=>{
-   const l=labels[+b.dataset.i],tg=TG101[l];if(!tg||!tg.length||b.querySelector('.tg101'))return;
+   const l=labels[+b.dataset.i],tg=TG101[l]||(typeof DSLT!=='undefined'?DSLT[l]:null);if(!tg||!tg.length||b.querySelector('.tg101'))return;
    b.insertAdjacentHTML('beforeend',tg.map(x=>`<span class="tg101">${x}</span>`).join(''));
   });
  }catch(e){}
