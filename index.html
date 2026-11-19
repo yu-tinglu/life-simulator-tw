@@ -13942,17 +13942,19 @@ astHTML=function(){
 };
 const tmAmt=()=>Math.round(Math.max(0,Math.min(S.money*.15,5e7))/1e4)*1e4;
 const tmOK=()=>S&&S.age>=25&&S.money>=3e6&&!S.dead;
+const pfMove=(k,a)=>{a=Math.min(a,Math.max(0,S.money));if(a<=0)return 0;S.pf=S.pf||{bond:0,tw:0,us:0,gold:0};S.money-=a;S.pf[k]=(S.pf[k]||0)+a;return a};
+const pfSellPct=p=>{S.pf=S.pf||{};let g=0;for(const k of ['tw','us']){const v=Math.round((S.pf[k]||0)*p);S.pf[k]=(S.pf[k]||0)-v;g+=v}S.money+=g;return g};
 E.push({id:'tm_crash',min:25,max:80,w:3,if:()=>tmOK()&&(S.econ||0)<-.02,run:()=>{const a=tmAmt();return {t:`景氣低迷、股市重挫，朋友說這是抄底的機會。你手上能動用約 ${money(a)}。`,c:[
- ch('分批進場',()=>{S.money-=a;const r=chance(.65)?R(8,30)/100:-R(5,15)/100;S.money+=Math.round(a*(1+r));return r>0?G(`分批買進，之後反彈，獲利約 ${money(Math.round(a*r))}。`):B(`市場繼續下探，帳面虧損約 ${money(Math.round(-a*r))}。`)}),
- ch('全部押進去',()=>{S.money-=a;const r=chance(.5)?R(15,50)/100:-R(10,35)/100;S.money+=Math.round(a*(1+r));S.stress=cl(S.stress+4);return r>0?G(`押對了，獲利約 ${money(Math.round(a*r))}。`):B(`押錯時機，虧損約 ${money(Math.round(-a*r))}。`)}),
+ ch('分批買進台股（先投一半）',()=>{const m=pfMove('tw',Math.round(a/2));return G(`已買進台股 ${money(m)}，之後的漲跌會反映在投資組合。`)}),
+ ch('全部押進台股',()=>{const m=pfMove('tw',a);S.stress=cl(S.stress+3);return N(`已買進台股 ${money(m)}，之後的漲跌會反映在投資組合。`)}),
  ch('保持現金觀望',()=>N('你按兵不動，睡得安穩。'))]}}});
-E.push({id:'tm_hot',min:25,max:80,w:3,if:()=>tmOK()&&(S.econ||0)>.02,run:()=>{const a=tmAmt();return {t:`景氣熱絡、房市股市都在漲，身邊的人紛紛加碼。你考慮投入約 ${money(a)}。`,c:[
- ch('跟著加碼',()=>{S.money-=a;const r=chance(.5)?R(5,20)/100:-R(8,25)/100;S.money+=Math.round(a*(1+r));return r>0?G(`再漲一波，獲利約 ${money(Math.round(a*r))}。`):B(`買在高點，虧損約 ${money(Math.round(-a*r))}。`)}),
- ch('獲利了結一部分',()=>{chg('happy',2);return N('你把一部分落袋為安，心裡踏實。')}),
+E.push({id:'tm_hot',min:25,max:80,w:3,if:()=>tmOK()&&(S.econ||0)>.02,run:()=>{const a=tmAmt();return {t:`景氣熱絡、市場一片看好，身邊的人紛紛加碼。你持有的股票約 ${money((S.pf&&((S.pf.tw||0)+(S.pf.us||0)))||0)}。`,c:[
+ ch('跟著加碼美股',()=>{const m=pfMove('us',a);return N(`已買進美股 ${money(m)}，之後的漲跌會反映在投資組合。`)}),
+ ch('獲利了結 3 成',()=>{const g=pfSellPct(.3);if(g<=0)return N('你沒有股票可賣，保持觀望。');chg('happy',2);return G(`賣出股票 ${money(g)} 入袋，心裡踏實。`)}),
  ch('不理會',()=>N('你照自己的節奏走。'))]}}});
 E.push({id:'tm_rate',min:25,max:80,w:2,if:()=>tmOK()&&(S.age>=30)&&S.money>=1e7,run:()=>{const a=tmAmt();return {t:`銀行通知利率走向轉變，理專建議你調整資金配置（約 ${money(a)}）。`,c:[
- ch('鎖定長期定存',()=>{S.money-=a;S.money+=Math.round(a*1.03);return N('你鎖定了一段穩定的利息。')}),
- ch('分散到不同資產',()=>{S.money-=a;const r=chance(.6)?R(2,12)/100:-R(2,8)/100;S.money+=Math.round(a*(1+r));return r>0?G('分散配置帶來穩定收益。'):N('這一年表現普通。')}),
+ ch('買進債券',()=>{const m=pfMove('bond',a);return N(`已買進債券 ${money(m)}。`)}),
+ ch('分散到債券、台股、美股',()=>{const t=Math.round(a/3);const m=pfMove('bond',t)+pfMove('tw',t)+pfMove('us',t);return N(`已分散投入 ${money(m)}。`)}),
  ch('維持現狀',()=>N('你覺得現在的配置就夠了。'))]}}});
 /* ---- p140：人生階段主題 ---- */
 const THM={
@@ -14017,6 +14019,12 @@ function bioText(){
  if(S.partner&&S.partner.married)s.push(`他與${S.partner.n}攜手走過了人生。`);
  if(S.kids&&S.kids.length)s.push(`留下 ${S.kids.length} 位子女。`);
  if(S.flags&&S.flags.donor>2)s.push('晚年投入慈善，名字被許多人記得。');
+ try{const L=S.log||[];let bad=null,good=null;const BAD=/破產|被裁|解僱|車禍|離婚|住院|手術|詐騙|入獄|被捕|倒閉|重大挫折/,GOOD=/結婚|畢業|創辦|上市|升任|升職|突破|獲獎|當選|出書|創立|成功/;
+ for(const l of L)for(const x of (l.lines||[])){const tx=x.t||'';if(!bad&&x.c==='bad'&&BAD.test(tx))bad={a:l.age,t:tx};if(x.c==='good'&&GOOD.test(tx))good={a:l.age,t:tx}}
+ if(bad)s.push(`最難熬的一次是 ${bad.a} 歲：${bad.t.replace(/[。]+$/,'')}。`);
+ if(good)s.push(`最亮眼的一刻在 ${good.a} 歲：${good.t.replace(/[。]+$/,'')}。`);
+ const ppl=[];if(S.partner)ppl.push([S.partner.rel||0,S.partner.n,'伴侶']);(S.kids||[]).forEach(k=>ppl.push([k.rel||0,k.n,'孩子']));(S.friends||[]).forEach(f=>ppl.push([f.rel||0,f.n,'朋友']));
+ ppl.sort((a,b)=>b[0]-a[0]);if(ppl[0]&&ppl[0][0]>=60)s.push(`對他最重要的人，是${ppl[0][2]}${ppl[0][1]}。`)}catch(e){}
  const nw=netWorth();s.push(nw>=1e8?'一生累積了可觀的財富。':nw>=3e6?'晚年生活無虞。':'日子不算寬裕，卻過得踏實。');
  return s.join('');
 }
