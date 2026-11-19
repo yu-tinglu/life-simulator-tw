@@ -13772,7 +13772,7 @@ const cPay=(co,x)=>{x=Math.round(x);if(co.L.cash<x)drawLoan(co,x-co.L.cash+Math.
 const cGet=(co,x)=>{x=Math.round(x);J(co.L,['cash',x],['re',-x])};
 const cG=(co,v,y)=>{coTmp(co).g.push({v,y})};
 const cS=(co,v,y)=>{coTmp(co).s.push({v,y})};
-const ce=(id,w,cond,fn,min)=>E.push({id:'ce_'+id,min:min||20,max:90,w,if:()=>!!cx()&&cond(),run:()=>fn(cx())});
+const ce=(id,w,cond,fn,min)=>E.push({id:'ce_'+id,min:min||20,max:90,w:w*.7,if:()=>!!cx()&&cond(),run:()=>fn(cx())});
 const rv=co=>co.prevRev;
 const fu=(co,k,d)=>{(co.fu=co.fu||[]).push({k,y:co.yrs+(d||2)})};
 ce('bigcli',3,()=>true,co=>({t:`「${co.name}」最大的客戶要求降價 10%，否則改找別家。`,c:[
@@ -13856,7 +13856,7 @@ ce('coop',3,()=>true,co=>({t:'一家知名品牌邀請你聯名合作，對方�
 /* ---- p137：公司事件後續（前面的選擇會回來找你）＋專案與公司串接 ---- */
 const fuHas=k=>{const co=cx();return !!co&&(co.fu||[]).some(x=>x.k===k&&x.y<=co.yrs)};
 const fuUse=(co,k)=>{co.fu=(co.fu||[]).filter(x=>!(x.k===k&&x.y<=co.yrs))};
-const cf=(k,w,fn)=>E.push({id:'cf_'+k,min:20,max:100,w,if:()=>fuHas(k),run:()=>{const co=cx();fuUse(co,k);return fn(co)}});
+const cf=(k,w,fn)=>E.push({id:'cf_'+k,min:20,max:100,w:w*5,if:()=>fuHas(k),run:()=>{const co=cx();fuUse(co,k);return fn(co)}});
 cf('cliAgain',9,co=>({t:'上次降價後，那位大客戶又來談，說競爭對手開價更低。',c:[
  ch('再讓一次',()=>{cG(co,-.015,2);cPay(co,rv(co)*.015);return B('客戶留下，但你的毛利已經很薄。')}),
  ch('坦白談合理價格',()=>{if(chance(.5)){cS(co,.008,2);return G('對方理解你的成本，雙方改成階梯價。')}cG(co,-.04,2);return B('客戶轉向別家。')}),
@@ -13959,7 +13959,7 @@ const THM={
  mid:{n:'中年轉捩',o:[['拚事業','事業衝刺：工作表現與收入提高，但壓力上升，家人相處時間變少。'],['顧家庭','家庭優先：快樂與親子關係提高，事業稍慢。'],['探索自我','探索自己：快樂與智力提高，但花費較多、事業穩定度下降。']]},
  late:{n:'人生下半場',o:[['傳承與經驗','把經驗傳下去：親子關係與名聲提高。'],['盡情享受','享受當下：快樂提高，花費增加。'],['回饋社會','投入公益：快樂與人緣提高，善行加分。']]}
 };
-const thmE=(k,lo,hi)=>E.push({id:'th_'+k,min:lo,max:hi,w:6,if:()=>S&&!S.dead&&!(S.flags&&S.flags['th_'+k]),run:()=>({t:`你走到了人生的一個轉折點：${THM[k].n}。接下來十年，你想把重心放在哪裡？`,c:THM[k].o.map((o,i)=>ch(o[0],()=>{S.flags['th_'+k]=1;S.th={k,i,y:S.age+10};return G(o[1])}))})});
+const thmE=(k,lo,hi)=>E.push({id:'th_'+k,min:lo,max:hi,w:30,if:()=>S&&!S.dead&&!(S.flags&&S.flags['th_'+k]),run:()=>({t:`你走到了人生的一個轉折點：${THM[k].n}。接下來十年，你想把重心放在哪裡？`,c:THM[k].o.map((o,i)=>ch(o[0],()=>{S.flags['th_'+k]=1;S.th={k,i,y:S.age+10};return G(o[1])}))})});
 thmE('mid',38,48);thmE('late',58,68);
 const _yr140=yearly;
 yearly=function(){
@@ -13973,14 +13973,14 @@ yearly=function(){
    else{chg('happy',1);S.karma=cl((S.karma||50)+1);S.money-=px(40000)}}
  }catch(e){}
 };
-E.push({id:'th_sand',min:36,max:58,w:5,if:()=>S&&!S.dead&&!(S.flags&&S.flags.th_sand)&&S.kids.some(k=>k.age<18)&&S.mom&&S.mom.alive&&S.age>=36,run:()=>({t:'孩子還在念書，母親的健康又出了狀況，工作也很忙，你同時被三件事拉扯。',c:[
+E.push({id:'th_sand',min:36,max:58,w:12,if:()=>S&&!S.dead&&!(S.flags&&S.flags.th_sand)&&S.kids.some(k=>k.age<18)&&S.mom&&S.mom.alive&&S.age>=36,run:()=>({t:'孩子還在念書，母親的健康又出了狀況，工作也很忙，你同時被三件事拉扯。',c:[
  ch('請看護、花錢解決',()=>{S.flags.th_sand=1;S.money-=px(480000);chg('happy',-1);return N('錢花得多，但三邊都沒有垮。')}),
  ch('自己扛起來',()=>{S.flags.th_sand=1;S.stress=cl(S.stress+12);chg('health',-3);if(S.mom)S.mom.rel=cl((S.mom.rel||50)+6);return B('你撐住了所有人，自己卻很累。')}),
  ch('和手足分擔',()=>{S.flags.th_sand=1;if(chance(.6)){S.stress=cl(S.stress+4);return G('手足願意輪流照顧，負擔減輕不少。')}S.stress=cl(S.stress+8);return B('手足推託，最後大半還是落在你身上。')})]})});
 /* ---- p140：家人性格弧線（子女、配偶、老友） ---- */
 const kidsIn=(a,b,f)=>(S.kids||[]).filter(k=>k.age>=a&&k.age<=b&&(!f||f(k)));
 const kidFlag=(k,f)=>(k.fl=k.fl||{},k.fl[f]);
-const kE=(id,a,b,cond,fn)=>E.push({id:'fa_'+id,min:a+10,max:b+60,w:4,if:()=>S&&!S.dead&&kidsIn(a,b,k=>!kidFlag(k,id)&&cond(k)).length>0,run:()=>{const k=pick(kidsIn(a,b,k=>!kidFlag(k,id)&&cond(k)));k.fl[id]=1;return fn(k)}});
+const kE=(id,a,b,cond,fn)=>E.push({id:'fa_'+id,min:a+10,max:b+60,w:10,if:()=>S&&!S.dead&&kidsIn(a,b,k=>!kidFlag(k,id)&&cond(k)).length>0,run:()=>{const k=pick(kidsIn(a,b,k=>!kidFlag(k,id)&&cond(k)));k.fl[id]=1;return fn(k)}});
 kE('rebel',13,17,k=>k.pers!=='勤奮',k=>({t:`${k.n}（${k.age} 歲，${k.pers}）進入叛逆期，開始頂嘴、晚歸，成績也往下掉。`,c:[
  ch('耐心傾聽、設立底線',()=>{k.rel=cl(k.rel+4);if(chance(.6)){k.gr=cl(k.gr+3);return G(`${k.n}慢慢願意跟你說心裡話。`)}return N('溝通有進展，但需要時間。')}),
  ch('嚴格管教',()=>{k.rel=cl(k.rel-8);k.gr=cl(k.gr+2);return B(`${k.n}表面順從，關係卻疏遠了。`)}),
@@ -13997,11 +13997,11 @@ kE('wed',26,36,k=>true,k=>({t:`${k.n}（${k.age} 歲）帶對象回家見你，�
  ch('熱情祝福並幫忙籌備',()=>{k.rel=cl(k.rel+6);S.money-=px(300000);chg('happy',5);return G('婚禮溫馨，你紅了眼眶。')}),
  ch('提出你的擔憂',()=>{if(chance(.5)){k.rel=cl(k.rel+2);return N(`${k.n}聽進去了你的建議。`)}k.rel=cl(k.rel-6);return B(`${k.n}覺得你不信任他的選擇。`)}),
  ch('尊重他的決定',()=>{k.rel=cl(k.rel+3);return N('你送上祝福。')})]}));
-E.push({id:'fa_spouse',min:30,max:70,w:4,if:()=>S&&!S.dead&&S.partner&&S.partner.married&&!S.flags.fa_spouse&&S.age>=32,run:()=>{const p=S.partner;S.flags.fa_spouse=1;return {t:`${p.n}得到一個重要的職涯機會，但需要搬家或長期外派，你的工作也不容易離開。`,c:[
+E.push({id:'fa_spouse',min:30,max:70,w:10,if:()=>S&&!S.dead&&S.partner&&S.partner.married&&!S.flags.fa_spouse&&S.age>=32,run:()=>{const p=S.partner;S.flags.fa_spouse=1;return {t:`${p.n}得到一個重要的職涯機會，但需要搬家或長期外派，你的工作也不容易離開。`,c:[
  ch('支持對方、你配合調整',()=>{p.rel=cl(p.rel+8);if(S.job)S.job.perf=cl((S.job.perf||50)-4);return G('對方很感激，關係更緊密。')}),
  ch('協議異地一段時間',()=>{if(chance(.6)){p.rel=cl(p.rel+2);return N('兩人靠聯絡撐過了這段時間。')}p.rel=cl(p.rel-10);return B('距離讓兩人漸行漸遠。')}),
  ch('請對方放棄',()=>{p.rel=cl(p.rel-12);chg('happy',-3);return B('對方雖然留下，心裡有了疙瘩。')})]}}});
-E.push({id:'fa_old',min:35,max:75,w:4,if:()=>S&&!S.dead&&!S.flags.fa_old&&S.friends&&S.friends.some(f=>f.rel<40&&f.rel>0),run:()=>{const f=S.friends.filter(f=>f.rel<40&&f.rel>0)[0];S.flags.fa_old=1;return {t:`你和老朋友${f.n}已經很久沒聯絡了，今天看到他的近況，忽然很想念當年。`,c:[
+E.push({id:'fa_old',min:35,max:75,w:8,if:()=>S&&!S.dead&&!S.flags.fa_old&&S.friends&&S.friends.some(f=>f.rel<40&&f.rel>0),run:()=>{const f=S.friends.filter(f=>f.rel<40&&f.rel>0)[0];S.flags.fa_old=1;return {t:`你和老朋友${f.n}已經很久沒聯絡了，今天看到他的近況，忽然很想念當年。`,c:[
  ch('主動聯絡',()=>{f.rel=cl(f.rel+30);chg('happy',5);return G(`${f.n}也一直惦記著你，兩人聊得很開心。`)}),
  ch('留言按個讚',()=>{f.rel=cl(f.rel+8);return N('一個小小的互動，重新連起了關係。')}),
  ch('讓回憶留在回憶',()=>N('有些人適合留在過去。'))]}}});
