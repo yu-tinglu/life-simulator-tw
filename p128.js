@@ -60,12 +60,12 @@ E.push({id:'turn_q',min:24,max:30,w:6,if:()=>!S.flags.turnQ&&!S.jail,run:()=>({t
  ch('穩穩把現在的事做好',()=>{S.flags.turnQ=1;if(S.job)S.job.perf=(S.job.perf||50)+4;chg('happy',1);return N('你選擇深耕，這個決定讓你之後更踏實。')}),
  ch('先出國走走，想清楚再說',()=>{S.flags.turnQ=1;S.money-=Math.round(px(150000));chg('happy',6);S.stress=cl(S.stress-6);return G('回來之後，你對很多事想通了。')})]})});
 E.push({id:'turn_m',min:39,max:48,w:6,if:()=>!S.flags.turnM&&!S.jail,run:()=>({t:'到了中年，你突然覺得有點空，事業、家庭、自己好像都沒顧好。',c:[
- ch('把重心放回家人',()=>{S.flags.turnM=1;if(S.partner)S.partner.rel=Math.min(100,S.partner.rel+10);chg('happy',5);if(S.job)S.job.perf=(S.job.perf||50)-3;return G('你提早下班、少了應酬，家裡的氣氛明顯變了。')}),
+ ch('把重心放回家人',()=>{S.flags.turnM=1;S.flags.famFirst=1;if(S.partner)S.partner.rel=Math.min(100,S.partner.rel+10);chg('happy',5);if(S.job)S.job.perf=(S.job.perf||50)-3;return G('你提早下班、少了應酬，家裡的氣氛明顯變了。')}),
  ch('為自己圓一個夢',()=>{S.flags.turnM=1;S.money-=Math.round(px(300000));chg('happy',7);S.stress=cl(S.stress-4);S.flags.dream=1;return G('你終於去做了那件拖了二十年的事。')}),
- ch('再拚一次事業',()=>{S.flags.turnM=1;S.stress=cl(S.stress+8);if(S.job){S.job.perf=(S.job.perf||50)+6;S.job.sal=Math.round(S.job.sal*1.08)}return N('身體有點吃不消，但成績單很亮眼。')}),
- ch('調整作息，照顧身體',()=>{S.flags.turnM=1;S.health=cl(S.health+6);S.stress=cl(S.stress-6);return G('你開始運動、少熬夜，整個人精神多了。')})]})});
+ ch('再拚一次事業',()=>{S.flags.turnM=1;S.flags.push=1;S.stress=cl(S.stress+8);if(S.job){S.job.perf=(S.job.perf||50)+6;S.job.sal=Math.round(S.job.sal*1.08)}return N('身體有點吃不消，但成績單很亮眼。')}),
+ ch('調整作息，照顧身體',()=>{S.flags.turnM=1;S.flags.fit=1;S.health=cl(S.health+6);S.stress=cl(S.stress-6);return G('你開始運動、少熬夜，整個人精神多了。')})]})});
 E.push({id:'turn_r',min:60,max:70,w:6,if:()=>!S.flags.turnR&&!S.jail,run:()=>({t:'回頭看這一生，你最想先做的是什麼？',c:[
  ch('跟重要的人和解或道謝',()=>{S.flags.turnR=1;chg('happy',8);S.karma=cl((S.karma||50)+3);return G('有些話說出口，比想像中輕鬆。')}),
- ch('把經驗整理下來，留給後人',()=>{S.flags.turnR=1;S.smarts=cl(S.smarts+2);chg('happy',4);try{fmAdd(1)}catch(e){}return G('你開始寫回憶錄，家人說想一直讀下去。')}),
+ ch('把經驗整理下來，留給後人',()=>{S.flags.turnR=1;S.flags.memoir=1;S.smarts=cl(S.smarts+2);chg('happy',4);try{fmAdd(1)}catch(e){}return G('你開始寫回憶錄，家人說想一直讀下去。')}),
  ch('去看看一直想去的地方',()=>{S.flags.turnR=1;S.money-=Math.round(px(200000));chg('happy',8);S.health=cl(S.health-1);return G('沿路拍的照片，成了你最珍貴的收藏。')}),
  ch('保持現在的日子就好',()=>{S.flags.turnR=1;chg('happy',2);return N('平凡也是一種圓滿。')})]})});
