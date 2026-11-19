@@ -13674,6 +13674,184 @@ yearly=function(){
  }catch(e){}
  return r;
 };
+/* ---- p135：大型投資與事業（專案）改版：效益一目了然、可調策略、事件 ---- */
+const PJM=['保守','平衡','進取'];
+const pjNet=k=>{const c=PJ[k];return c.give?-c.give:c.mu-c.up};
+const pjRisk=k=>{const s=PJ[k].sd;return s<=0?'無':s<.08?'低':s<.16?'中':s<.22?'高':'極高'};
+const pjLiq=k=>k==='fnd'?'捐出不可贖回':'賣出約 85 折（上市後 97 折）';
+const pjRange=k=>{const c=PJ[k],m=1+pjNet(k),s=c.sd,l=Math.log(Math.max(.2,m)),f=z=>Math.exp(5*l+z*s*Math.sqrt(5));return [f(-1.28),f(1.28)]};
+const pjSpark=h=>{
+ if(!h||!h.length)return '<span class="sub">（還沒有紀錄，過一年後開始累積）</span>';
+ const w=12,n=h.length,bw=Math.floor(120/w);let s=`<svg viewBox="0 0 ${w*bw} 34" width="${w*bw}" height="34" style="vertical-align:middle"><line x1="0" y1="17" x2="${w*bw}" y2="17" stroke="#bbb" stroke-width=".5"/>`;
+ h.slice(-w).forEach((v,i)=>{const hh=Math.max(1,Math.min(16,Math.abs(v)/40*16));s+=`<rect x="${i*bw+1}" y="${v>=0?17-hh:17}" width="${bw-2}" height="${hh}" fill="${v>=0?'#2f9e6b':'#c0553a'}"/>`});
+ return s+'</svg>';
+};
+const _py135=pjYear;
+pjYear=function(){
+ const P=S&&S.pj;if(!P)return;
+ const before={},saved={};
+ for(const k of PJK){const p=P[k];if(!p||p.val<=0)continue;before[k]=p.val;if(!p.y0)p.y0=S.age;
+  const c=PJ[k],m=p.mode==null?1:p.mode,mg=p.mgr?1:0;
+  if((m!==1||mg)&&!c.give){saved[k]=c;PJ[k]=Object.assign({},c,{mu:c.mu+[-.015,0,.01][m],sd:c.sd*[.6,1,1.5][m]*(mg?.75:1),jp:[c.jp[0]*[.5,1,1.6][m],c.jp[1],c.jp[2]],cr:[c.cr[0]*[.6,1,1.4][m]*(mg?.7:1),c.cr[1]],up:c.up+(mg?.01:0)})}}
+ try{_py135.apply(this,arguments)}finally{for(const k in saved)PJ[k]=saved[k]}
+ for(const k in before){const p=P[k];if(p){const ov=p.val-before[k];p.lo=ov;p.h=(p.h||[]).concat([+(ov/before[k]*100).toFixed(1)]).slice(-12)}}
+};
+const _ph135=pjHTML;
+pjHTML=function(){
+ let h=_ph135();const P=pjGet();
+ const held=PJK.filter(k=>P[k]&&P[k].val>0);
+ const inv=held.reduce((t,k)=>t+P[k].inv,0),val=held.reduce((t,k)=>t+P[k].val,0),lo=held.reduce((t,k)=>t+(P[k].lo||0),0);
+ /* 總覽 */
+ const i0=h.indexOf('<div class="sub">現金'),i1=h.indexOf('</div>',i0);
+ if(i0>=0&&i1>i0)h=h.slice(0,i0)+`<div class="sub">現金 ${money(S.money)}・已計入淨資產。每年估值隨機波動；賣出打折，去世時未指定接班人以 7 折變現。</div>`+(held.length?`<div class="item"><b>專案總覽</b><div class="sub">總投入 ${money(inv)}・現值 ${money(val)}<br>累計損益 <b style="color:${val>=inv?'#2f9e6b':'#c0553a'}">${val>=inv?'+':''}${money(val-inv)}（${inv>0?((val/inv-1)*100).toFixed(1):0}%）</b>・去年 ${lo>=0?'+':''}${money(lo)}</div></div>`:'')+h.slice(i1+6);
+ /* 持有中卡片 */
+ const a=h.indexOf('<div class="sec op">持有中</div>'),b=h.indexOf('<div class="sec op">新增或加碼</div>');
+ if(a>=0&&b>a){
+  const card=k=>{const p=P[k],c=PJ[k],yrs=Math.max(1,S.age-(p.y0||S.age)),gain=p.val-p.inv,cagr=p.inv>0&&yrs>=1?Math.pow(Math.max(.01,p.val/p.inv),1/yrs)-1:0,m=p.mode==null?1:p.mode;
+   return `<div class="item"><b>${c.n}</b>${p.pub?'（已上市）':''}<div class="sub">現值 ${money(p.val)}・投入 ${money(p.inv)}<br>損益 <b style="color:${gain>=0?'#2f9e6b':'#c0553a'}">${gain>=0?'+':''}${money(gain)}（${((p.val/p.inv-1)*100).toFixed(1)}%）</b>・年化約 ${(cagr*100).toFixed(1)}%（持有 ${yrs} 年）</div><div style="margin:4px 0">${pjSpark(p.h)}<span class="sub"> 近年每年報酬</span></div>`
+   +(c.give?'':`<div class="seg" style="margin:4px 0">${PJM.map((t,i)=>`<button class="${i===m?'on':''}" data-a="pjm:${k}:${i}">${t}</button>`).join('')}</div><div class="sub">${['保守：報酬略降、波動與重挫機率大減','平衡：標準設定','進取：報酬略升，但波動與重挫機率增加'][m]}</div><button class="btn" data-a="pjg:${k}">${p.mgr?'解聘專業經理人':'聘請專業經理人'}<small>${p.mgr?'目前每年多付約 1% 管理費，波動降 25%':'每年約 1% 管理費，波動降 25%、重挫機率降 30%'}</small></button>`)
+   +`<button class="btn" data-a="pj:sell:${k}">賣出<small>預計實拿 ${money(Math.round(p.val*(p.pub?.97:.85)))}</small></button></div>`};
+  h=h.slice(0,a)+`<div class="sec op">持有中</div>`+held.map(card).join('')+h.slice(b);
+ }
+ /* 項目說明改成「效益表」 */
+ const d0=h.indexOf('<details>'),d1=h.indexOf('</details>');
+ if(d0>=0&&d1>d0){
+  const row=k=>{const c=PJ[k],n=pjNet(k),[lo,hi]=pjRange(k);
+   return `<div class="item"><b>${c.n}</b>（${money(c.min)} 起）<div class="sub">${c.d}<br>預期年報酬 <b>${(n*100).toFixed(1)}%</b>（已扣持有成本）・風險 ${pjRisk(k)}${c.jp[0]?`・突破機率 ${(c.jp[0]*100).toFixed(0)}%／年`:''}${c.cr[0]?`・重挫機率 ${(c.cr[0]*100).toFixed(0)}%／年`:''}<br>${c.give?`每年捐出約 ${(c.give*100)}%，換心情與名聲`:`5 年後約 ${lo.toFixed(2)}～${hi.toFixed(2)} 倍（約 8 成情境，不含突破與重挫）`}・心情 ${c.hp?'+'+c.hp+'/年':'無'}${c.st?'・壓力+3/年':''}<br>流動性：${pjLiq(k)}</div></div>`};
+  h=h.slice(0,d0)+`<div class="sec">效益比較（點開）</div><details><summary class="sub">各項目預期報酬、風險、成本</summary>${PJK.map(row).join('')}</details>`+h.slice(d1+10);
+ }
+ /* 下拉選項加上預期與風險 */
+ PJK.forEach(k=>{const c=PJ[k];h=h.replace(`${c.n}・最低 ${money(c.min)}`,`${c.n}・預期 ${(pjNet(k)*100).toFixed(1)}%・風險${pjRisk(k)}・最低 ${money(c.min)}`)});
+ return h;
+};
+const _hd135=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&S.pj){
+  const m=a.match(/^pjm:(\w+):(\d)$/);
+  if(m&&S.pj[m[1]]){S.pj[m[1]].mode=+m[2];view.msg=N(`${PJ[m[1]].n}策略改為「${PJM[+m[2]]}」。`);render();try{showSheet('ast')}catch(e){}return}
+  const g=a.match(/^pjg:(\w+)$/);
+  if(g&&S.pj[g[1]]){const p=S.pj[g[1]];p.mgr=p.mgr?0:1;view.msg=N(p.mgr?'已聘請專業經理人。':'已解聘專業經理人。');render();try{showSheet('ast')}catch(e){}return}
+ }
+ return _hd135.apply(this,arguments);
+};
+/* 專案事件：有決策、有後果 */
+const pjH=(types)=>PJK.filter(k=>S.pj&&S.pj[k]&&S.pj[k].val>=1e7&&(!types||types.includes(k)));
+const pjEv=(id,w,types,fn)=>E.push({id:'pje_'+id,min:25,max:100,w,if:()=>pjH(types).length>0,run:()=>{const k=pick(pjH(types)),p=S.pj[k],c=PJ[k];return fn(k,p,c)}});
+pjEv('mgr',3,null,(k,p,c)=>({t:`${c.n}的經營績效連續落後預期，董事會問你要不要調整。`,c:[
+ ch('換掉經營團隊',()=>{const l=Math.round(p.val*.02);p.val-=l;p.mgr=1;return N(`重組團隊花了 ${money(l)}，之後由專業經理人接手。`)}),
+ ch('親自下場督導',()=>{S.stress=cl(S.stress+6);if(chance(.55)){const g=Math.round(p.val*.08);p.val+=g;return G(`你親自督導，績效回升，估值增加 ${money(g)}。`)}return B('你花了很多時間，但效果有限。')}),
+ ch('再觀察一年',()=>N('你決定先觀望。'))]}));
+pjEv('add',3,['space','ev','ai','fus','vc','art','team'],(k,p,c)=>{const a=Math.round(p.val*.1);return {t:`${c.n}的經營者提出追加募資，邀你再投入 ${money(a)}，說會用在關鍵的下一階段。`,c:[
+ ch('追加投資',()=>{if(S.money<a)return B('現金不足，錯過了這次機會。');S.money-=a;p.inv+=a;if(chance(.55)){p.val+=Math.round(a*1.5);return G('追加的資金發揮效果，估值明顯提升。')}p.val+=Math.round(a*.7);return B('追加的資金效果不如預期。')}),
+ ch('不跟進',()=>{const l=Math.round(p.val*.03);p.val-=l;return N(`你的持股被稀釋，估值減少 ${money(l)}。`)})]}});
+pjEv('crisis',3,['space','ev','ai','media','team'],(k,p,c)=>({t:`${c.n}爆出爭議，媒體連續報導。`,c:[
+ ch('花錢請公關處理',()=>{const l=Math.round(p.val*.02);p.val-=l;if(chance(.7))return N(`風波平息，公關支出 ${money(l)}。`);const l2=Math.round(p.val*.05);p.val-=l2;return B('公關失敗，估值再下修。')}),
+ ch('公開誠懇回應',()=>{if(chance(.5)){S.karma=cl((S.karma||50)+2);return G('坦承問題反而贏得信任。')}const l=Math.round(p.val*.06);p.val-=l;return B(`輿論不買單，估值減少 ${money(l)}。`)}),
+ ch('保持沉默',()=>{const l=Math.round(p.val*.04);p.val-=l;return B(`不回應被解讀為心虛，估值減少 ${money(l)}。`)})]}));
+pjEv('launch',3,['space'],(k,p,c)=>({t:'下一次發射窗口接近，工程團隊說還有些風險沒完全排除。',c:[
+ ch('依原計畫發射',()=>{if(chance(.7)){const g=Math.round(p.val*.18);p.val+=g;return G(`發射成功，估值增加 ${money(g)}。`)}const l=Math.round(p.val*.2);p.val-=l;return B(`發射失敗，估值減少 ${money(l)}。`)}),
+ ch('延後再檢查',()=>{const l=Math.round(p.val*.02);p.val-=l;return N(`延後的成本 ${money(l)}，但下次更穩。`)})]}));
+pjEv('auction',3,['art'],(k,p,c)=>({t:'一件收藏品在拍賣會上被熱烈競價，行家說這是出手好時機。',c:[
+ ch('賣出一件',()=>{const g=Math.round(p.val*.12);p.val-=g;S.money+=Math.round(g*1.3);return G(`賣出一件收藏，拿到 ${money(Math.round(g*1.3))}。`)}),
+ ch('繼續持有',()=>{if(chance(.5)){const g=Math.round(p.val*.05);p.val+=g;return G('行情續漲，估值增加。')}return N('行情沒有太大變動。')})]}));
+pjEv('star',3,['team'],(k,p,c)=>({t:'經紀人說有位明星球員願意轉會，但簽約金很高。',c:[
+ ch('砸錢簽下',()=>{const l=Math.round(p.val*.04);p.val-=l;chg('happy',3);if(chance(.6)){const g=Math.round(p.val*.1);p.val+=g;return G(`球隊戰績大漲，估值增加 ${money(g)}。`)}return B('明星表現不如預期。')}),
+ ch('培養新秀',()=>{if(chance(.4)){const g=Math.round(p.val*.08);p.val+=g;return G('新秀爆發，球隊成本低又有成績。')}return N('新秀還需要時間。')})]}));
+pjEv('invite',3,['vc'],(k,p,c)=>({t:'基金的合夥人帶來一家明星新創，估值很高，但團隊很強。',c:[
+ ch('重押一筆',()=>{const a=Math.round(p.val*.06);p.val-=a;if(chance(.25)){p.val+=Math.round(a*4);return G('新創成為獨角獸，帳面大賺。')}if(chance(.5)){p.val+=Math.round(a*.4);return N('新創表現平平。')}return B('新創倒閉，投入全數損失。')}),
+ ch('不碰高估值',()=>N('你決定守住紀律。'))]}));
+pjEv('give',3,['fnd'],(k,p,c)=>({t:'基金會收到好幾個受助申請，每年預算只夠支持一個。',c:[
+ ch('支持教育偏鄉',()=>{S.karma=cl((S.karma||50)+3);chg('happy',3);try{fmAdd(1)}catch(e){}return G('許多孩子因此受惠，你的名字被許多人記得。')}),
+ ch('支持醫療弱勢',()=>{S.karma=cl((S.karma||50)+3);chg('happy',3);return G('一些家庭撐過了最艱難的時刻。')}),
+ ch('支持長期研究',()=>{S.karma=cl((S.karma||50)+2);S.net=cl((S.net||0)+2);return G('你資助的研究多年後有了成果。')})]}));
+/* ---- p136：公司經營事件擴充（有取捨、有後果；依產業類別） ---- */
+const cx=()=>S&&S.co&&S.co.yrs>=1&&S.co.prevRev>0?S.co:null;
+const cat=()=>{const c=cx();return c?INDS[c.ind].cat:''};
+const cIn=(...a)=>()=>a.includes(cat());
+const cPay=(co,x)=>{x=Math.round(x);if(co.L.cash<x)drawLoan(co,x-co.L.cash+Math.round(co.prevRev*.02),'現金不足，向銀行臨時借款');J(co.L,['cash',-x],['re',x])};
+const cGet=(co,x)=>{x=Math.round(x);J(co.L,['cash',x],['re',-x])};
+const cG=(co,v,y)=>{coTmp(co).g.push({v,y})};
+const cS=(co,v,y)=>{coTmp(co).s.push({v,y})};
+const ce=(id,w,cond,fn,min)=>E.push({id:'ce_'+id,min:min||20,max:90,w,if:()=>!!cx()&&cond(),run:()=>fn(cx())});
+const rv=co=>co.prevRev;
+ce('bigcli',3,()=>true,co=>({t:`「${co.name}」最大的客戶要求降價 10%，否則改找別家。`,c:[
+ ch('答應降價',()=>{cG(co,-.01,1);cPay(co,rv(co)*.02);return N('保住了客戶，但毛利被壓縮。')}),
+ ch('拒絕並找新客戶',()=>{if(chance(.55)){cG(co,.03,2);return G('你很快找到替代客戶，客群更分散。')}cG(co,-.05,1);return B('客戶真的走了，今年營收受影響。')}),
+ ch('提出長約換折扣',()=>{if(chance(.7)){cS(co,.01,2);return G('談成兩年長約，量大且穩定。')}return N('對方不接受，維持原價。')})]}));
+ce('poach',3,()=>S.co.yrs>=2,co=>({t:`同業開高薪挖角「${co.name}」的核心員工。`,c:[
+ ch('加薪留人',()=>{cPay(co,rv(co)*.012);return N('核心員工留下，人事成本上升。')}),
+ ch('給股權激勵',()=>{co.shares=(co.shares||0);cG(co,.015,3);chg('happy',1);return G('員工士氣大增，未來三年成長加成。')}),
+ ch('讓他走',()=>{if(chance(.5)){cG(co,-.03,2);return B('專案進度受影響，成長減緩。')}return N('團隊順利接手。')})]}));
+ce('supply',3,cIn('製造','餐飲','零售','農林漁牧','營建'),co=>({t:'主要供應商突然斷貨，交期延誤。',c:[
+ ch('改找備援供應商（貴一些）',()=>{cPay(co,rv(co)*.015);return N('多花了成本，但出貨沒有中斷。')}),
+ ch('等原供應商恢復',()=>{if(chance(.5))return N('一週後恢復，影響不大。');cG(co,-.04,1);return B('缺貨造成訂單流失。')}),
+ ch('趁機簽雙供應商',()=>{cPay(co,rv(co)*.01);cS(co,.008,3);return G('之後議價能力提升，成本下降。')})]}));
+ce('labor',3,cIn('餐飲','零售','製造','運輸','服務','醫療'),co=>({t:`員工提出勞資爭議，主張加班費與休假問題。`,c:[
+ ch('依法補發並改善制度',()=>{cPay(co,rv(co)*.02);cG(co,.01,3);chg('happy',1);return G('補齊後，離職率下降，工作氣氛變好。')}),
+ ch('協商和解',()=>{cPay(co,rv(co)*.01);return N('雙方達成和解。')}),
+ ch('硬撐到底',()=>{if(chance(.4))return N('勞檢結果對你有利。');cPay(co,rv(co)*.05);S.stress=cl(S.stress+5);return B('勞檢開罰，還被媒體報導。')})]}));
+ce('cyber',3,cIn('科技','金融','教育','娛樂','生技'),co=>({t:`「${co.name}」的系統遭到攻擊，客戶資料可能外洩。`,c:[
+ ch('立即通報並公開說明',()=>{cPay(co,rv(co)*.02);if(chance(.7))return N('處理得宜，客戶多半諒解。');cG(co,-.03,1);return B('部分客戶仍然流失。')}),
+ ch('悄悄修補',()=>{if(chance(.5))return N('沒有擴大。');cPay(co,rv(co)*.06);S.stress=cl(S.stress+5);return B('事後被揭露，被主管機關重罰。')}),
+ ch('投資資安體系',()=>{cPay(co,rv(co)*.03);cG(co,.01,3);return G('資安升級，後續客戶更信任你。')})]}));
+ce('subsidy',3,()=>true,co=>({t:'政府公告中小企業補助方案，申請要準備不少文件。',c:[
+ ch('花力氣申請',()=>{if(chance(.6)){const g=rv(co)*.03;cGet(co,g);return G(`補助核准，入帳 ${money(Math.round(g))}。`)}return N('審查未通過，白忙一場。')}),
+ ch('委託顧問代辦',()=>{cPay(co,rv(co)*.004);if(chance(.8)){cGet(co,rv(co)*.03);return G('顧問協助下順利拿到補助。')}return N('沒過，白付了顧問費。')}),
+ ch('不申請',()=>N('你把時間花在本業上。'))]}));
+ce('mna',3,()=>S.co.stage>=1||rv(co0())>1e7,co=>({t:'一家小同業因經營困難，主動詢問是否願意被你併購。',c:[
+ ch('收購它',()=>{const p=rv(co)*.12;cPay(co,p);if(chance(.6)){cG(co,.04,3);return G('整合順利，客戶與產能加進來。')}cG(co,-.01,2);S.stress=cl(S.stress+4);return B('整合不順，文化衝突不斷。')}),
+ ch('只挖他的客戶與人才',()=>{cPay(co,rv(co)*.02);cG(co,.015,2);return N('小有收穫。')}),
+ ch('婉拒',()=>N('你決定專注本業。'))]}),30);
+function co0(){return S.co||{prevRev:0}}
+ce('investor',3,()=>S.co.yrs>=3,co=>({t:'一位天使投資人想投資「'+co.name+'」，但要求兩成的股份。',c:[
+ ch('接受（出讓兩成）',()=>{const g=Math.max(rv(co)*.4,2e6);co.shares=co.shares||1;J(co.L,['cash',Math.round(g)],['capital',-Math.round(g)]);cG(co,.03,3);return G(`資金進來 ${money(Math.round(g))}，你的持股比例下降，但能加速成長。`)}),
+ ch('還價（出讓一成）',()=>{if(chance(.4)){const g=Math.max(rv(co)*.2,1e6);J(co.L,['cash',Math.round(g)],['capital',-Math.round(g)]);cG(co,.015,3);return G('對方接受了較小的方案。')}return N('談不攏，對方離開。')}),
+ ch('不引進外部股東',()=>N('你想保有完整的決策權。'))]}),30);
+ce('launch',3,cIn('科技','娛樂','餐飲','零售','生技','教育'),co=>({t:'團隊提出一款新產品，說可能成為爆款，也可能無人問津。',c:[
+ ch('全力押注',()=>{cPay(co,rv(co)*.03);if(chance(.35)){cG(co,.08,2);return G('爆款了！訂單湧入。')}cG(co,-.01,1);return B('反應冷淡，投入打水漂。')}),
+ ch('小量試賣',()=>{cPay(co,rv(co)*.008);if(chance(.3)){cG(co,.04,2);return G('小量試賣反應不錯，穩穩放大。')}return N('試賣結果普通，暫時擱置。')}),
+ ch('否決',()=>N('團隊有些失望。'))]}));
+ce('viral',3,cIn('餐飲','零售','服務','娛樂','教育','科技'),co=>({t:'一位網路名人無預警分享了你的產品，流量暴增。',c:[
+ ch('趁勢加碼廣告',()=>{cPay(co,rv(co)*.015);if(chance(.6)){cG(co,.05,1);return G('流量變現，今年營收大增。')}return N('熱度很快就退了。')}),
+ ch('穩住品質，慢慢承接',()=>{cG(co,.02,2);return G('口碑穩定累積。')}),
+ ch('不做特別處理',()=>{cG(co,.01,1);return N('熱度自然退去。')})]}));
+ce('audit',3,()=>true,co=>({t:'稅務機關通知「'+co.name+'」要查帳。',c:[
+ ch('請會計師全程協助',()=>{cPay(co,rv(co)*.006);if(chance(.8))return N('查帳順利過關。');cPay(co,rv(co)*.015);return B('有幾筆認定不符，補稅罰款。')}),
+ ch('自己應付',()=>{if(chance(.55))return N('順利過關。');cPay(co,rv(co)*.04);S.stress=cl(S.stress+4);return B('帳務不夠完整，被補稅加罰款。')})]}));
+ce('overseas',3,cIn('製造','科技','餐飲','零售','生技','娛樂'),co=>({t:'一位海外經銷商想代理你的產品，進軍海外市場。',c:[
+ ch('簽下代理',()=>{cPay(co,rv(co)*.012);if(chance(.6)){cG(co,.04,3);return G('海外訂單進來，成長加速。')}return N('水土不服，成效有限。')}),
+ ch('自建海外據點',()=>{cPay(co,rv(co)*.06);if(chance(.45)){cG(co,.07,4);return G('海外市場站穩腳跟。')}cG(co,-.02,2);return B('據點虧損，被拖累一陣子。')}),
+ ch('暫不出海',()=>N('你覺得時機未到。'))]}),30);
+ce('spin',3,()=>S.co.yrs>=4,co=>({t:'一位資深員工想離職自立門戶，做和你類似的生意。',c:[
+ ch('投資他、成為股東',()=>{cPay(co,rv(co)*.02);if(chance(.5)){cG(co,.02,3);return G('他的新公司成為你的通路夥伴。')}return N('他的公司規模不大，但相安無事。')}),
+ ch('祝福他離開',()=>{chg('happy',1);return N('好聚好散。')}),
+ ch('加薪挽留',()=>{cPay(co,rv(co)*.01);return N('他留下來了。')})]}));
+ce('down',3,()=>S.econ<-.01,co=>({t:'景氣下滑，訂單變少，現金流吃緊。',c:[
+ ch('裁員保現金',()=>{cPay(co,rv(co)*.015);cS(co,.02,2);cG(co,-.02,1);chg('happy',-2);return N('省下成本，但員工人心惶惶。')}),
+ ch('降薪共體時艱',()=>{if(chance(.6)){cS(co,.012,2);return G('員工願意共體時艱。')}cG(co,-.02,2);return B('核心人員離職。')}),
+ ch('逆勢擴張',()=>{cPay(co,rv(co)*.03);if(chance(.4)){cG(co,.06,3);return G('景氣回升時你搶下市占。')}S.stress=cl(S.stress+5);return B('景氣遲遲不回，壓力很大。')})]}));
+ce('kin',3,()=>S.co.yrs>=2,co=>({t:'親戚聽說你開了公司，希望入股或安排工作。',c:[
+ ch('讓他入職',()=>{cPay(co,rv(co)*.008);try{fmAdd(1)}catch(e){}if(chance(.4)){cG(co,.01,2);return G('他意外地很能幹。')}return N('效率普通，但家人關係維持。')}),
+ ch('婉拒入股',()=>{if(chance(.5))return N('對方理解。');chg('happy',-2);return B('家族聚會氣氛有點尷尬。')})]}));
+ce('burn',3,()=>S.co.yrs>=3&&S.stress>65,co=>({t:'你連續幾個月沒有好好休息，身心都在警告你。',c:[
+ ch('請長假、交給團隊',()=>{S.stress=cl(S.stress-20);chg('health',3);cG(co,-.015,1);return N('公司短暫變慢，但你恢復了。')}),
+ ch('請專業經理人',()=>{cPay(co,rv(co)*.02);co.mag=(co.mag||0)+.01;S.stress=cl(S.stress-12);return G('經營權部分下放，你喘口氣。')}),
+ ch('繼續硬撐',()=>{S.stress=cl(S.stress+6);chg('health',-4);return B('健康亮起紅燈。')})]}));
+ce('store',3,cIn('餐飲','零售','教育','服務','醫療'),co=>({t:'旁邊的店面釋出，房東問你要不要承租，擴大營業。',c:[
+ ch('承租擴店',()=>{cPay(co,rv(co)*.04);if(chance(.55)){cG(co,.06,3);return G('第二個據點帶來新客群。')}cG(co,-.01,2);return B('兩邊客人被稀釋，租金壓力大。')}),
+ ch('放棄',()=>N('你想先把原店顧好。')),
+ ch('把空間分租出去',()=>{cGet(co,rv(co)*.01);return N('多了一筆穩定租金收入。')})]}));
+ce('patent',3,cIn('科技','製造','生技','醫療'),co=>({t:'競爭對手指控你侵害其專利。',c:[
+ ch('找律師應戰',()=>{cPay(co,rv(co)*.015);if(chance(.6))return G('勝訴，對手撤告。');cPay(co,rv(co)*.04);return B('敗訴，賠償加上律師費。')}),
+ ch('付費授權和解',()=>{cPay(co,rv(co)*.025);return N('和解結案，省下訴訟風險。')}),
+ ch('改良設計規避',()=>{cPay(co,rv(co)*.02);cG(co,.01,2);return N('新設計反而更有特色。')})]}));
+ce('disaster',2,cIn('餐飲','零售','製造','農林漁牧','營建','運輸'),co=>({t:'颱風來襲，營運受到影響。',c:[
+ ch('有保險，申請理賠',()=>{if(chance(.6)){cGet(co,rv(co)*.015);return N('保險給付了一部分損失。')}cPay(co,rv(co)*.02);return B('保險不理賠，損失自行吸收。')}),
+ ch('自行復原',()=>{cPay(co,rv(co)*.025);return N('花了一筆錢，很快恢復營運。')})]}));
+ce('coop',3,()=>true,co=>({t:'一家知名品牌邀請你聯名合作，對方要求保證最低銷量。',c:[
+ ch('簽下合作',()=>{if(chance(.6)){cG(co,.05,2);return G('聯名大賣，品牌聲量大增。')}cPay(co,rv(co)*.02);return B('銷量未達標，要補差額。')}),
+ ch('談彈性條件',()=>{cG(co,.02,2);return N('條件放寬，效果普通。')}),
+ ch('婉拒',()=>N('你不想承擔太大風險。'))]}),25);
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
