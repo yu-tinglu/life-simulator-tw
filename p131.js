@@ -35,7 +35,7 @@ E.push({id:'arc2',min:24,max:62,w:30,if:()=>{const k=arcJ(),a=k&&arcS()[k];retur
  ch('全力接下挑戰',()=>{const p=Math.min(.85,.4+(S.job.perf||50)/250+(S.job.mast||0)/400);a.st=2;a.y=S.age;S.stress=cl(S.stress+4);if(chance(p)){a.q++;S.money+=Math.round(px(R(10,30)*1000));chg('happy',4);return G(d.g)}chg('happy',-2);return B(d.b)}),
  ch('穩穩處理就好',()=>{a.st=2;a.y=S.age;if(chance(.6)){S.job.perf=Math.min(100,(S.job.perf||50)+2);return N(d.g)}return N(d.b)})]}}});
 E.push({id:'arc3',min:26,max:66,w:30,if:()=>{const k=arcJ(),a=k&&arcS()[k];return !!a&&a.st===2&&S.age-a.y>=3},run:()=>{const k=arcJ(),a=arcS()[k],d=ARC131[k][a.br];return {t:`【${k}職涯】多年累積之後，一個決定性的時刻到來。`,c:[
- ch('接受這個結果',()=>{a.st=3;const hi=a.q>=1;if(hi){S.job.sal=Math.round(S.job.sal*1.15);chg('happy',8);S.karma=cl((S.karma||50)+1);try{fmAdd(1)}catch(e){}}else{S.job.sal=Math.round(S.job.sal*1.04);chg('happy',3)}
-  S.arcD131=S.arcD131||[];S.arcD131.push({job:k,title:d.et,hi});return hi?G(`${d.et}：${d.ex}`):N(`你走完了這條路，雖然沒有太大突破，也算一個階段。（${d.et}）`)})]}}});
+ ch('接受這個結果',()=>{a.st=3;const mt=S.npc&&S.npc.mentor&&S.npc.mentor.s>=1,hi=a.q>=1||(mt&&chance(.6));if(hi){S.job.sal=Math.round(S.job.sal*1.15);chg('happy',8);S.karma=cl((S.karma||50)+1);try{fmAdd(1)}catch(e){}}else{S.job.sal=Math.round(S.job.sal*1.04);chg('happy',3)}
+  S.arcD131=S.arcD131||[];S.arcD131.push({job:k,title:d.et,hi});return hi?G(`${d.et}：${d.ex}${mt?'（導師當年的指點，這時派上了用場。）':''}`):N(`你走完了這條路，雖然沒有太大突破，也算一個階段。（${d.et}）`)})]}}});
 const _gh131=goalHTML;
 goalHTML=function(){const h=_gh131.apply(this,arguments);const a=S.arcD131||[];return h+(a.length?`<div class="sec">職涯成就</div>`+a.map(x=>`<div class="item"><b>${esc(x.job)}・${esc(x.title)}</b><div class="sub">${x.hi?'達成':'走完這條路'}</div></div>`).join(''):'')};

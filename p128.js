@@ -45,7 +45,7 @@ E.push({id:'cq_stay',min:22,max:55,w:3,if:()=>(S.friends||[]).length>=1&&!cqHas(
  ch('幫他付幾天旅館',()=>{S.money-=Math.round(px(8000));cqAdd('stay',R(4,10),{n,half:1});return N('你覺得這樣彼此都有空間。')}),
  ch('抱歉，不方便',()=>N('你說家裡真的沒有地方。'))]}}});
 E.push({id:'cqf_stay',min:27,max:80,w:60,if:()=>!!cqDue('stay'),run:()=>{const s=cqTake('stay'),n=s.d.n,r=Math.random();
- return {t:r<.6?`${n}現在過得不錯，他說永遠記得你當年伸出援手，邀你去他家作客。`:`${n}輾轉聯絡上你，說他想請你當他婚禮的見證人。`,c:[ch('欣然前往',()=>{chg('happy',s.d.half?4:7);S.net=cl((S.net||0)+(s.d.half?1:3));return G('那天你坐在最前排，他向所有人介紹你是「改變我人生的人」。')}),ch('心意到就好',()=>{chg('happy',2);return N('你寄了一份賀禮。')})]}}});
+ return {t:r<.6?`${n}現在過得不錯，他說永遠記得你當年伸出援手，邀你去他家作客。`:`${n}輾轉聯絡上你，說他想請你當他婚禮的見證人。`,c:[ch('欣然前往',()=>{S.flags.stayOK=1;chg('happy',s.d.half?4:7);S.net=cl((S.net||0)+(s.d.half?1:3));return G('那天你坐在最前排，他向所有人介紹你是「改變我人生的人」。')}),ch('心意到就好',()=>{chg('happy',2);return N('你寄了一份賀禮。')})]}}});
 /* 網路上說了重話 */
 E.push({id:'cq_post',min:16,max:45,w:3,if:()=>!cqHas('post'),run:()=>({t:'你在網路上看到一則爭議留言，氣得想寫一長串回覆，直接點名對方。',c:[
  ch('寫了，按下送出',()=>{chg('happy',2);cqAdd('post',R(3,10),{});return N('你覺得舒坦，沒想到截圖被留了下來。')}),

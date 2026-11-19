@@ -15,7 +15,7 @@ function goalProg(){
  try{
   if(g==='wealth')v=netWorth()/3e7;
   else if(g==='family')v=(S.partner&&S.partner.married?.34:S.partner?.12:0)+c(S.kids.length/2)*.33+(S.partner?c(S.partner.rel/60)*.33:0);
-  else if(g==='career')v=(S.co&&S.co.stage>=2)?1:S.job?c(S.job.lv/3):0;
+  else if(g==='career')v=(S.co&&S.co.stage>=2)||(S.arcD131&&S.arcD131.some(x=>x.hi))?1:S.job?c(S.job.lv/3):0;
   else if(g==='scholar')v=S.edu/6;
   else if(g==='calm')v=c(S.age/50)*(c((70-(S.stress||0))/35)*.5+c(S.happy/75)*.5);
   else if(g==='kind')v=(S.karma||0)/75;
@@ -50,7 +50,7 @@ E.push({id:'cq_loan',min:23,max:55,w:3,if:()=>(S.friends||[]).length>=1&&S.money
  ch('只借一半',()=>{S.money-=Math.round(a/2);cqAdd('loan',R(3,8),{n,a:Math.round(a/2)});return N(`你借了一半，${n}說已經很感激。`)}),
  ch('婉拒',()=>{chg('happy',-1);return N(`你說最近手頭也緊，${n}沒再多說什麼。`)})]}}});
 E.push({id:'cqf_loan',min:23,max:80,w:60,if:()=>!!cqDue('loan'),run:()=>{const s=cqTake('loan'),n=s.d.n,a=s.d.a,r=Math.random();
- if(r<.4)return {t:`${n}突然聯絡你，說當年的錢終於可以還了，還多包了一份心意。`,c:[ch('收下',()=>{S.money+=Math.round(a*1.2);chg('happy',5);return G(`連本帶利收回 ${money(Math.round(a*1.2))}，你們喝了一整晚的酒。`)}),ch('只收本金',()=>{S.money+=a;S.karma=cl((S.karma||50)+3);return G('你只收回本金，這份交情更穩了。')})]};
+ if(r<.4)return {t:`${n}突然聯絡你，說當年的錢終於可以還了，還多包了一份心意。`,c:[ch('收下',()=>{S.flags.loanOK=1;S.money+=Math.round(a*1.2);chg('happy',5);return G(`連本帶利收回 ${money(Math.round(a*1.2))}，你們喝了一整晚的酒。`)}),ch('只收本金',()=>{S.flags.loanOK=1;S.money+=a;S.karma=cl((S.karma||50)+3);return G('你只收回本金，這份交情更穩了。')})]};
  if(r<.65)return {t:`${n}的事業做起來了，他回來還錢，還邀你入股新事業。`,c:[ch('入股',()=>{S.money+=a;const x=Math.round(a*(chance(.6)?3:-.5));S.money-=a;S.money+=x>0?x:0;chg('happy',3);return x>0?G(`${n}的公司成長得很好，你分到 ${money(x)}。`):B('新事業沒撐過去，你投進去的錢拿不回來。')}),ch('只拿回本金',()=>{S.money+=a;return N('你覺得穩穩的就好。')})]};
  return {t:`${n}早就換了電話，你再也聯絡不上，那筆錢像石沉大海。`,c:[ch('算了，當作買個教訓',()=>{chg('happy',-3);S.karma=cl((S.karma||50)+1);return B('你不再提這件事，只是之後對借錢謹慎多了。')}),ch('託人打聽',()=>{if(chance(.3)){S.money+=Math.round(a*.5);return N('輾轉聽到消息，他還了一半。')}chg('happy',-2);return B('沒有任何消息。')})]}}});
 /* 資助清寒學生 */
@@ -59,7 +59,7 @@ E.push({id:'cq_mentee',min:28,max:60,w:3,if:()=>S.money>=px(300000)&&!cqHas('men
  ch('介紹獎學金機構',()=>{cqAdd('mentee',R(8,14),{});return N('你幫他找到幾個管道，之後就沒有聯絡。')}),
  ch('婉拒',()=>N('你覺得自己的責任不在這裡。'))]})});
 E.push({id:'cqf_mentee',min:35,max:85,w:60,if:()=>!!cqDue('mentee'),run:()=>{cqTake('mentee');const r=Math.random();
- return {t:r<.7?'一封信寄到你手上：當年那位學生已經是醫師／工程師，他說自己的人生是從那一年改變的。':'你收到一張卡片，是當年那位學生寄來的，他說他現在也開始幫助別人。',c:[ch('回信祝福',()=>{chg('happy',8);S.karma=cl((S.karma||50)+3);try{fmAdd(1)}catch(e){}return G('你把信收進抽屜，每次心情不好都拿出來看。')}),ch('邀他吃頓飯',()=>{chg('happy',10);S.net=cl((S.net||0)+2);return G('他把你介紹給他的朋友，你的人脈圈多了一群年輕人。')})]}}});
+ return {t:r<.7?'一封信寄到你手上：當年那位學生已經是醫師／工程師，他說自己的人生是從那一年改變的。':'你收到一張卡片，是當年那位學生寄來的，他說他現在也開始幫助別人。',c:[ch('回信祝福',()=>{S.flags.menteeOK=1;chg('happy',8);S.karma=cl((S.karma||50)+3);try{fmAdd(1)}catch(e){}return G('你把信收進抽屜，每次心情不好都拿出來看。')}),ch('邀他吃頓飯',()=>{S.flags.menteeOK=1;chg('happy',10);S.net=cl((S.net||0)+2);return G('他把你介紹給他的朋友，你的人脈圈多了一群年輕人。')})]}}});
 /* 作弊／抄襲 */
 E.push({id:'cq_cheat',min:14,max:22,w:3,if:()=>!!S.school&&!cqHas('cheat'),run:()=>({t:'期中考快到了，你的進度落後，同學遞來一份答案。',c:[
  ch('收下來用',()=>{if(chance(.3)){chg('happy',-6);S.grade=cl((S.grade||60)-10);return B('被老師抓到，記了一支警告，家人也很失望。')}chg('smarts',-1);cqAdd('cheat',R(10,20),{});S.grade=cl((S.grade||60)+6);return N('成績漂亮地過關了，但你一直記得這件事。')}),
