@@ -9,7 +9,10 @@ yearly=function(){
   if(f.fit&&S.age>40)S.health=cl(S.health+1);
   if(f.push&&S.job&&S.age<56){S.job.perf=Math.min(100,(S.job.perf||50)+1);S.stress=cl(S.stress+1)}
   if(f.bold&&S.job&&S.job.mast!=null&&S.age<45)S.job.mast=Math.min(100,S.job.mast+1);
-  if(f.memoir&&!f.memoirD&&S.age>=70){f.memoirD=1;log('你的回憶錄出版了，鄰居和老朋友都來要簽名。','good');chg('happy',6);try{fmAdd(1)}catch(e){}}
+  if(f.memoir&&!f.memoirD&&S.age>=70){f.memoirD=1;let fm=0;try{fm=fmGet()}catch(e){}
+   if(fm>=30||S.smarts>=85){log('有出版社看過你整理的回憶，願意替你出版，書店裡擺了一小排。','good');chg('happy',6);try{fmAdd(1)}catch(e){}}
+   else if(S.smarts>=65){log('你把回憶錄自費印了一批，送給親友，也放上電子書平台。','good');chg('happy',4)}
+   else{log('你把寫下的回憶影印裝訂成冊，一人一本送給家人。','good');chg('happy',3)}}
  }catch(e){}
  return r;
 };
