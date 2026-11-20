@@ -1,1 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#b5532f"/><circle cx="50" cy="38" r="14" fill="#f6efe6"/><path d="M22 82c4-20 16-26 28-26s24 6 28 26z" fill="#f6efe6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+<radialGradient id="bg" cx="50%" cy="38%" r="75%"><stop offset="0" stop-color="#8a2d33"/><stop offset="1" stop-color="#3f1017"/></radialGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8cf94"/><stop offset=".5" stop-color="#b59a68"/><stop offset="1" stop-color="#8a7240"/></linearGradient>
+<linearGradient id="cv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5a1a22"/><stop offset=".08" stop-color="#7a2530"/><stop offset="1" stop-color="#5e1c25"/></linearGradient>
+</defs>
+<rect width="512" height="512" fill="url(#bg)"/>
+<path d="M0 0H512V70Q256 130 0 70Z" fill="#2a0a10" opacity=".55"/>
+<path d="M60 0Q110 150 40 330" stroke="#c9a95f" stroke-opacity=".18" stroke-width="10" fill="none"/>
+<path d="M452 0Q402 150 472 330" stroke="#c9a95f" stroke-opacity=".18" stroke-width="10" fill="none"/>
+<rect x="104" y="96" width="304" height="352" rx="16" fill="#2a0a10" opacity=".55" transform="translate(8 10)"/>
+<rect x="100" y="90" width="304" height="352" rx="16" fill="url(#cv)"/>
+<rect x="100" y="90" width="26" height="352" rx="12" fill="#3c1018"/>
+<rect x="116" y="106" width="276" height="320" rx="8" fill="none" stroke="url(#gold)" stroke-width="3"/>
+<rect x="126" y="116" width="256" height="300" rx="4" fill="none" stroke="url(#gold)" stroke-opacity=".6" stroke-width="1.5"/>
+<g fill="url(#gold)"><circle cx="256" cy="148" r="6"/><circle cx="226" cy="156" r="3" opacity=".7"/><circle cx="286" cy="156" r="3" opacity=".7"/></g>
+<g transform="translate(256 262)">
+<path d="M-46-86H46" stroke="url(#gold)" stroke-width="10" stroke-linecap="round"/>
+<path d="M-46 86H46" stroke="url(#gold)" stroke-width="10" stroke-linecap="round"/>
+<path d="M-38-80Q-38-20 0 0Q-38 20 -38 80H38Q38 20 0 0Q38-20 38-80Z" fill="none" stroke="url(#gold)" stroke-width="7" stroke-linejoin="round"/>
+<path d="M-26-70H26Q22-36 0-14Q-22-36-26-70Z" fill="url(#gold)" opacity=".85"/>
+<path d="M-2-4L2-4 6 40Q18 56 26 72H-26Q-18 56-6 40Z" fill="url(#gold)" opacity=".85"/>
+<circle cx="0" cy="-2" r="3" fill="#e8cf94"/>
+<circle cx="0" cy="22" r="1.8" fill="#e8cf94"/><circle cx="0" cy="34" r="1.8" fill="#e8cf94"/>
+</g>
+<g stroke="url(#gold)" stroke-width="2.5" fill="none" opacity=".9"><path d="M150 392Q256 372 362 392"/><path d="M170 150Q150 160 150 180M342 150Q362 160 362 180"/></g>
+</svg>

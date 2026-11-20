@@ -14254,7 +14254,7 @@ for(const e of E){
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
 /* ---- p147：版本編號（設定頁與標題畫面顯示；更新後第一次開啟會提示） ---- */
-const APPV=123,APPD='2026-11-20',APPN='版本號改為 1.23 格式、開啟時自動檢查更新、設定內可手動檢查';
+const APPV=124,APPD='2026-11-20',APPN="復古人生手札風格改版、新圖示、人生檔案與章節、人生圖鑑、翻開下一年、人生紀念冊";
 const verStr=n=>'v'+(n/100).toFixed(2);
 const verTxt=()=>`版本 ${verStr(APPV)}・${APPD}`;
 const _sh147=setHTML;
@@ -14288,6 +14288,119 @@ const _sh147b=setHTML;
 setHTML=function(){return _sh147b().replace('<div class="sec">存檔匯出',`<div class="sec">更新</div><button class="btn" data-a="lf:set:upd">檢查更新<small>目前 ${verStr(APPV)}</small></button><div class="sec">存檔匯出`)};
 const _lf147=lfHandle;
 lfHandle=function(x,y,z,u){if(x==='set'&&y==='upd'){verCheck(true);return null}return _lf147(x,y,z,u)};
+/* ---- p148：復古人生手札 × 劇場（只改畫面，不動遊戲邏輯） ---- */
+try{
+ const st=document.createElement('style');st.id='style148';
+ st.textContent=`
+:root{--bg:#F6F0E6;--card:#FFFCF6;--acc:#B95640;--acc2:#82917B;--gold:#B59A68;--ink:#382F2A;--mute:#7a6e62;--line:#e8dcc6}
+.dos148{font-size:10.5px;letter-spacing:2px;color:var(--gold);font-weight:700;margin:0 0 1px}
+.quote148{font-family:var(--serif);font-size:12.5px;color:var(--mute);margin:3px 0 0;font-style:italic;line-height:1.4}
+.chap148{display:flex;align-items:center;gap:10px;margin:18px 2px 10px;color:var(--gold);font-family:var(--serif)}
+.chap148::before,.chap148::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.55}
+.chap148 b{font-size:14px;letter-spacing:2px;font-weight:700;white-space:nowrap}
+.yr.major148{background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 9%,var(--card)),var(--card));box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 45%,transparent),var(--sh)}
+.yr.major148::before{background:var(--gold);opacity:1}
+.yr.major148::after{content:"重要";position:absolute;right:12px;top:12px;font-size:10px;letter-spacing:2px;color:var(--acc);border:1px solid var(--acc);border-radius:4px;padding:1px 5px;transform:rotate(-6deg);opacity:.75}
+.st .w148{font-size:10.5px;color:var(--mute);margin-top:2px;white-space:nowrap}
+.st.good148 .w148{color:var(--acc2)}
+#ageBtn{width:84px;height:84px;line-height:1.25;font-size:14px;letter-spacing:1px;background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--acc) 70%,#fff),var(--acc) 62%)}
+#feed.flip148{animation:flip148 .38s ease both}
+@keyframes flip148{from{opacity:.55;transform:translateY(10px) rotateX(8deg)}to{opacity:1;transform:none}}
+.zhi148{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.q148{width:100%;margin:6px 0 10px;padding:12px 14px;border-radius:14px;border:1px solid var(--gold);background:var(--card);font-family:var(--serif);font-size:15px}
+.mem148 .ln{font-size:14px}
+.mem148 b.q{font-family:var(--serif);color:var(--acc)}
+.hd148 .nm{letter-spacing:1px}
+`;
+ document.head.appendChild(st);
+}catch(e){}
+/* 人生檔案編號 */
+const _ng148=newGame;
+newGame=function(){const r=_ng148.apply(this,arguments);try{const n=(lsGet('lifesim_lifeno',0)||0)+1;lsSet('lifesim_lifeno',n);S.no=n}catch(e){}return r};
+/* 章節 */
+const CHAP148=[[0,5,'初來人間','人生的第一章，才剛開始。'],[6,12,'童年時光','世界很大，好奇心是最好的行囊。'],[13,17,'少年青澀','還不確定要成為誰，但已經出發。'],[18,24,'青春啟程','選擇一條路，也就錯過了另一條。'],[25,39,'立業成家','忙著建立生活，偶爾也記得抬頭看看。'],[40,59,'壯年風霜','走過大半，才懂什麼值得留下。'],[60,200,'暮年回眸','回頭看，每一段都算數。']];
+const chapOf148=a=>{const i=CHAP148.findIndex(c=>a>=c[0]&&a<=c[1]);return i<0?CHAP148.length-1:i};
+const HW148={health:[[90,'狀態極佳'],[70,'良好'],[50,'普通'],[30,'虛弱'],[0,'危急']],happy:[[85,'幸福洋溢'],[65,'愉快'],[45,'平靜'],[25,'低落'],[0,'沮喪']],smarts:[[85,'才智過人'],[65,'持續成長'],[40,'尚可'],[0,'有待磨練']],looks:[[85,'氣質出眾'],[65,'外型出色'],[40,'平易近人'],[0,'樸實無華']]};
+const hw148=(k,v)=>{if(k==='stress')return v<=20?'輕鬆自在':v<=45?'從容':v<=70?'壓力明顯':'喘不過氣';const t=HW148[k];if(!t)return '';for(const [m,w] of t)if(v>=m)return w;return ''};
+const MAJ148=/結婚|畢業|創辦|創立|出生|生下|迎接|離婚|分手|退休|破產|上市|考上|升任|過世|去世|當選|入獄|移民|買下|得獎/;
+const _r148=render;
+render=function(){
+ _r148.apply(this,arguments);
+ try{
+  if(!S)return;
+  const hd=document.getElementById('hd');if(hd)hd.classList.add('hd148');
+  const who=document.querySelector('#hd .who');
+  if(who){who.querySelectorAll('.dos148,.quote148').forEach(x=>x.remove());
+   const d=document.createElement('div');d.className='dos148';d.textContent='人生檔案 No.'+String(S.no||1).padStart(3,'0');who.insertBefore(d,who.firstChild);
+   const q=document.createElement('div');q.className='quote148';q.textContent='「'+(S.dead?'故事寫到這裡，謝謝你走過。':CHAP148[chapOf148(S.age)][3])+'」';who.appendChild(q)}
+  const ha=document.getElementById('hAge');if(ha)ha.textContent=`${calYear()-S.age} 年生・${(typeof CNS!=='undefined'&&CNS[S.cn||'TW']?CNS[S.cn||'TW'].n:'台灣')}${S.dead?'・已逝世':''}`;
+  document.querySelectorAll('#stats .st').forEach((el,i)=>{const s=STATS[i];if(!s)return;const k=s[0],v=S[k],em=el.querySelector('.lb em');
+   if(!el.querySelector('.w148'))el.insertAdjacentHTML('beforeend',`<div class="w148">${hw148(k,v)}</div>`);
+   if(k==='stress'){const bar=el.querySelector('.bar i');if(bar)bar.style.background=v>=70?'var(--acc)':v>=45?'var(--gold)':'var(--acc2)';el.classList.toggle('good148',v<45)}});
+  const feed=document.getElementById('feed');
+  if(feed){let last=-1,n=0;[...feed.querySelectorAll('.yr')].forEach(y=>{const a=parseInt((y.querySelector('h4')||{}).textContent,10);if(isNaN(a))return;
+    const c=chapOf148(a);if(c!==last){last=c;n++;const h=document.createElement('div');h.className='chap148';h.innerHTML=`<b>第${'一二三四五六七'[c]}章｜${CHAP148[c][2]}</b>`;feed.insertBefore(h,y)}
+    if(MAJ148.test(y.textContent))y.classList.add('major148')})}
+  const ab=document.getElementById('ageBtn');if(ab&&ab.dataset.l148!=='1'){ab.dataset.l148='1';ab.innerHTML='翻開<br>下一年'}
+ }catch(e){}
+};
+/* 年齡鈕：翻頁動畫＋長按連續推進（遇到需要選擇的事件會自動停下） */
+try{
+ const ab=document.getElementById('ageBtn');let lp=0,tm=null,run=0;
+ const open=()=>{const m=document.getElementById('modal'),s=document.getElementById('sheet');return (m&&m.classList.contains('on'))||(s&&s.classList.contains('on'))};
+ const flip=()=>{const f=document.getElementById('feed');if(f){f.classList.remove('flip148');void f.offsetWidth;f.classList.add('flip148')}};
+ const step=()=>{if(!run)return;if(!S||S.dead||open()||(typeof busy!=='undefined'&&busy)){run=0;return}
+  ageUp();flip();run--;if(run>0)setTimeout(step,520)};
+ ab.onclick=function(){if(lp){lp=0;return}flip();ageUp()};
+ const down=()=>{lp=0;clearTimeout(tm);tm=setTimeout(()=>{lp=1;run=5;if(navigator.vibrate)try{navigator.vibrate(20)}catch(e){}step()},650)};
+ const up=()=>clearTimeout(tm);
+ ab.addEventListener('touchstart',down,{passive:true});ab.addEventListener('mousedown',down);
+ ['touchend','touchcancel','mouseup','mouseleave'].forEach(e=>ab.addEventListener(e,up));
+ ab.addEventListener('contextmenu',e=>e.preventDefault());
+}catch(e){}
+/* 「更多」改成人生圖鑑 */
+const ZH148=[
+ ['人物篇','person',['lf:stat','lf:skill','lf:av','lf:art','lf:mind','lf:health']],
+ ['關係篇','heart',['lf:tree','lf:cg']],
+ ['成長篇','book',['lf:edu','lf:cook','lf:wk','lf:si','lf:ch','open:eco']],
+ ['世界篇','globe',['lf:pol','lf:eth','lf:rg','lf:wd']],
+ ['收藏篇','star',['lf:tl','lf:rev','lf:ach','lf:dx','lf:sv','open:lg']]
+];
+const _mh148=moreHTML;
+moreHTML=function(){
+ const h=_mh148(),tiles={};
+ (h.match(/<button class="tile"[^>]*>[\s\S]*?<\/button>/g)||[]).forEach(t=>{const m=t.match(/data-a="([^"]+)"/);if(m&&!tiles[m[1]])tiles[m[1]]=t});
+ const used={};view.mco=view.mco||{};
+ const cats=ZH148.map(([n,ic,ks])=>[n,ic,ks.filter(k=>tiles[k]&&!used[k]&&(used[k]=1))]);
+ const TABOWN=['open:rel','open:act','open:ast','open:job','lf:led','lf:hs','open:cn','rom:go:h','lf:tour','lf:set','lf:help','lf:legal'];
+ const rest=Object.keys(tiles).filter(k=>!used[k]&&TABOWN.indexOf(k)<0);if(rest.length)cats.push(['更多功能','menu',rest]);
+ const inp='<input type="search" id="tq" placeholder="你想在人生中做些什麼？" class="q148" oninput="moreSearch(this.value)">';
+ const tags=['lf:set','lf:ach','lf:tl','lf:rev'].filter(k=>tiles[k]||k==='lf:set');
+ const quick=`<div class="sub" style="margin:0 0 6px">常用</div><div class="seg" style="margin-bottom:8px"><button data-a="fx:open">找功能</button><button data-a="lf:set">設定</button></div>`;
+ return `<h3 style="margin:0 0 4px">人生圖鑑</h3><div class="sub" style="margin:0 0 6px">職業、關係、活動、資產在下方分頁；這裡收藏你一生的紀錄與工具。</div>`+inp+quick+cats.filter(c=>c[2].length).map(([n,ic,ks],i)=>{
+  const open=!!view.mco[i];
+  return `<button class="msec" data-a="mc:${i}" data-ic148="${ic}"><span>${n}（${ks.length}）</span><span>${open?'收合':'展開'}</span></button><div class="grid" data-cl="${open?0:1}" style="${open?'':'display:none'}">${ks.map(k=>tiles[k]).join('')}</div>`}).join('');
+};
+const _ss148=showSheet;
+showSheet=function(tab,sub){const r=_ss148(tab,sub);try{document.querySelectorAll('#sheetBody .msec[data-ic148]').forEach(b=>{const sp=b.firstElementChild;if(!sp)return;sp.querySelectorAll('svg').forEach(x=>x.remove());sp.insertBefore(mkIcon(b.dataset.ic148),sp.firstChild)})}catch(e){}return r};
+/* 系統與說明移到設定 */
+const _sh148=setHTML;
+setHTML=function(){const h=_sh148();return h.replace('<div class="sec">外觀</div>',`<div class="sec">系統與說明</div><div class="seg" style="margin:6px 0"><button data-a="lf:tour">玩法導覽</button><button data-a="lf:help">玩法說明</button><button data-a="lf:legal">版權資料</button></div><div class="sec">外觀</div>`)};
+/* 人生紀念冊 */
+const MEMK148=/考上|畢業|結婚|離婚|創辦|創立|生下|迎接|孫|退休|買下|得獎|當選|升任|移民|上市|破產|過世|去世/;
+const _se148=showEnd;
+showEnd=function(){
+ _se148.apply(this,arguments);
+ try{const b=document.getElementById('modalBody');if(!b)return;
+  const all=[];(S.log||[]).forEach(y=>(y.lines||[]).forEach(l=>{if(MEMK148.test(l.t)&&!/[？?]/.test(l.t))all.push({a:y.age,t:l.t,c:l.c})}));
+  const lastGrad=all.map(x=>/畢業/.test(x.t)).lastIndexOf(true);const keep=all.filter((x,i)=>!/畢業/.test(x.t)||i===lastGrad);
+  const rows=(keep.length>9?keep.filter((x,i)=>i<4||i>=keep.length-5):keep).map(x=>`<div class="ln ${x.c||''}">${x.a} 歲｜${esc(x.t)}</div>`);
+  const born=calYear()-S.age,died=calYear();
+  const h=`<div class="item mem148"><b style="font-family:var(--serif);font-size:17px">${esc(S.name)}的一生</b><div class="sub">${born} — ${died}・享年 ${S.age} 歲</div>${rows.join('')||'<div class="sub">這一生平靜而安穩。</div>'}<p style="margin:10px 0 0"><b class="q">如果人生可以重來，你會做出不同的選擇嗎？</b></p></div>`;
+  b.innerHTML=b.innerHTML.replace('<p><b>人生結局',h+'<p><b>人生結局');
+  const ag=document.getElementById('again');if(ag){ag.textContent='開啟另一段人生'}
+ }catch(e){}
+};
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
