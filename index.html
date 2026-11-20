@@ -14253,6 +14253,21 @@ for(const e of E){
  const r0=e.run,sf=TSUF[m[1]];
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
+/* ---- p147：版本編號（設定頁與標題畫面顯示；更新後第一次開啟會提示） ---- */
+const APPV=122,APPD='2026-11-20',APPN='定期定額與停損停利、家族里程碑、新事件情境、英文字典補充';
+const verTxt=()=>`第 ${APPV} 版・${APPD}`;
+const _sh147=setHTML;
+setHTML=function(){const h=_sh147();return h.replace('<h3>⚙️ 設定</h3>',`<h3>⚙️ 設定</h3><div class="sub">目前版本：${verTxt()}<br>${APPN}</div>`)};
+const _ss147=showStart;
+showStart=function(){_ss147.apply(this,arguments);try{const b=document.getElementById('startBody');if(b&&!b.querySelector('.ver147')){const d=document.createElement('div');d.className='sub ver147';d.style.cssText='text-align:center;margin-top:10px';d.textContent=verTxt();b.appendChild(d)}}catch(e){}};
+try{
+ const last=lsGet('lifesim_ver',0);
+ if(last!==APPV){
+  lsSet('lifesim_ver',APPV);
+  if(last&&typeof document!=='undefined'&&document.body&&document.createElement){
+   setTimeout(()=>{try{const d=document.createElement('div');d.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:9999;background:#c0553a;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3)';d.innerHTML=`已更新到<b>第 ${APPV} 版</b>（${APPD}）<br><span style="opacity:.9">${APPN}</span>`;d.onclick=()=>d.remove();document.body.appendChild(d);setTimeout(()=>d.remove(),8000)}catch(e){}},800)}
+ }
+}catch(e){}
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
