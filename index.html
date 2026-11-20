@@ -14254,7 +14254,7 @@ for(const e of E){
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
 /* ---- p147：版本編號（設定頁與標題畫面顯示；更新後第一次開啟會提示） ---- */
-const APPV=134,APPD='2026-11-20',APPN="全遊戲配色改為與圖示一致的鼠尾草綠";
+const APPV=135,APPD='2026-11-20',APPN="字體與文字顏色統一為柔和質感";
 const verStr=n=>'v'+(n/100).toFixed(2);
 const verTxt=()=>`版本 ${verStr(APPV)}`;
 const _sh147=setHTML;
@@ -14416,7 +14416,7 @@ try{
  const st=document.createElement('style');st.id='style149';
  const HILL="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200' preserveAspectRatio='none'><path d='M0 70Q100 20 200 60T400 40V200H0Z' fill='%23d5e4d3'/><path d='M0 120Q120 80 230 115T400 100V200H0Z' fill='%23c1d7c4'/></svg>";
  st.textContent=`
-:root{--bg:#F7EFE4;--card:#FFFCF6;--acc:#5a866b;--acc2:#7fa38d;--gold:#a3b8a0;--warn:#c76b55;--ink:#3d3530;--mute:#857a6d;--line:#e8dccb;--bad:#c76b55;--good:#4f8a68;--sh:0 1px 2px rgba(120,95,70,.05),0 6px 16px rgba(120,95,70,.07)}
+:root{--bg:#F7EFE4;--card:#FFFCF6;--acc:#5a866b;--acc2:#7fa38d;--gold:#a3b8a0;--warn:#c76b55;--ink:#4a3f37;--mute:#8c7f72;--serif:-apple-system,'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif;--line:#e8dccb;--bad:#c76b55;--good:#4f8a68;--sh:0 1px 2px rgba(120,95,70,.05),0 6px 16px rgba(120,95,70,.07)}
 html.dark{--bg:#0e1316;--card:#171e22;--ink:#e8ece9;--mute:#97a39f;--line:#273036;--acc:#8fc3a0;--acc2:#6fa88a;--gold:#6f8f7c;--warn:#ff8f7e}
 html:not(.dark),html:not(.dark) body{background-color:#F7EFE4}
 html:not(.dark) body{background:transparent}
@@ -14429,6 +14429,14 @@ html:not(.dark) body::before{content:"";position:fixed;inset:0;z-index:-1;pointe
 .yr.major148 h4::before{color:var(--acc);border-color:var(--acc)}
 .chap148{color:#8aa591}
 .chap148::before,.chap148::after{background:linear-gradient(90deg,transparent,#a3b8a0,transparent)}
+body{letter-spacing:.3px}
+h1,h2,h3,h4{font-weight:500;letter-spacing:1.5px}
+.chap148 b,.quote148,.q148,.mem148 b.q{font-weight:400}
+.quote148{font-style:normal;letter-spacing:1px}
+#hd .nm{font-weight:500;letter-spacing:2px}
+.sec{color:#6d9580;letter-spacing:1.5px;font-weight:600}
+.item>b,.scard b{font-weight:500;letter-spacing:.5px}
+.agebox b,.agebox .big,.agebox>*:first-child{font-weight:400!important}
 .logo148{box-shadow:0 8px 22px rgba(138,106,82,.22)}
 `;
  document.head.appendChild(st);
