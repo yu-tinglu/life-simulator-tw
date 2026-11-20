@@ -14041,25 +14041,100 @@ showEnd=function(){
 /* 提示 */
 NX125.push(['th_mid',()=>S.age>=38&&S.age<=50&&!(S.flags&&S.flags.th_mid),'人生到了中年，轉折事件隨時會出現，留意決定十年重心的選擇。'],
  ['eco',()=>S.age>=25&&S.money>=3e6&&!view.seenEco,'「資產」頁上方有景氣燈號，低迷或過熱時常會遇到進場或獲利了結的時機決策。']);
-/* ---- p142：投資交易成本（手續費與證交稅，遊戲簡化值） ---- */
+/* ---- p142：投資交易成本（手續費與證交稅，遊戲簡化值）＋成本基礎追蹤 ---- */
 const PFEE={tw:[.0015,.0015],us:[.003,0],bond:[.0005,0],gold:[.005,0]};
 const pfFee=(k,sell)=>(PFEE[k]||[0,0])[sell?1:0];
+function pfTrk(){S.pfc=S.pfc||{};S.pff=S.pff||0;S.pf=S.pf||{};for(const k in S.pf)if(S.pfc[k]==null)S.pfc[k]=S.pf[k]||0;return S.pfc}
 const _hd142=handle;
 handle=function(a){
  if(typeof a==='string'&&S&&S.pf&&/^pf:(b|s|sp):/.test(a)){
-  const k=a.split(':')[2],b0=S.pf[k]||0,m0=S.money;
+  pfTrk();const k=a.split(':')[2],b0=S.pf[k]||0,m0=S.money;
   const r=_hd142.apply(this,arguments);
-  try{const d=(S.pf[k]||0)-b0;if(PFEE[k]&&d!==0){const fee=Math.round(Math.abs(d)*pfFee(k,d<0));if(fee>0){S.money-=fee;log(`${d>0?'買進':'賣出'}手續費${d<0&&k==='tw'?'與證交稅':''} ${money(fee)}。`,'bad')}}}catch(e){}
+  try{const d=(S.pf[k]||0)-b0;let fee=0;if(d<0){const bi=Math.round(-d-(S.money-m0));if(bi>0&&bi<-d*.05)S.pff+=bi}
+   if(PFEE[k]&&d!==0){fee=Math.round(Math.abs(d)*pfFee(k,d<0));if(fee>0){S.money-=fee;S.pff+=fee;log(`${d>0?'買進':'賣出'}手續費${d<0&&k==='tw'?'與證交稅':''} ${money(fee)}。`,'bad')}}
+   if(d>0)S.pfc[k]=(S.pfc[k]||0)+Math.max(d,m0-S.money);else if(d<0&&b0>0)S.pfc[k]=Math.round((S.pfc[k]||0)*(S.pf[k]||0)/b0)}catch(e){}
   return r;
  }
  return _hd142.apply(this,arguments);
 };
 const _pm142=pfMove;
-pfMove=function(k,a){const m=_pm142(k,a);try{const f=Math.round(m*pfFee(k,0));S.money-=f;S.pf[k]=Math.max(0,S.pf[k]-f)}catch(e){}return m};
+pfMove=function(k,a){pfTrk();const m=_pm142(k,a);try{const f=Math.round(m*pfFee(k,0));S.money-=f;S.pf[k]=Math.max(0,S.pf[k]-f);S.pff+=f;S.pfc[k]=(S.pfc[k]||0)+m}catch(e){}return m};
 const _ps142=pfSellPct;
-pfSellPct=function(p){const g=_ps142(p);try{const f=Math.round(g*.004);S.money-=f;return g-f}catch(e){return g}};
+pfSellPct=function(p){pfTrk();const b={tw:S.pf.tw||0,us:S.pf.us||0};const g=_ps142(p);try{const f=Math.round(g*.004);S.money-=f;S.pff+=f;for(const k of ['tw','us'])if(b[k]>0)S.pfc[k]=Math.round((S.pfc[k]||0)*(S.pf[k]||0)/b[k]);return g-f}catch(e){return g}};
+const PFNM={bond:'債券',tw:'台股',us:'美股',gold:'黃金'};
+function perfHTML(){
+ pfTrk();const rows=[];let cost=0,val=0;
+ for(const k in S.pf){const v=S.pf[k]||0,c=S.pfc[k]||0;if(v<=0&&c<=0)continue;cost+=c;val+=v;rows.push(`<div class="item"><b>${PFNM[k]||k}</b><div class="sub">現值 ${money(v)}・成本 ${money(c)}<br>損益 <b style="color:${v>=c?'#2f9e6b':'#c0553a'}">${v>=c?'+':''}${money(v-c)}${c>0?`（${((v/c-1)*100).toFixed(1)}%）`:''}</b></div></div>`)}
+ let props='';const P=S.props||[];let pv=0,pb=0;P.forEach(p=>{pv+=p.value;pb+=p.bp});
+ if(S.house){pv+=S.house.value||0;pb+=S.house.bp||0}
+ if(pv>0&&pb>0)props=`<div class="item"><b>房產</b><div class="sub">市值 ${money(pv)}・買入 ${money(pb)}<br>帳面損益 <b style="color:${pv>=pb?'#2f9e6b':'#c0553a'}">${pv>=pb?'+':''}${money(pv-pb)}（${((pv/pb-1)*100).toFixed(1)}%）</b>（賣出還要扣仲介費與稅）</div></div>`;
+ let pj='';try{const hk=Object.keys(S.pj||{}).filter(k=>S.pj[k].val>0);if(hk.length){const v=hk.reduce((t,k)=>t+S.pj[k].val,0),c=hk.reduce((t,k)=>t+S.pj[k].inv,0);pj=`<div class="item"><b>大型專案</b><div class="sub">現值 ${money(v)}・投入 ${money(c)}<br>帳面損益 <b style="color:${v>=c?'#2f9e6b':'#c0553a'}">${v>=c?'+':''}${money(v-c)}（${((v/c-1)*100).toFixed(1)}%）</b></div></div>`}}catch(e){}
+ const tot=`<div class="item"><b>證券投資總覽</b><div class="sub">現值 ${money(val)}・成本 ${money(cost)}<br>損益 <b>${val>=cost?'+':''}${money(val-cost)}</b>・累計交易成本 ${money(S.pff||0)}</div></div>`;
+ return `<div class="sec">投資績效</div><details><summary class="sub">各類資產損益與成本（點開）</summary>${tot}${rows.join('')}${props}${pj}<div class="sub">成本以你在遊戲中買進的金額計算；追蹤功能上線前就持有的部分，以首次查看時的現值為成本。</div></details>`;
+}
 const _ph142=pfHTML;
-pfHTML=function(){return _ph142()+'<p class="sub">交易成本（簡化）：賣出一律 0.3%，台股另加證交稅等 0.15%（合計約 0.45%）；買進台股 0.15%、美股 0.3%、債券 0.05%、黃金 0.5%、加密貨幣 1%。</p>'};
+pfHTML=function(){return _ph142()+perfHTML()+'<p class="sub">交易成本（簡化）：賣出一律 0.3%，台股另加證交稅等 0.15%（合計約 0.45%）；買進台股 0.15%、美股 0.3%、債券 0.05%、黃金 0.5%、加密貨幣 1%。</p>'};
+/* ---- p143：新事件文字變化（開場與情境小句隨機） ---- */
+const TPRE=['今年春天，','前陣子，','某個週一早上，','年底前，','一個深夜裡，','這幾個月，','最近，','',''];
+const TSUF={ce_:['（財務長提醒你，這會影響今年的現金流。）','（團隊都在等你拍板。）','（你翻了一下最近的報表。）','（辦公室裡的氣氛有點緊繃。）'],cf_:['（你想起當初的那個決定。）','（這件事其實早有徵兆。）','（你心裡有一點預感。）'],pje_:['（顧問把資料放到你桌上。）','（你打開最新的估值報告。）','（董事會的郵件進來了。）'],fa_:['（你想起這些年一起走過的時光。）','（家裡的氣氛有些微妙。）','（你默默想了很久。）'],th_:['（你望著窗外想了很久。）','（夜裡你翻來覆去睡不著。）'],tm_:['（新聞每天都在談這件事。）','（同事午餐時也在聊這個話題。）','（理專剛好打電話來。）']};
+for(const e of E){
+ const m=/^(ce_|cf_|pje_|fa_|th_|tm_)/.exec(e.id);if(!m)continue;
+ const r0=e.run,sf=TSUF[m[1]];
+ e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
+}
+/* ---- p144：English 介面（只翻導覽、標題、常用按鈕與選單；事件與職業文字維持中文） ---- */
+const EN={
+'職業':'Career','關係':'Relations','活動':'Activities','資產':'Assets','更多':'More','年齡 +1':'Age +1',
+'健康':'Health','快樂':'Happy','智力':'Smarts','外貌':'Looks',
+'← 返回':'← Back','返回':'Back','關閉':'Close','取消':'Cancel','知道了':'Got it','略過':'Skip','下一步':'Next','← 上一步':'← Previous','開始':'Start','繼續':'Continue','刪除':'Delete','複製':'Copy','清除':'Clear','查看':'View','前往':'Go','購買':'Buy','賣出':'Sell','全部賣出':'Sell all','全賣':'Sell all','買 100 萬':'Buy NT$1M','買 500 萬':'Buy NT$5M',
+'出生！':'Be born!','重新投胎':'Be reborn','繼續上一局':'Continue last life','男':'Male','女':'Female','男生':'Boy','女生':'Girl','異性戀':'Straight','同性戀':'Gay','雙性戀':'Bisexual','隨機':'Random',
+'設定':'Settings','⚙️ 設定':'Settings','外觀':'Appearance','字級':'Text size','自動':'Auto','淺色':'Light','深色':'Dark','小':'Small','標準':'Standard','大':'Large','特大':'Extra large','存檔匯出／匯入':'Export / import save','回到標題畫面':'Back to title','匯入存檔':'Import save','複製存檔文字':'Copy save text','難度':'Difficulty','減少動畫':'Reduce motion','高對比':'High contrast',
+'玩法說明':'How to play','玩法導覽':'Tour','新手清單':'Checklist','我想做…':'I want to…','今年建議':'Suggestion',
+'基本資料':'Profile','個人檔案':'Profile','能力總覽':'Abilities','基本能力':'Basic stats','個性與技能':'Traits & skills','財務總覽':'Finances','財務':'Finances','收入':'Income','支出':'Expenses','現金':'Cash','淨資產':'Net worth','名聲':'Fame','成長故事':'Life story','人生故事':'Life story','人生傳記':'Biography','人生結局':'Ending','人生分數':'Life score','人生目標':'Life goal','成就與結局':'Achievements & endings','圖鑑與收集':'Collection','人生總結卡':'Summary card','年度回顧':'Yearly review','人生章節':'Life chapters','人生時間軸':'Timeline','重大時刻':'Key moments','家族':'Family','家族檔案':'Family archive','歷代傳承':'Generations','家族史':'Family history','傳承與遺囑':'Legacy & will',
+'學歷與進修':'Education','進修':'Study','輟學':'Drop out','就學貸款':'Student loan','才藝與課程':'Talents & classes','我的才藝':'My talents',
+'職業與學業':'Career & school','徵才資訊':'Job listings','辭職':'Quit','辭掉兼職':'Quit part-time','創業':'Startup','創業：選擇產業':'Startup: choose industry','經營狀況':'Status','經營決策':'Decisions','經營改善':'Improvements','組織型態':'Entity type','資本額（本金）':'Capital','登記成立':'Register','← 公司主頁':'← Company home','出售公司':'Sell company','解散清算':'Liquidate','共同創辦人':'Co-founders','核心人才':'Key talent','公開發行與 IPO':'IPO','合夥人與併購':'Partners & M&A','擴廠投資':'Expansion','融資與增資':'Financing','銀行貸款':'Bank loan','現金增資':'Equity raise','股權與資本運作':'Equity & capital',
+'人際關係':'Relationships','家人':'Family','父母':'Parents','子女':'Children','朋友':'Friends','伴侶':'Partner','伴侶・戀愛':'Partner & romance','戀愛':'Romance','認識新朋友':'Meet people','心儀對象':'Crush','領養孩子':'Adopt','手足':'Siblings','寵物':'Pets','告白':'Confess','網友':'Online friends','聊天':'Chat','寄禮物':'Send gift','視訊通話':'Video call','去見面':'Meet up','結束往來':'End contact','基本互動':'Interactions','互動':'Interact','教養決策':'Parenting',
+'活動':'Activities','健康與醫療':'Health & medical','身心健康':'Mind & body','請假（依勞基法）':'Leave','旅遊':'Travel','去過的地方':'Places visited','世界各國':'Countries','移民與匯率':'Migration & FX','外匯交易':'Foreign exchange','外幣存款與匯率':'FX deposits','移居途徑':'Migration paths','回台灣':'Return to Taiwan','創作':'Create','創作與作品':'Works','我的作品':'My works','比賽':'Competition','報名參賽':'Enter contest','競技生涯':'Athlete career','料理與食譜':'Cooking','我的餐廳':'My restaurant','開店':'Open shop','宗教與信仰':'Faith','政治與選舉':'Politics','登記參選':'Run for office',
+'銀行存款':'Bank','活期存款':'Checking','定存單':'Time deposits','存入活存':'Deposit','從活存提領':'Withdraw','提前解約':'Break early','投資組合':'Portfolio','債券':'Bonds','台股':'TW stocks','美股':'US stocks','黃金':'Gold','持有中':'Holding','新增或加碼':'Add or increase','大型投資與事業':'Large investments','專案總覽':'Project summary','效益比較（點開）':'Compare returns','投資績效':'Performance','各類資產損益與成本（點開）':'P/L and cost by asset','證券投資總覽':'Securities summary','專案接班人':'Project heir','經濟儀表板':'Economy dashboard','房屋與房市':'Housing market','房屋':'Housing','賣掉自住房':'Sell home','賣掉投資房':'Sell property','提前還款 100 萬':'Prepay NT$1M','轉貸降息':'Refinance','現金買入':'Buy cash','貸款買入':'Buy with loan','買車':'Buy car','賣掉車子':'Sell car','年度收支':'Annual cash flow','年度收支明細':'Cash flow detail','走勢圖':'Charts','房價指數（相對初始，各城市）':'House price index','你的淨資產（萬）':'Net worth (10k)','近期世界事件':'World events','基本工資':'Minimum wage','生育補助':'Birth subsidy','社會與政策':'Society & policy',
+'存檔（共三格）':'Saves (3 slots)','所有存檔':'All saves','存入目前':'Save current','存檔欄位（手動備份 3 個）':'Backup slots','讀取':'Load','開始新的人生':'Start a new life','版權與聲明':'Copyright','資料來源':'Sources','參考法規':'Laws','錯誤紀錄':'Error log',
+'每日挑戰':'Daily challenge','今日成績':"Today's score",'歷史前五名':'Top 5','選擇的回響':'Echoes of choices','時光回溯點':'Rewind points','在此刻留下回溯點':'Leave a rewind point','分享':'Share','下載圖片':'Download image','複製文字':'Copy text','產生人生故事':'Generate story','產生分享圖片（長按儲存）':'Make share image','與朋友比較結果':'Compare with friends','比較':'Compare','你':'You',
+'🎲 人生模擬器':'Life Simulator','人生模擬器':'Life Simulator','🏠 資產':'Assets','🎯 活動':'Activities','💼 職業與學業':'Career & school','👪 人際關係':'Relationships','☰ 更多功能':'More','📊 經濟儀表板':'Economy dashboard','📋 複製人生年表':'Copy life timeline','🕊️ 你的一生結束了':'Your life has ended','🏆 成就與結局':'Achievements','🎯 人生目標':'Life goal','🌳 家族史':'Family tree','📰 社會與政策':'Society','🩺 健康與醫療':'Health','🧠 身心健康':'Mind & body','🧬 個性與技能':'Traits','📜 傳承與遺囑':'Legacy & will',
+'展開':'Expand','收合':'Collapse','人物與成長':'People & growth','家庭與感情':'Family & love','學業與事業':'School & work','財務資訊':'Finance info','社會與世界':'Society & world','紀錄與傳承':'Records & legacy','系統與說明':'System & help','不知道功能在哪？按這裡':'Not sure where? Tap here','搜尋功能或人生紀錄（例如：房、股、結婚）':'Search features or log (e.g. house, stock)','職業、關係、活動、資產在下方分頁；這裡放其他功能。':'Career, relations, activities, assets are in the bottom tabs; other features are here.','我想做…（找功能）':'Find a feature','投資組合（總值':'Portfolio (total','自動':'Auto','已收集':'Collected','經營':'Manage',
+'姓名（留空則隨機）':'Name (blank = random)','進階：戀愛傾向（預設隨機）':'Advanced: orientation'
+};
+const ENP=[[/^(.+)（(\d+)）$/,null],[/^查看人生總結$/,'View summary'],[/^顯示更早的 (\d+) 年$/,'Show earlier $1 years'],[/^(\d+) 歲$/,'Age $1'],[/^享年 (\d+) 歲$/,'Died at $1']];
+const lgOn=()=>{try{return (lsGet(PREFK,{}).lg||'zh')==='en'}catch(e){return false}};
+const enStrip=t=>t.replace(/^[^一-鿿A-Za-z0-9←]+/,'');
+function enNode(n){
+ if(n.nodeType===3){const raw=n.nodeValue,t=raw.trim();if(!t||!/[一-鿿]/.test(t))return;
+  let k=EN[t]!=null?t:(EN[enStrip(t)]!=null?enStrip(t):null);
+  if(k!=null){n.nodeValue=raw.replace(t,EN[k]);return}
+  const cm=/^(.+)（(\d+)）$/.exec(t);if(cm&&EN[cm[1]]!=null){n.nodeValue=raw.replace(t,EN[cm[1]]+' ('+cm[2]+')');return}
+  for(const [re,rp] of ENP)if(rp&&re.test(t)){n.nodeValue=raw.replace(t,t.replace(re,rp));return}}
+ else if(n.nodeType===1){if(n.placeholder&&EN[n.placeholder])n.placeholder=EN[n.placeholder];n.childNodes.forEach(enNode)}
+}
+let enObs=null,enBusy=false;
+function enApply(){
+ try{
+  if(!lgOn()){if(enObs){enObs.disconnect();enObs=null}return}
+  document.documentElement.lang='en';
+  const run=()=>{if(enBusy)return;enBusy=true;try{enNode(document.body)}finally{enBusy=false}};
+  run();
+  if(!enObs&&typeof MutationObserver==='function'){enObs=new MutationObserver(()=>{if(!enBusy)requestAnimationFrame(run)});enObs.observe(document.body,{childList:true,subtree:true,characterData:true})}
+ }catch(e){}
+}
+const _sh144=setHTML;
+setHTML=function(){
+ const h=_sh144(),cur=(lsGet(PREFK,{}).lg||'zh');
+ const b=`<div class="sec">語言 Language</div><div class="seg" style="margin:6px 0"><button class="${cur==='zh'?'on':''}" data-a="lf:set:lg:zh">中文</button><button class="${cur==='en'?'on':''}" data-a="lf:set:lg:en">English（部分）</button></div><div class="sub">English mode only translates menus and common buttons; events and job text stay in Chinese.</div>`;
+ const i=h.indexOf('<div class="sec">存檔匯出');return i<0?h+b:h.slice(0,i)+b+h.slice(i);
+};
+const _lf144=lfHandle;
+lfHandle=function(x,y,z,u){
+ if(x==='set'&&y==='lg'){const p=lsGet(PREFK,{th:'auto',fs:1});p.lg=z;lsSet(PREFK,p);try{if(z==='zh')location.reload();else enApply()}catch(e){}return null}
+ return _lf144(x,y,z,u);
+};
+try{enApply()}catch(e){}
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
