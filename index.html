@@ -14254,7 +14254,7 @@ for(const e of E){
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
 /* ---- p147：版本編號（設定頁與標題畫面顯示；更新後第一次開啟會提示） ---- */
-const APPV=135,APPD='2026-11-20',APPN="字體與文字顏色統一為柔和質感";
+const APPV=136,APPD='2026-11-20',APPN="死亡率與健康衰退校準、事件變化與伏筆、老年與遺產、立志與引導";
 const verStr=n=>'v'+(n/100).toFixed(2);
 const verTxt=()=>`版本 ${verStr(APPV)}`;
 const _sh147=setHTML;
@@ -14441,6 +14441,83 @@ h1,h2,h3,h4{font-weight:500;letter-spacing:1.5px}
 `;
  document.head.appendChild(st);
 }catch(e){}
+/* ---- p150：死亡率校準（對照台灣生命表，原本偏高約 10 歲） ---- */
+const MORC150=(a,sx)=>{let c=a<45?0:a<70?.2:a<85?.15:0;if(sx==="女"&&c>0)c+=.1;return c};
+const _dc150=deathCheck;
+deathCheck=function(){const c=_dc150();if(!c||c==='健康惡化'||S.age>=108)return c;if(S.health>25&&chance(MORC150(S.age,S.sx)))return null;return c};
+const HREC150=.5;
+const _y150=yearly;yearly=function(){const h0=S.health,a=S.age;_y150.apply(this,arguments);try{if(a>=35&&S.health<h0&&S.health>0)S.health=Math.min(100,Math.round(S.health+(h0-S.health)*HREC150))}catch(e){}};
+/* ---- p151：事件多樣化（降低重複）、伏筆回收、老年與遺產、立志 ---- */
+const _re150=randEvents;
+randEvents=function(){
+ const ws=E.map(e=>e.w);
+ try{E.forEach(e=>{const n=(S.evn||{})[e.id]||0;if(n>0)e.w=e.w/(1+.7*n)})}catch(x){}
+ let out;try{out=_re150.apply(this,arguments)}finally{E.forEach((e,i)=>{e.w=ws[i]})}
+ try{S.evn=S.evn||{};out.forEach(e=>{S.evn[e.id]=(S.evn[e.id]||0)+1})}catch(x){}
+ return out;
+};
+const NM151=['志豪','怡君','俊宏','雅婷','建志','淑芬','家豪','佳穎','宗翰','美玲','冠宇','詩涵'];
+const kids151=()=>(S.kids||[]).filter(k=>k&&k.age>=0);
+/* 立志 */
+E.push({id:'cb_goal',min:13,max:19,w:40,if:()=>!S.goal&&!S.flags.goalAsked,run:()=>{S.flags.goalAsked=1;
+ const set=(id,t)=>()=>{S.goal=id;S.gms={};return G(t)};
+ return {t:'國文老師要大家寫「二十年後的我」。你盯著空白的稿紙，想了很久。',c:[
+  ch('有錢，不必為生活煩惱',set('wealth','你寫下：想要財務自由。（人生目標：財務自由）')),
+  ch('有個溫暖的家',set('family','你寫下：想要一個溫暖的家。（人生目標：幸福家庭）')),
+  ch('活得平靜自在',set('calm','你寫下：想要平靜地過日子。（人生目標：平靜生活）')),
+  ch('現在還不知道',()=>N('你把稿紙折起來放進抽屜。之後可以在「更多→人生目標」再選。'))]}}});
+/* 伏筆回收 */
+E.push({id:'cb_teacher',min:30,max:65,w:3,if:()=>S.edu>=3&&!S.flags.cbT,run:()=>{S.flags.cbT=1;const n=pick(NM151).slice(0,1)+'老師';return {t:`${n}退休了，當年的同學發起謝師宴。你收到邀請，上一次見面是十幾年前。`,c:[
+ ch('出席，送上一份禮',()=>{S.money-=px(5000);chg('happy',6);S.net=(S.net||0)+3;return G('老師還記得你當年的樣子，說你比想像中更穩重。你帶著久違的輕鬆回家。')}),
+ ch('工作太忙，回個訊息',()=>{chg('happy',-2);return N('你傳了祝福，後來看到同學貼的合照，有點悵然。')})]}}});
+E.push({id:'cb_exnews',min:28,max:75,w:3,if:()=>S.ex&&S.ex.length>0&&!S.flags.cbX,run:()=>{S.flags.cbX=1;const x=S.ex[S.ex.length-1];const hard=chance(.5);return {t:hard?`共同朋友告訴你，${x.n}最近過得不太好，剛經歷一場變故。`:`你在社群看到${x.n}結婚的消息，照片裡笑得很開心。`,c:hard?[
+ ch('傳訊息關心一下',()=>{if(chance(.7)){chg('happy',3);S.karma=Math.min(100,(S.karma||50)+2);return G('對方回了很長的訊息，謝謝你還記得。你們沒有重新開始，但都釋懷了。')}return N('訊息已讀，沒有回覆。你也覺得這樣就好。')}),
+ ch('默默放在心裡',()=>N('你關掉對話框，過了很久才想起這件事。'))]:[
+ ch('按讚，送上祝福',()=>{chg('happy',2);return G('你真心覺得，這樣很好。')}),
+ ch('滑過去，裝作沒看到',()=>{chg('happy',-2);return N('你說不上來是什麼感覺，只是那天特別安靜。')})]}}});
+E.push({id:'cb_oldco',min:32,max:62,w:3,if:()=>S.job&&!S.job.founder&&S.job.years>=6&&S.money>px(1e6)&&!S.flags.cbO,run:()=>{S.flags.cbO=1;const n=pick(NM151);const need=px(8e5);return {t:`以前的同事${n}找你吃飯，說他準備創業，缺一個信得過的夥伴，問你要不要入股 ${money(need)}。`,c:[
+ ch('入股，賭一把',()=>{S.money-=need;S.stress=cl(S.stress+5);if(chance(.35)){S.money+=need*R(3,6);chg('happy',10);return G(`公司三年後站穩了，你的股份分到不少紅利。${n}說：「當年只有你相信我。」`)}if(chance(.5)){S.money+=Math.round(need*.4);chg('happy',-4);return N('公司撐了兩年，結束營業時還了一部分錢。你說不後悔。')}chg('happy',-8);return B('公司倒了，錢拿不回來。你們還是朋友，只是很久沒聯絡。')}),
+ ch('婉拒，但祝福他',()=>{S.net=(S.net||0)+1;return N('你請他吃了頓飯，說：「做出來再找我。」')})]}}});
+E.push({id:'cb_friendloan',min:25,max:70,w:3,if:()=>S.friends&&S.friends.length>0&&S.money>px(3e5)&&!(S.flags.cbF>=2),run:()=>{S.flags.cbF=(S.flags.cbF||0)+1;const f=pick(S.friends);const amt=px(3e5);return {t:`${f.n}週轉不靈，吞吞吐吐地問你能不能借 ${money(amt)}，說三個月內還。`,c:[
+ ch('借他',()=>{S.money-=amt;if(chance(.6+(f.tru||50)/250)){S.money+=amt;f.rel=Math.min(100,f.rel+10);S.flags.cbFR=(S.flags.cbFR||0)+1;return G(`${f.n}準時還了錢，還請你吃了一頓。你們比以前更熟。`)}f.rel=Math.max(0,f.rel-35);chg('happy',-6);return B(`${f.n}拖了半年，後來就不再回你訊息。你學到了借錢的代價。`)}),
+ ch('少借一點，當作送他',()=>{S.money-=Math.round(amt/3);f.rel=Math.min(100,f.rel+6);S.karma=Math.min(100,(S.karma||50)+2);return N('你說不用還了。對方紅著眼眶說謝謝。')}),
+ ch('說自己也有難處',()=>{f.rel=Math.max(0,f.rel-12);return N('你說得很委婉，對方點點頭，氣氛有些尷尬。')})]}}});
+E.push({id:'cb_hometown',min:38,max:75,w:2.5,if:()=>!S.flags.cbH,run:()=>{S.flags.cbH=1;return {t:'你回到小時候住的地方，巷口的柑仔店換成了便利商店，但那棵榕樹還在。',c:[
+ ch('在樹下坐一會兒',()=>{chg('happy',7);S.stress=cl(S.stress-8);return G('風吹過樹葉，和小時候一樣的聲音。你想起很多人，也想起當時以為永遠不會變的日子。')}),
+ ch('拍張照傳給家人',()=>{chg('happy',4);for(const p of [S.mom,S.dad])if(p&&p.alive)p.rel=Math.min(100,p.rel+4);return G('家人回你：「你還記得這裡啊。」附上一串笑臉。')})]}}});
+/* 老年與遺產 */
+E.push({id:'old_trip',min:64,max:82,w:6,if:()=>S.health>=40&&S.money>px(1.5e6)&&!S.flags.oldTrip,run:()=>{S.flags.oldTrip=1;const c=px(4e5);return {t:'你想起年輕時一直說「以後有空再去」的地方。現在有空了，只是膝蓋不太聽話。',c:[
+ ch(`出發，這次真的去（${money(c)}）`,()=>{S.money-=c;chg('happy',14);S.health=Math.min(100,S.health+(chance(.3)?-6:2));return G('你走得很慢，但每一步都看得很仔細。回家後把照片洗出來，一張一張放進相簿。')}),
+ ch('在家附近走走就好',()=>{chg('happy',3);return N('你在公園繞了一圈，心想：其實也不錯。')})]}}});
+E.push({id:'old_will',min:66,max:96,w:8,if:()=>!S.flags.oldWill&&S.money>px(2e6),run:()=>{S.flags.oldWill=1;const ks=kids151();const has=ks.length>0;return {t:has?`你請律師來家裡，討論遺囑。${ks.length} 個孩子的名字寫在紙上，你拿著筆停了很久。`:'你沒有子女，律師問你：「財產想怎麼安排？」',c:has?[
+ ch('平均分給每個孩子',()=>{S.flags.willK='equal';ks.forEach(k=>k.rel=Math.min(100,(k.rel||60)+3));return G('寫下公平的分配。你覺得安心：至少不會讓他們為此吵架。')}),
+ ch('多留給最需要幫助的孩子',()=>{S.flags.willK='need';const k=ks.reduce((a,b)=>(a.inc||0)<=(b.inc||0)?a:b);ks.forEach(x=>{if(x!==k)x.rel=Math.max(0,(x.rel||60)-R(0,8))});return N('你把理由寫在信裡。有人理解，有人心裡不太舒服。')}),
+ ch('一部分捐給公益',()=>{S.flags.willK='donate';S.karma=Math.min(100,(S.karma||50)+6);chg('happy',5);return G('你說：「留一點給需要的人。」孩子們點頭，沒有人反對。')})]:[
+ ch('成立小型基金，長期做公益',()=>{S.flags.willK='fund';S.karma=Math.min(100,(S.karma||50)+8);chg('happy',8);return G('你的名字會用在一筆獎學金上。想到這裡，你笑了。')}),
+ ch('留給親友',()=>{S.flags.willK='kin';chg('happy',3);return N('你一個一個想過，把名字寫在信封上。')})]}}});
+E.push({id:'old_dispute',min:70,max:98,w:5,if:()=>S.flags.oldWill&&S.flags.willK==='need'&&kids151().length>=2&&!S.flags.oldDisp,run:()=>{S.flags.oldDisp=1;return {t:'一個孩子打電話來，語氣不太好：「為什麼他可以分比較多？」電話那頭的呼吸聲很重。',c:[
+ ch('把當時的想法好好說清楚',()=>{const ks=kids151();ks.forEach(k=>k.rel=Math.min(100,(k.rel||60)+(chance(.6)?5:-3)));chg('happy',-2);return N('你說了很久。對方沒有完全同意，但最後說：「我知道了。」')}),
+ ch('重新修改遺囑，改成平均',()=>{S.flags.willK='equal';chg('happy',2);return G('你重新簽了字。紛爭平息，你卻有點累。')})]}}});
+E.push({id:'old_letter',min:72,max:100,w:6,if:()=>kids151().length>0&&!S.flags.oldLetter,run:()=>{S.flags.oldLetter=1;return {t:'你想在還能握筆的時候，寫幾封信給孩子。',c:[
+ ch('寫下你當年最後悔和最驕傲的事',()=>{chg('happy',6);kids151().forEach(k=>k.rel=Math.min(100,(k.rel||60)+6));S.flags.letter=1;return G('孩子看完信，打電話來哭了很久。你們聊了一整個晚上。')}),
+ ch('只寫簡單的祝福',()=>{chg('happy',2);return N('你寫了幾行字，覺得話不多，但夠了。')})]}}});
+E.push({id:'old_memory',min:68,max:105,w:5,if:()=>S.age>=68,run:()=>{const L=(S.log||[]).flatMap(x=>(x.lines||[]).map(l=>({a:x.age,t:l.t}))).filter(x=>x.t&&x.t.length<40&&x.a>=10);const m=L.length?pick(L):null;return {t:m?`午後的陽光很好。你想起 ${m.a} 歲那年：「${m.t.replace(/。$/,'')}」。`:'午後的陽光很好，你坐在窗邊，想起很多人。',c:[
+ ch('把這段記憶說給家人聽',()=>{chg('happy',5);return G('他們聽得很認真。有些細節你記錯了，大家都笑了。')}),
+ ch('自己安靜地想',()=>{chg('happy',3);return N('光線慢慢移動，你不知不覺睡著了。')})]}}});
+E.push({id:'old_farewell',min:82,max:110,w:6,if:()=>S.health<55&&!S.flags.oldFw,run:()=>{S.flags.oldFw=1;return {t:'你知道自己的時間不多了。你想把最後的事情安排好。',c:[
+ ch('把想說的話，一個一個當面說',()=>{chg('happy',8);S.stress=cl(S.stress-12);for(const p of [S.partner])if(p)p.rel=Math.min(100,p.rel+8);kids151().forEach(k=>k.rel=Math.min(100,(k.rel||60)+5));return G('你和每個人道謝，也道歉。沒有留下太多遺憾。')}),
+ ch('不想談，照常過日子',()=>{chg('happy',2);return N('你像往常一樣喝茶、看報紙。但你知道他們都明白。')})]}}});
+const _bio151=bioText;
+bioText=function(){let t=_bio151.apply(this,arguments);try{
+ const G0=S.goal&&GOALS.find(x=>x.id===S.goal);
+ if(G0){const p=Math.round(goalProg()*100),nm=G0.n.replace(/^\S+\s/,'');t+=S.flags.goalDone?`年少時立下的志向「${nm}」，最後完成了。`:`年少時立下的志向是「${nm}」，一生走到 ${p}%。`}
+ if(S.flags.willK==='donate'||S.flags.willK==='fund')t+='晚年把一部分財產留給了公益。';
+ if(S.flags.letter)t+='他寫給孩子的那幾封信，被好好收著。';
+ if(S.flags.cbFR>0)t+='有人借了錢準時還，也讓他相信人。';
+}catch(e){}return t};
+NX125.push(['cb_goal_hint',()=>S.age>=12&&S.age<=18&&!S.goal,'人生目標可以在「更多→人生目標」選擇，結局回顧會對照完成度。']);
+CO125.splice(1,0,['.st','這五項是你的身心狀態：健康歸零會死亡，壓力太高會傷身，快樂影響你過得好不好。'],['#hlTog','覺得訊息太多，可以打開「只看重點」；每一年也能點開看細節。']);
+CO125.push(['#hd .sub, #hd .dos148','小提示：長按「翻開下一年」可以一次前進五年；人生目標、成就和家族紀念冊都在「更多」。']);
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
