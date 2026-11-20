@@ -14254,7 +14254,7 @@ for(const e of E){
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
 /* ---- p147：版本編號（設定頁與標題畫面顯示；更新後第一次開啟會提示） ---- */
-const APPV=136,APPD='2026-11-20',APPN="死亡率與健康衰退校準、事件變化與伏筆、老年與遺產、立志與引導";
+const APPV=138,APPD='2026-11-20',APPN="各系統加深：生活習慣、職涯與職場人際、婚姻與教養、保險、司法流程、學業、技能瓶頸、時代浪潮";
 const verStr=n=>'v'+(n/100).toFixed(2);
 const verTxt=()=>`版本 ${verStr(APPV)}`;
 const _sh147=setHTML;
@@ -14518,6 +14518,223 @@ bioText=function(){let t=_bio151.apply(this,arguments);try{
 NX125.push(['cb_goal_hint',()=>S.age>=12&&S.age<=18&&!S.goal,'人生目標可以在「更多→人生目標」選擇，結局回顧會對照完成度。']);
 CO125.splice(1,0,['.st','這五項是你的身心狀態：健康歸零會死亡，壓力太高會傷身，快樂影響你過得好不好。'],['#hlTog','覺得訊息太多，可以打開「只看重點」；每一年也能點開看細節。']);
 CO125.push(['#hd .sub, #hd .dos148','小提示：長按「翻開下一年」可以一次前進五年；人生目標、成就和家族紀念冊都在「更多」。']);
+/* ---- p152：健康生活習慣（睡眠・飲食・運動）累積，影響健康與疾病風險 ---- */
+const HAB152=[['sl','睡眠',['隨性熬夜','規律作息','嚴格早睡'],[0,0,0]],['di','飲食',['想吃就吃','留意均衡','嚴格控管'],[0,12000,48000]],['mv','運動',['幾乎不動','每週運動','固定訓練'],[0,6000,24000]]];
+const habInit=()=>{if(!S.hab)S.hab={sl:60,di:60,mv:50};if(!S.habp)S.habp={sl:1,di:1,mv:1};return S};
+const habAvg=()=>{habInit();return (S.hab.sl+S.hab.di+S.hab.mv)/3};
+const habWord=v=>v>=80?'很好':v>=60?'不錯':v>=40?'普通':v>=25?'偏差':'很差';
+const _y152=yearly;
+yearly=function(){
+ _y152.apply(this,arguments);
+ try{if(S.age<18||S.dead)return;habInit();const idx=typeof medIdx==='function'?medIdx():1;
+  const T=[[35,60,85],[35,60,85],[30,58,85]];
+  HAB152.forEach(([k,n,lv,cost],i)=>{
+   const p=S.habp[k];let tg=T[i][p];
+   if(k==='sl'&&S.stress>65)tg-=15;if(k==='sl'&&S.job&&S.job.env&&S.job.env.c==='加班文化')tg-=8;
+   if(k==='mv'&&S.health<30)tg=Math.min(tg,45);
+   S.hab[k]=Math.round(Math.max(0,Math.min(100,S.hab[k]+(tg-S.hab[k])*.3)));
+   const c=Math.round(cost[p]*idx);if(c&&S.money>c){S.money-=c}else if(c){S.habp[k]=Math.max(0,p-1)}
+   if(k==='mv'&&p===2)chg('happy',-1);if(k==='sl'&&p===2)S.stress=cl(S.stress-2)});
+  if(S.age>=25){const h=habAvg(),d=(h-55)/28;const x=d>0?Math.min(1.5,d):Math.max(-2.5,d);
+   S.health=Math.max(1,Math.min(100,Math.round(S.health+x*(S.age>=50?1.2:1))));
+   if(S.age>=30&&S.hab.sl<30&&chance(.25))log('長期睡眠不足，白天總是昏昏沉沉。','bad');
+   else if(S.age>=30&&S.hab.mv>=80&&chance(.2))log('固定運動讓你體力比同齡人好很多。','good')}
+ }catch(e){}
+};
+const _ia152=illAdj;
+illAdj=function(k){let m=_ia152.apply(this,arguments);try{habInit();const h=habAvg();let f=1+(55-h)/150;
+ if(k==='heart'||k==='htn'||k==='diab')f*=1+(55-(S.hab.di+S.hab.mv)/2)/200;
+ m*=Math.max(.6,Math.min(1.5,f))}catch(e){}return m};
+const _hh152=healthHTML;
+healthHTML=function(){let h=_hh152.apply(this,arguments);try{habInit();
+ let b='<div class="sec">生活習慣</div><div class="sub">每年依你的選擇慢慢變化，長期累積會影響健康與疾病機率。飲食與運動越嚴格，每年花費越高。</div>';
+ HAB152.forEach(([k,n,lv,cost])=>{b+=`<div class="item"><b>${n}：${habWord(S.hab[k])}（${S.hab[k]}）</b><div class="seg" style="margin:6px 0">${lv.map((t,i)=>`<button class="${S.habp[k]===i?'on':''}" data-a="lf:health:hab:${k}:${i}">${t}</button>`).join('')}</div></div>`});
+ const i=h.indexOf('<div class="sec">檢查</div>');return i>=0?h.slice(0,i)+b+h.slice(i):h+b}catch(e){return h}};
+const _lf152=lfHandle;
+lfHandle=function(x,y,z,u){if(x==='health'&&y==='hab'){habInit();if(S.habp[z]!=null){S.habp[z]=+u;const n=HAB152.find(q=>q[0]===z);return N(`${n[1]}習慣改為「${n[2][+u]}」。`)}return null}return _lf152(x,y,z,u)};
+/* 事件 */
+E.push({id:'hb_sleep',min:25,max:60,w:5,if:()=>S.job&&S.stress>60&&(habInit(),S.hab.sl<45),run:()=>({t:'最近連續幾週都睡不到六小時，開會時你發現自己話講到一半忘了詞。',c:[
+ ch('調整作息，晚上十一點前關機',()=>{S.habp.sl=Math.max(S.habp.sl,1);S.hab.sl=Math.min(100,S.hab.sl+12);S.stress=cl(S.stress-4);return G('前幾天很難適應，一週後精神明顯變好。')}),
+ ch('撐過這波專案再說',()=>{S.hab.sl=Math.max(0,S.hab.sl-6);chg('health',-2);return B('專案結束了，你的黑眼圈也很久沒退。')})]})});
+E.push({id:'hb_gym',min:22,max:65,w:4,if:()=>(habInit(),S.hab.mv<50&&S.money>px(6e4)),run:()=>({t:`同事約你一起上運動中心，年費 ${money(px(6000))}。你想起上次爬樓梯就喘的狀況。`,c:[
+ ch('加入，每週固定去',()=>{S.money-=px(6000);S.habp.mv=Math.max(S.habp.mv,1);S.hab.mv=Math.min(100,S.hab.mv+15);chg('happy',3);return G('第一個月很痛苦，第三個月你開始期待下班後的運動時間。')}),
+ ch('下次再說',()=>N('你把會員卡的傳單夾進記事本，再也沒有翻開。'))]})});
+E.push({id:'hb_diet',min:28,max:70,w:4,if:()=>(habInit(),S.hab.di<45&&S.age>=30),run:()=>({t:'健檢報告上有幾個數字被紅筆圈起來：血糖、血脂都偏高。醫師說：「現在調整還來得及。」',c:[
+ ch('開始控制飲食',()=>{S.habp.di=Math.max(S.habp.di,1);S.hab.di=Math.min(100,S.hab.di+18);chg('health',2);return G('你學會看營養標示，也發現原來早餐不吃糖也撐得下去。')}),
+ ch('不太放在心上',()=>{S.hab.di=Math.max(0,S.hab.di-4);return N('你把報告塞進抽屜，半年後再翻出來，數字更高了。')})]})});
+E.push({id:'hb_good',min:35,max:75,w:3,if:()=>(habInit(),habAvg()>=75),run:()=>({t:'公司健檢結果出來，醫師看著你的數字說：「你這個年紀，這樣很少見。」',c:[
+ ch('分享你的作息給同事',()=>{S.net=(S.net||0)+2;chg('happy',4);return G('幾個同事跟著你吃午餐、散步，辦公室氣氛變好了。')}),
+ ch('笑笑收下，繼續保持',()=>{chg('happy',3);return N('你把報告貼在冰箱上當提醒。')})]})});
+/* ---- p153：職涯路線（穩定／一般／衝刺）與固定的主管・同事 ---- */
+const CPN=['志明','淑華','建國','雅惠','國棟','美珠','永昌','怡萱','俊傑','秀蘭','信宏','怡伶'];
+const cpInit=()=>{if(!S.cp3)S.cp3={pol:1,team:[],jt:''};return S.cp3};
+const cpStage=()=>{const l=S.job?S.job.lv||1:0;return l<=1?'基層':l===2?'資深':l===3?'主管':'高階'};
+function cpTeam(){const c=cpInit();if(!S.job||S.job.founder)return;
+ if(c.jt!==S.job.t||!c.team.length){c.jt=S.job.t;c.team=[{n:pick(CPN)+'經理',role:'主管',rel:50},{n:pick(CPN),role:'同事',rel:50},{n:pick(CPN),role:'同事',rel:45}];if((S.job.lv||1)>=3)c.team.push({n:pick(CPN),role:'下屬',rel:55})}
+ if((S.job.lv||1)>=3&&!c.team.some(x=>x.role==='下屬'))c.team.push({n:pick(CPN),role:'下屬',rel:55})}
+const cpBoss=()=>cpInit().team.find(x=>x.role==='主管');
+const _y153=yearly;
+yearly=function(){_y153.apply(this,arguments);
+ try{if(!S.job||S.job.founder||S.dead){return}cpTeam();const c=cpInit(),p=c.pol,boss=cpBoss();
+  c.team.forEach(x=>{x.rel=Math.max(0,Math.min(100,x.rel+R(-4,3)))});
+  if(p===2){S.job.perf=Math.min(100,(S.job.perf||50)+5);S.stress=cl(S.stress+6);chg('health',-1);
+   const pr=.14+(boss?(boss.rel-50)/400:0);
+   if(S.job.lv<6&&S.job.years>=2&&chance(pr)){S.job.lv++;S.job.sal=Math.round(S.job.sal*1.12);log('你這幾年的拚勁被看見了，升上了更高的職位，薪水也調整了。','good')}}
+  else if(p===0){S.stress=cl(S.stress-3);S.job.perf=Math.max(0,(S.job.perf||50)-1);chg('happy',1)}
+  else if(boss&&boss.rel>=70&&S.job.lv<6&&S.job.years>=3&&chance(.06)){S.job.lv++;S.job.sal=Math.round(S.job.sal*1.08);log(`${boss.n}替你向上面說了不少好話，你升職了。`,'good')}
+ }catch(e){}};
+const _jh153=jobHTML;
+jobHTML=function(){let h=_jh153.apply(this,arguments);try{
+ if(!S.job||S.job.founder||view.fsub)return h;cpTeam();const c=cpInit();
+ let b=`<div class="sec">職涯規劃・目前階段：${cpStage()}</div><div class="seg" style="margin:6px 0">${['穩定','一般','衝刺'].map((t,i)=>`<button class="${c.pol===i?'on':''}" data-a="cp3:pol:${i}">${t}</button>`).join('')}</div><div class="sub">${['穩定：壓力下降，升遷機會少','一般：維持現狀','衝刺：績效與升遷機率提高，壓力與健康代價也高'][c.pol]}</div>`;
+ b+='<div class="sec">職場人際</div>'+c.team.map((x,i)=>`<div class="item"><b>${x.n}</b>（${x.role}）<div class="sub">關係 ${x.rel}・${x.rel>=70?'很信任你':x.rel>=45?'普通':'不太對盤'}</div>${S.acts.team?'':`<button class="btn" data-a="cp3:act:${i}">${x.role==='主管'?'主動匯報、請教':x.role==='同事'?'請吃午餐、幫個忙':'指導與肯定'}<small>花費約 NT$${(1200*(typeof medIdx==='function'?medIdx():1)).toLocaleString()}</small></button>`}</div>`).join('');
+ const k=h.indexOf('<button class="btn" data-a="quit">');return k>=0?h.slice(0,k)+b+h.slice(k):h+b}catch(e){return h}};
+const _hd153=handle;
+handle=function(a){
+ if(typeof a==='string'&&a.startsWith('cp3:')&&S){const c=cpInit(),m=a.split(':');
+  if(m[1]==='pol'){c.pol=+m[2];view.msg=N('職涯策略改為「'+['穩定','一般','衝刺'][c.pol]+'」。');render();try{showSheet('job')}catch(e){}return}
+  if(m[1]==='act'){const x=c.team[+m[2]];if(x&&!S.acts.team){S.acts.team=1;const cost=Math.round(1200*(typeof medIdx==='function'?medIdx():1));if(S.money<cost){view.msg=B('錢不夠。')}else{S.money-=cost;x.rel=Math.min(100,x.rel+R(5,10));view.msg=G(`你和${x.n}的關係拉近了一些。`)}}render();try{showSheet('job')}catch(e){}return}}
+ return _hd153.apply(this,arguments)};
+const hasT=r=>S.job&&!S.job.founder&&(cpTeam(),cpInit().team.some(x=>x.role===r));
+E.push({id:'tm_bossrec',min:25,max:62,w:5,if:()=>S.job&&!S.job.founder&&cpBoss()&&cpBoss().rel>=65&&S.job.years>=2,run:()=>{const b=cpBoss();return {t:`${b.n}把你叫進辦公室，說上面有個新位置，想推薦你。`,c:[
+ ch('接受，也請他多指導',()=>{S.job.lv=Math.min(6,(S.job.lv||1)+1);S.job.sal=Math.round(S.job.sal*1.1);b.rel=Math.min(100,b.rel+8);S.stress=cl(S.stress+4);return G('新職位的責任更重，但你說不上來地感到踏實。')}),
+ ch('婉拒，想先把手上的事做好',()=>{b.rel=Math.min(100,b.rel+3);return N(`${b.n}點點頭，說：「那下次再談。」`)})]}}});
+E.push({id:'tm_bossblame',min:25,max:62,w:5,if:()=>S.job&&!S.job.founder&&cpBoss()&&cpBoss().rel<35,run:()=>{const b=cpBoss();return {t:`專案出了狀況，${b.n}在會議上點名你：「這個誰負責的？」你知道責任不全在你。`,c:[
+ ch('當場說明來龍去脈',()=>{if(chance(.5)){b.rel=Math.min(100,b.rel+10);return G('你把時間線攤開，大家都看得出來。會後主管的態度緩和了一些。')}b.rel=Math.max(0,b.rel-8);S.stress=cl(S.stress+6);return B('主管覺得你在頂撞他，氣氛更僵了。')}),
+ ch('先承擔，私下再談',()=>{S.stress=cl(S.stress+5);S.job.perf=Math.max(0,(S.job.perf||50)-4);b.rel=Math.min(100,b.rel+4);return N('你吞下了這一口氣。事後他私下說：「我知道不是你。」')})]}}});
+E.push({id:'tm_poach',min:27,max:58,w:4,if:()=>S.job&&!S.job.founder&&(cpTeam(),cpInit().team.some(x=>x.role==='同事'&&x.rel>=60)),run:()=>{const x=cpInit().team.find(y=>y.role==='同事'&&y.rel>=60);return {t:`${x.n}跳槽到另一間公司，現在傳訊息給你：「我們這邊缺人，薪水比你現在高兩成，要不要談談？」`,c:[
+ ch('去面試看看',()=>{if(chance(.6)){S.job.sal=Math.round(S.job.sal*1.2);S.job.years=0;S.job.perf=50;cpInit().team=[];return G(`你轉職了，${x.n}帶你熟悉新環境。年薪提高約兩成。`)}return N('面試沒有過，但對方說下次有機會再聯絡。')}),
+ ch('謝謝，現在這裡不錯',()=>{x.rel=Math.min(100,x.rel+3);return N('你們約好改天吃飯聊聊近況。')})]}}});
+E.push({id:'tm_backstab',min:25,max:60,w:4,if:()=>S.job&&!S.job.founder&&(cpTeam(),cpInit().team.some(x=>x.role==='同事'&&x.rel<35)),run:()=>{const x=cpInit().team.find(y=>y.role==='同事'&&y.rel<35);return {t:`你發現${x.n}把你負責的部分說成是自己的成果，在主管面前報告。`,c:[
+ ch('私下找他談',()=>{if(chance(.45)){x.rel=Math.min(100,x.rel+15);return G('他承認了，也在下次會議上補了一句：「這部分是你做的。」')}x.rel=Math.max(0,x.rel-10);return B('他裝傻到底，你只能自己多留心。')}),
+ ch('把紀錄整理好，之後報告時主動說明',()=>{S.stress=cl(S.stress+3);S.job.perf=Math.min(100,(S.job.perf||50)+3);return N('你不爭一時，但每個重要成果都留了紀錄。')})]}}});
+E.push({id:'tm_sub',min:30,max:62,w:4,if:()=>S.job&&!S.job.founder&&(S.job.lv||1)>=3&&(cpTeam(),cpInit().team.some(x=>x.role==='下屬')),run:()=>{const x=cpInit().team.find(y=>y.role==='下屬');return {t:`${x.n}遞出辭呈，說：「在這裡學不到新東西了。」他是你一手帶起來的人。`,c:[
+ ch('挽留，談談他想做什麼',()=>{if(chance(.5)){x.rel=Math.min(100,x.rel+10);S.job.perf=Math.min(100,(S.job.perf||50)+2);return G('你調整了他的工作內容，他決定留下來。')}return N('他還是決定離開，臨走前說謝謝你的帶領。')}),
+ ch('祝福他，開始找人接手',()=>{S.stress=cl(S.stress+3);cpInit().team=cpInit().team.filter(y=>y!==x);return N('你替他寫了推薦信。交接那週很忙，但你不後悔。')})]}}});
+/* ---- p154：婚姻（金錢觀・家務分工・衝突處理）與教養方式 ---- */
+const mrInit=()=>{if(!S.mr)S.mr={chore:1,styl:1};if(S.partner&&!S.partner.fin)S.partner.fin=pick(['節儉','隨性','投資型']);return S.mr};
+const kds=()=>(S.kids||[]).filter(k=>k&&k.age>=0&&k.age<18);
+const _y154=yearly;
+yearly=function(){_y154.apply(this,arguments);
+ try{if(S.dead)return;const m=mrInit();
+  if(S.partner&&S.partner.married){const p=S.partner;
+   if(m.chore===0){S.stress=cl(S.stress+3);p.rel=Math.min(100,p.rel+2)}
+   else if(m.chore===2){p.rel=Math.max(0,p.rel-2);S.stress=cl(S.stress-1)}
+   else if(m.chore===3){const c=Math.round(120000*(typeof medIdx==='function'?medIdx():1));if(S.money>c){S.money-=c;S.stress=cl(S.stress-3)}else m.chore=1}
+   if(p.fin==='投資型'&&S.money>3e6&&chance(.3)){S.money+=Math.round(S.money*.01);}
+   if(p.fin==='隨性'&&chance(.25)){S.money-=Math.round(60000*(typeof medIdx==='function'?medIdx():1));}}
+  const ks=kds();if(ks.length){ks.forEach(k=>{
+   if(m.styl===0){k.rel=Math.min(100,(k.rel||60)+1);k.gr=Math.max(0,(k.gr||50)-1)}
+   else if(m.styl===2){k.sm=Math.min(100,(k.sm||50)+1);k.rel=Math.max(0,(k.rel||60)-(k.age>=12?3:1))}
+   else{k.rel=Math.min(100,(k.rel||60)+(chance(.5)?1:0))}});
+   if(m.styl===2)S.stress=cl(S.stress+1)}
+ }catch(e){}};
+/* 面板：在關係頁加入設定（插在關係頁頂部之後）*/
+const FAMNAME=['隨手','平均','我多','外包'];
+const _rh154=typeof relHTML==='function'?relHTML:null;
+if(_rh154){relHTML=function(){let h=_rh154.apply(this,arguments);try{const m=mrInit();let b='';
+ if(S.partner&&S.partner.married){b+=`<div class="sec">婚姻經營</div><div class="sub">伴侶金錢觀：${S.partner.fin}。家務分工會影響你的壓力與你們的關係。</div><div class="seg" style="margin:6px 0">${[['我負責較多',0],['平均分擔',1],['對方負責較多',2],['請人協助',3]].map(([t,i])=>`<button class="${m.chore===i?'on':''}" data-a="mr4:chore:${i}">${t}</button>`).join('')}</div>${m.chore===3?'<div class="sub">每年約 NT$12 萬（請鐘點人員），壓力下降。</div>':''}`}
+ if(kds().length){b+=`<div class="sec">教養方式</div><div class="sub">放養：親子關係好、孩子較不自律；民主：平衡；嚴格：成績與能力提升、關係與你的壓力付出代價。</div><div class="seg" style="margin:6px 0">${['放養','民主','嚴格'].map((t,i)=>`<button class="${m.styl===i?'on':''}" data-a="mr4:styl:${i}">${t}</button>`).join('')}</div>`}
+ if(!b)return h;const i=h.lastIndexOf('</div>');return h+b}catch(e){return h}}}
+const _hd154=handle;
+handle=function(a){if(typeof a==='string'&&a.startsWith('mr4:')&&S){const m=mrInit(),p=a.split(':');if(p[1]==='chore')m.chore=+p[2];else m.styl=+p[2];view.msg=N('已調整。');render();try{showSheet('rel')}catch(e){}return}return _hd154.apply(this,arguments)};
+/* 事件 */
+E.push({id:'mr_money',min:24,max:60,w:5,if:()=>S.partner&&S.partner.married&&(mrInit(),!S.flags.mrMoney),run:()=>{S.flags.mrMoney=1;const p=S.partner;return {t:`年底整理帳單，你發現${p.n}的消費習慣和你差很多：${p.fin==='節儉'?'他每筆錢都存著，連換季衣服都要比價':p.fin==='隨性'?'他覺得錢賺了就是要花，信用卡帳單常常超出預期':'他把大部分積蓄都拿去買股票和基金，很少留現金'}。`,c:[
+ ch('坐下來，一起訂預算',()=>{p.rel=Math.min(100,p.rel+6);chg('happy',3);return G('一開始有點吵，最後你們各留了一筆自由運用的錢，也談好共同存款比例。')}),
+ ch('各管各的帳',()=>{p.rel=Math.max(0,p.rel-3);return N('少了爭執，但也少了一點「我們」的感覺。')}),
+ ch('忍耐，不想破壞氣氛',()=>{S.stress=cl(S.stress+5);return B('話沒說出口，壓力卻悄悄累積。')})]}}});
+E.push({id:'mr_fight',min:24,max:70,w:5,if:()=>S.partner&&S.partner.married&&S.partner.rel<60,run:()=>{const p=S.partner;return {t:`因為一件小事，你和${p.n}大吵了一架。冷戰到第三天，家裡安靜得讓人不自在。`,c:[
+ ch('先低頭，主動開口',()=>{p.rel=Math.min(100,p.rel+8);S.stress=cl(S.stress-3);return G('你說：「我們別吵了，我想好好談。」他沉默了一下，終於也說出了心裡的話。')}),
+ ch('等他先來',()=>{if(chance(.4)){p.rel=Math.min(100,p.rel+3);return N('第四天，他煮了你愛吃的菜，誰也沒提吵架的事。')}p.rel=Math.max(0,p.rel-7);return B('誰也不想先開口，冷戰又延長了一週。')}),
+ ch('找朋友訴苦',()=>{S.stress=cl(S.stress-2);p.rel=Math.max(0,p.rel-2);return N('你心情好了一些，但問題還在原地。')})]}}});
+E.push({id:'mr_tenth',min:30,max:70,w:3,if:()=>S.partner&&S.partner.married&&S.age-(S.partner.since||S.age)>=10&&!S.flags.mrTenth,run:()=>{S.flags.mrTenth=1;const p=S.partner;return {t:`結婚十年了。${p.n}在廚房一邊煮飯一邊說：「欸，我們今年要不要出去走走？」`,c:[
+ ch('安排兩個人的旅行',()=>{const c=px(1.2e5);S.money-=c;p.rel=Math.min(100,p.rel+12);chg('happy',8);return G('你們走在陌生的街上，像回到剛認識的時候。')}),
+ ch('在家吃頓好的就好',()=>{p.rel=Math.min(100,p.rel+4);chg('happy',3);return N('蠟燭、紅酒、剩下的菜。你覺得這樣也很好。')})]}}});
+E.push({id:'kd_teen',min:28,max:62,w:6,if:()=>S.kids.some(k=>k.age>=13&&k.age<=16)&&!S.flags.kdTeen,run:()=>{S.flags.kdTeen=1;const k=S.kids.find(x=>x.age>=13&&x.age<=16);const m=mrInit();return {t:`${k.n}最近很晚回家，房門鎖著，問他什麼都只回「還好」。你在他書包裡發現一份退學警告。`,c:[
+ ch('坐下來，先聽他說',()=>{const ok=m.styl!==2||chance(.35);if(ok){k.rel=Math.min(100,(k.rel||60)+10);k.gr=Math.min(100,(k.gr||50)+6);return G('他說了很多：同學、壓力、不知道該怎麼辦。你們談到半夜，他說：「我以為你不會懂。」')}k.rel=Math.max(0,(k.rel||60)-6);return B('你一開口就忍不住提高聲調，他把門關上了。')}),
+ ch('立刻管制：手機、門禁',()=>{k.gr=Math.min(100,(k.gr||50)+8);k.rel=Math.max(0,(k.rel||60)-12);S.stress=cl(S.stress+4);return N('成績回來了一些，家裡的氣氛卻變得沉重。')}),
+ ch('給他空間，相信他會想通',()=>{if(m.styl===0||chance(.4)){k.rel=Math.min(100,(k.rel||60)+4);return N('幾個月後他自己找你談，說他已經在調整了。')}k.gr=Math.max(0,(k.gr||50)-8);return B('你沒有多問，他的狀況卻越來越糟。')})]}}});
+E.push({id:'kd_major',min:36,max:62,w:6,if:()=>S.kids.some(k=>k.age>=17&&k.age<=19)&&!S.flags.kdMajor,run:()=>{S.flags.kdMajor=1;const k=S.kids.find(x=>x.age>=17&&x.age<=19);return {t:`${k.n}告訴你，他不想填你期待的科系，想念自己喜歡的：${pick(['設計','音樂','哲學','電影','廚藝'])}。`,c:[
+ ch('支持他，尊重他的選擇',()=>{k.rel=Math.min(100,(k.rel||60)+12);k.sm=Math.max(0,(k.sm||50)-2);S.stress=cl(S.stress+3);return G('你雖然擔心，但還是替他報名了。他說：「我會證明給你看。」')}),
+ ch('勸他選比較穩定的方向',()=>{k.rel=Math.max(0,(k.rel||60)-8);k.gr=Math.min(100,(k.gr||50)+5);return N('他勉強同意了，但整個暑假沒怎麼跟你說話。')}),
+ ch('各讓一步：主修穩定，輔修興趣',()=>{k.rel=Math.min(100,(k.rel||60)+5);return G('他想了一晚，點頭說：「好，我試試。」')})]}}});
+E.push({id:'kd_grand',min:56,max:90,w:5,if:()=>S.kids.some(k=>k.age>=28)&&!S.flags.kdGrand,run:()=>{S.flags.kdGrand=1;const k=S.kids.find(x=>x.age>=28);return {t:`${k.n}說他們夫妻都要上班，問你能不能幫忙帶孫子。`,c:[
+ ch('答應，每週帶三天',()=>{S.stress=cl(S.stress+5);chg('health',-1);k.rel=Math.min(100,(k.rel||60)+10);chg('happy',8);return G('孫子叫你的第一聲，讓你覺得再累都值得。')}),
+ ch('偶爾幫忙，但保留自己的時間',()=>{k.rel=Math.min(100,(k.rel||60)+3);chg('happy',4);return N('你和孩子約好：週末可以，平日不行。他們也理解。')}),
+ ch('婉拒，建議請保母',()=>{k.rel=Math.max(0,(k.rel||60)-6);return N('他沒有說什麼，但你聽得出來有些失望。')})]}}});
+/* ---- p155：保險規劃（醫療險・壽險）与理賠 ---- */
+const INS155=[['med','醫療險',['未投保','基本型（保費低、理賠約三成五）','完整型（保費高、理賠約七成）']],['life','壽險',['未投保','保額 300 萬','保額 1,000 萬']]];
+const insInit=()=>{if(!S.ins)S.ins={med:0,life:0};return S.ins};
+const insIdx=()=>typeof medIdx==='function'?medIdx():1;
+const insPrem=(k,l)=>{const a=S.age;const ag=1+Math.max(0,a-30)/35;return Math.round(({med:[0,9000,30000],life:[0,12000,36000]}[k][l])*ag*insIdx())};
+const _ic155=illCost;
+illCost=function(i){let c=_ic155.apply(this,arguments);try{const l=insInit().med;if(l>0){const cov=[0,.35,.7][l];c=Math.round(c*(1-cov*(i.tx===2?.8:1)))}}catch(e){}return c};
+const _y155=yearly;
+yearly=function(){_y155.apply(this,arguments);
+ try{if(S.dead||S.age<20)return;const I=insInit();
+  for(const [k] of INS155){const l=I[k];if(!l)continue;const p=insPrem(k,l);if(S.money>p)S.money-=p;else{I[k]=l-1;log(`繳不出${k==='med'?'醫療險':'壽險'}保費，保障降了一級。`,'bad')}}
+ }catch(e){}};
+const _hh155=healthHTML;
+healthHTML=function(){let h=_hh155.apply(this,arguments);try{const I=insInit();
+ let b='<div class="sec">保險規劃</div><div class="sub">保費每年自動扣款，隨年齡上升。醫療險會降低疾病治療的自費金額；壽險在你過世時留給下一代。（簡化估算，實際商品請洽專業人員）</div>';
+ INS155.forEach(([k,n,lv])=>{b+=`<div class="item"><b>${n}</b>・目前：${lv[I[k]].split('（')[0]}・年保費約 NT$${insPrem(k,I[k]).toLocaleString()}<div class="seg" style="margin:6px 0">${lv.map((t,i)=>`<button class="${I[k]===i?'on':''}" data-a="lf:health:ins:${k}:${i}">${['無','基本','完整'][i]}</button>`).join('')}</div></div>`});
+ const i=h.indexOf('<div class="sec">檢查</div>');return i>=0?h.slice(0,i)+b+h.slice(i):h+b}catch(e){return h}};
+const _lf155=lfHandle;
+lfHandle=function(x,y,z,u){if(x==='health'&&y==='ins'){const I=insInit();if(S.age<20)return B('成年後才能投保。');if(I[z]!=null){I[z]=+u;return N(`已調整${z==='med'?'醫療險':'壽險'}。`)}return null}return _lf155(x,y,z,u)};
+const _ap155=applySuccession;
+applySuccession=function(){const r=_ap155.apply(this,arguments);try{const l=(S.ins&&S.ins.life)||0;if(l>0){const b=[0,px(3e6),px(1e7)][l];S.money+=b;log(`父母留下的壽險理賠 ${money(b)}，幫你穩住了生活。`,'good')}}catch(e){}return r};
+E.push({id:'ins_agent',min:24,max:55,w:5,if:()=>(insInit(),S.ins.med===0&&S.money>px(2e5)&&!S.flags.insAgent),run:()=>{S.flags.insAgent=1;return {t:'一位親戚轉行做保險，約你喝咖啡。他把幾張保單攤開在桌上，說得很誠懇。',c:[
+ ch('投保基本型醫療險',()=>{insInit().med=1;return N('保費不高，你覺得多一層保障比較安心。')}),
+ ch('聽完，說要回去研究',()=>N('你把資料帶回家，認真比較了各家條款。'))]}}});
+E.push({id:'ins_claim',min:30,max:90,w:3,if:()=>(insInit(),S.ins.med>0&&S.ill&&S.ill.some(i=>!i.hid&&i.tx>0)&&!S.flags.insClaim),run:()=>{S.flags.insClaim=1;return {t:'你把診斷書、收據整理好，寄給保險公司申請理賠。',c:[
+ ch('耐心等審核',()=>{const g=px(1.2e5)*(S.ins.med);S.money+=g;return G(`兩週後理賠入帳 ${money(g)}。你鬆了一口氣。`)})]}}});
+E.push({id:'ins_tax',min:25,max:70,w:3,if:()=>S.job&&!S.job.founder&&!S.flags.insTax&&S.money>px(1e6),run:()=>{S.flags.insTax=1;return {t:'五月報稅季，你發現去年的醫療收據和保險費單據都沒有留，只能按標準扣除額申報。',c:[
+ ch('從今年開始建立歸檔習慣',()=>{S.stress=cl(S.stress-2);return N('你開了一個資料夾，每筆單據拍照存檔。明年報稅會輕鬆很多。')}),
+ ch('算了，下次再說',()=>N('你把這件事排進「之後再說」的清單。'))]}}});
+/* ---- p156：司法流程（律師・緩刑・假釋・更生）、學業、技能瓶頸、時代浪潮 ---- */
+const lgInit=()=>{if(!S.jl)S.jl={tot:0,served:0,lawyer:0,par:0};return S.jl};
+const _y156=yearly;
+yearly=function(){
+ const wasJail=S.jail>0;
+ if(wasJail){const j=lgInit();if(!j.tot)j.tot=S.jail;j.served++}
+ _y156.apply(this,arguments);
+ try{const j=lgInit();
+  if(S.par&&S.par>0){S.par--;if(S.par===0)log('假釋期滿，你正式回到自由的身分。','good');else if(S.karma<25&&chance(.08)){S.jail=Math.max(1,j.tot-j.served);S.par=0;log('假釋期間再犯，被撤銷假釋，回去服完剩下的刑期。','bad')}}
+  if(!S.jail&&j.tot){j.tot=0;j.served=0;j.lawyer=0;S.relY=0;S.jlOut=S.age}
+ }catch(e){}};
+E.push({id:'lg_lawyer',min:18,max:90,w:60,if:()=>S.jail>0&&(lgInit(),!S.jl.lawyer&&S.jl.served<=1),run:()=>{const j=lgInit();j.lawyer=1;const c=px(2.5e5);return {t:`看守所裡，有人轉告你：有位律師願意幫你看卷宗，評估上訴。費用約 ${money(c)}。`,c:[
+ ch('委任律師上訴',()=>{if(S.money<c)return B('錢不夠，只好放棄。');S.money-=c;if(chance(.4)&&S.jail>1){S.jail=Math.max(1,Math.round(S.jail*.7));j.tot=S.jail+j.served;return G('二審改判較輕，刑期縮短了。')}return N('二審駁回上訴，維持原判。')}),
+ ch('認罪，不上訴',()=>{S.karma=cl(S.karma+2);return N('你決定好好服刑，把心力放在出獄後的日子。')})]}}});
+E.push({id:'lg_parole',min:20,max:95,w:50,if:()=>{const j=lgInit();return S.jail>0&&j.tot>=2&&j.served>=Math.ceil(j.tot/3)&&!j.parTried},run:()=>{const j=lgInit();j.parTried=1;return {t:'你服刑已超過三分之一，監獄通知你可以提出假釋申請。審查會看你在獄中的表現。',c:[
+ ch('提出申請',()=>{const p=.45+(S.karma-30)/200;if(chance(Math.max(.2,Math.min(.8,p)))){S.par=Math.max(1,S.jail);S.jail=0;S.job=null;chg('happy',10);return G('假釋核准了。你走出大門的那一刻，陽光刺得你睜不開眼。')}chg('happy',-4);return B('假釋沒有通過，你被告知還要繼續服完刑期。')}),
+ ch('不申請，安靜服完',()=>N('你覺得申請了也沒什麼不同。'))]}}});
+E.push({id:'lg_rehab',min:20,max:80,w:50,if:()=>S.jlOut&&S.age-S.jlOut<=1&&!S.jail&&!S.flags.lgRehab,run:()=>{S.flags.lgRehab=1;return {t:'出獄後的第一個月，更生保護會的社工約你談話，問你接下來打算怎麼走。',c:[
+ ch('參加職業訓練',()=>{S.smarts=Math.min(100,S.smarts+3);S.record=Math.max(0,S.record-1);chg('happy',5);return G('你學會了一技之長，社工幫你轉介了面試機會。')}),
+ ch('先找份臨時工',()=>{S.money+=px(4e4);chg('happy',1);return N('薪水不高，但你有了固定的作息。')}),
+ ch('不想跟任何人接觸',()=>{chg('happy',-5);S.stress=cl(S.stress+6);return B('你把自己關在租來的小房間裡，日子過得很慢。')})]}}});
+E.push({id:'lg_stigma',min:20,max:65,w:6,if:()=>S.record>0&&!S.jail&&!S.job&&!S.flags.lgStig,run:()=>{S.flags.lgStig=1;return {t:'面試官翻到你的資料，問：「這個空白期是怎麼回事？」',c:[
+ ch('誠實說明，並說明改變',()=>{if(chance(.45)){chg('happy',6);return G('他沉默了一會兒，說：「我們給你一個機會，試用三個月。」')}return B('他客氣地說會再通知，後來你沒有等到電話。')}),
+ ch('含糊帶過',()=>{S.karma=cl(S.karma-2);return N('他沒有追問，但你覺得心裡沉沉的。')})]}}});
+/* 學業 */
+E.push({id:'ed_double',min:19,max:23,w:6,if:()=>S.school&&S.major&&!S.flags.edDouble,run:()=>{S.flags.edDouble=1;return {t:'學長姊說，修輔系或雙主修會讓履歷好看很多，但每學期要多修十幾學分。',c:[
+ ch('修輔系，撐過去',()=>{S.smarts=Math.min(100,S.smarts+4);S.stress=cl(S.stress+7);S.flags.edDbl=1;return N('夜裡的圖書館成了你的第二個家。')}),
+ ch('把時間留給社團和朋友',()=>{chg('happy',5);S.net=(S.net||0)+3;return G('你過了一個很熱鬧的大學生活。')})]}}});
+E.push({id:'ed_advisor',min:21,max:30,w:5,if:()=>S.school&&S.edu>=4&&!S.flags.edAdv,run:()=>{S.flags.edAdv=1;return {t:'指導教授要你選論文題目：一個是他熟悉的主流題目，另一個是你自己很有興趣、但資料很難找的方向。',c:[
+ ch('選主流題目，穩穩畢業',()=>{S.smarts=Math.min(100,S.smarts+2);return N('你按著進度走，一年後順利完成。')}),
+ ch('選自己的題目',()=>{S.stress=cl(S.stress+8);if(chance(.55)){S.smarts=Math.min(100,S.smarts+6);chg('happy',8);return G('過程很辛苦，但教授在口試時說：「這個題目，值得做下去。」')}S.smarts=Math.min(100,S.smarts+2);return N('資料不夠，你多花了一個學期才完成，但也學到很多。')})]}}});
+/* 技能瓶頸 */
+E.push({id:'ac_plateau',min:16,max:70,w:5,if:()=>{const m=typeof artMax==='function'?artMax():null;return m&&m[1]>=45&&m[1]<90&&!S.flags.acPl},run:()=>{S.flags.acPl=1;const m=artMax();const nm=(typeof ARTALL!=='undefined'&&ARTALL[m[0]]&&ARTALL[m[0]].n)||'這項才藝';return {t:`練了好幾年，${nm}卻怎麼練都沒有進步，你開始懷疑自己是不是到極限了。`,c:[
+ ch('請專業老師重新調整基本功',()=>{const c=px(6e4);if(S.money<c)return B('學費不夠。');S.money-=c;S.art[m[0]]=Math.min(100,m[1]+9);chg('happy',5);return G('老師指出你多年來的一個小習慣，改掉之後，進步又開始了。')}),
+ ch('休息一陣子，做別的事',()=>{S.stress=cl(S.stress-6);S.art[m[0]]=Math.min(100,m[1]+2);return N('幾個月後你再拿起來，反而有了新的感覺。')}),
+ ch('去參加比賽，換個壓力',()=>{if(chance(.4)){S.art[m[0]]=Math.min(100,m[1]+7);chg('happy',6);return G('比賽的緊張感逼出了你的潛力。')}S.art[m[0]]=Math.min(100,m[1]+3);chg('happy',-2);return N('沒有名次，但你看到了別人的水準。')})]}}});
+/* 時代浪潮 */
+E.push({id:'era_ai',min:20,max:62,w:6,if:()=>calYear()>=2024&&calYear()<=2040&&S.job&&!S.job.founder&&!S.flags.eraAI,run:()=>{S.flags.eraAI=1;return {t:'公司開始導入 AI 工具，會議上主管說：「用得好的人效率會變兩倍。」同事們的臉色各不相同。',c:[
+ ch('下班後花時間學',()=>{S.smarts=Math.min(100,S.smarts+3);S.stress=cl(S.stress+4);S.job.perf=Math.min(100,(S.job.perf||50)+6);return G('三個月後，你成了部門裡最會用的人，主管開始把新專案交給你。')}),
+ ch('先觀望，需要再說',()=>N('你照舊的方式工作，感覺還行，但偶爾會看到別人已經超前一大截。')),
+ ch('擔心被取代，開始想轉行',()=>{S.stress=cl(S.stress+7);return N('你上網查了很多課程，一時還沒做出決定。')})]}}});
+E.push({id:'era_remote',min:22,max:60,w:4,if:()=>calYear()>=2020&&calYear()<=2035&&S.job&&!S.job.founder&&!S.flags.eraRem,run:()=>{S.flags.eraRem=1;return {t:'公司開放每週兩天遠端工作。你發現通勤時間省下來了，但家裡的界線也開始模糊。',c:[
+ ch('把省下的時間拿來運動、陪家人',()=>{chg('happy',5);S.stress=cl(S.stress-4);return G('生活的節奏變得比較從容。')}),
+ ch('全部拿來多做事',()=>{S.job.perf=Math.min(100,(S.job.perf||50)+4);S.stress=cl(S.stress+5);return N('績效很漂亮，但你有時分不清上班和下班。')})]}}});
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
