@@ -13942,8 +13942,8 @@ astHTML=function(){
 };
 const tmAmt=()=>Math.round(Math.max(0,Math.min(S.money*.15,5e7))/1e4)*1e4;
 const tmOK=()=>S&&S.age>=25&&S.money>=3e6&&!S.dead;
-const pfMove=(k,a)=>{a=Math.min(a,Math.max(0,S.money));if(a<=0)return 0;S.pf=S.pf||{bond:0,tw:0,us:0,gold:0};S.money-=a;S.pf[k]=(S.pf[k]||0)+a;return a};
-const pfSellPct=p=>{S.pf=S.pf||{};let g=0;for(const k of ['tw','us']){const v=Math.round((S.pf[k]||0)*p);S.pf[k]=(S.pf[k]||0)-v;g+=v}S.money+=g;return g};
+function pfMove(k,a){a=Math.min(a,Math.max(0,S.money));if(a<=0)return 0;S.pf=S.pf||{bond:0,tw:0,us:0,gold:0};S.money-=a;S.pf[k]=(S.pf[k]||0)+a;return a}
+function pfSellPct(p){S.pf=S.pf||{};let g=0;for(const k of ['tw','us']){const v=Math.round((S.pf[k]||0)*p);S.pf[k]=(S.pf[k]||0)-v;g+=v}S.money+=g;return g}
 E.push({id:'tm_crash',min:25,max:80,w:3,if:()=>tmOK()&&(S.econ||0)<-.02,run:()=>{const a=tmAmt();return {t:`景氣低迷、股市重挫，朋友說這是抄底的機會。你手上能動用約 ${money(a)}。`,c:[
  ch('分批買進台股（先投一半）',()=>{const m=pfMove('tw',Math.round(a/2));return G(`已買進台股 ${money(m)}，之後的漲跌會反映在投資組合。`)}),
  ch('全部押進台股',()=>{const m=pfMove('tw',a);S.stress=cl(S.stress+3);return N(`已買進台股 ${money(m)}，之後的漲跌會反映在投資組合。`)}),
@@ -14041,6 +14041,25 @@ showEnd=function(){
 /* 提示 */
 NX125.push(['th_mid',()=>S.age>=38&&S.age<=50&&!(S.flags&&S.flags.th_mid),'人生到了中年，轉折事件隨時會出現，留意決定十年重心的選擇。'],
  ['eco',()=>S.age>=25&&S.money>=3e6&&!view.seenEco,'「資產」頁上方有景氣燈號，低迷或過熱時常會遇到進場或獲利了結的時機決策。']);
+/* ---- p142：投資交易成本（手續費與證交稅，遊戲簡化值） ---- */
+const PFEE={tw:[.0015,.0015],us:[.003,0],bond:[.0005,0],gold:[.005,0]};
+const pfFee=(k,sell)=>(PFEE[k]||[0,0])[sell?1:0];
+const _hd142=handle;
+handle=function(a){
+ if(typeof a==='string'&&S&&S.pf&&/^pf:(b|s|sp):/.test(a)){
+  const k=a.split(':')[2],b0=S.pf[k]||0,m0=S.money;
+  const r=_hd142.apply(this,arguments);
+  try{const d=(S.pf[k]||0)-b0;if(PFEE[k]&&d!==0){const fee=Math.round(Math.abs(d)*pfFee(k,d<0));if(fee>0){S.money-=fee;log(`${d>0?'買進':'賣出'}手續費${d<0&&k==='tw'?'與證交稅':''} ${money(fee)}。`,'bad')}}}catch(e){}
+  return r;
+ }
+ return _hd142.apply(this,arguments);
+};
+const _pm142=pfMove;
+pfMove=function(k,a){const m=_pm142(k,a);try{const f=Math.round(m*pfFee(k,0));S.money-=f;S.pf[k]=Math.max(0,S.pf[k]-f)}catch(e){}return m};
+const _ps142=pfSellPct;
+pfSellPct=function(p){const g=_ps142(p);try{const f=Math.round(g*.004);S.money-=f;return g-f}catch(e){return g}};
+const _ph142=pfHTML;
+pfHTML=function(){return _ph142()+'<p class="sub">交易成本（簡化）：賣出一律 0.3%，台股另加證交稅等 0.15%（合計約 0.45%）；買進台股 0.15%、美股 0.3%、債券 0.05%、黃金 0.5%、加密貨幣 1%。</p>'};
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
