@@ -14078,7 +14078,7 @@ pfHTML=function(){return _ph142()+perfHTML()+'<p class="sub">交易成本（簡�
 const TPRE=['今年春天，','前陣子，','某個週一早上，','年底前，','一個深夜裡，','這幾個月，','最近，','',''];
 const TSUF={ce_:['（財務長提醒你，這會影響今年的現金流。）','（團隊都在等你拍板。）','（你翻了一下最近的報表。）','（辦公室裡的氣氛有點緊繃。）'],cf_:['（你想起當初的那個決定。）','（這件事其實早有徵兆。）','（你心裡有一點預感。）'],pje_:['（顧問把資料放到你桌上。）','（你打開最新的估值報告。）','（董事會的郵件進來了。）'],fa_:['（你想起這些年一起走過的時光。）','（家裡的氣氛有些微妙。）','（你默默想了很久。）'],th_:['（你望著窗外想了很久。）','（夜裡你翻來覆去睡不著。）'],tm_:['（新聞每天都在談這件事。）','（同事午餐時也在聊這個話題。）','（理專剛好打電話來。）']};
 for(const e of E){
- const m=/^(ce_|cf_|pje_|fa_|th_|tm_)/.exec(e.id);if(!m)continue;
+ const m=/^(ce_|cf_|pje_|fa_|th_|tm_)/.exec(e.id);if(!m||e.__t)continue;e.__t=1;
  const r0=e.run,sf=TSUF[m[1]];
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
@@ -14135,6 +14135,124 @@ lfHandle=function(x,y,z,u){
  return _lf144(x,y,z,u);
 };
 try{enApply()}catch(e){}
+/* ---- p145：英文字典補充、定期定額與停損停利、家族里程碑、事件情境變體 ---- */
+Object.assign(EN,{
+'← 返回設定':'← Back to settings','學習食譜':'Learn recipes','伴侶檔案':'Partner profile','拜訪對方的家人':"Visit partner's family",'帶對方見你的家人':'Introduce to family','一起養寵物':'Raise a pet together','認真談一次、修復關係':'Talk it out','創投輪次':'VC rounds','員工認股權':'Stock options','股票質押借款':'Stock-backed loan','公司買回股份':'Buy back shares','外貌與造型':'Looks & style','戀愛回憶':'Memories','常用':'Common','其他':'Other','上語言課':'Language class','申請永久居留':'Apply for PR','歸化為公民':'Naturalize','取回投資款':'Withdraw investment','💱 外匯交易':'Foreign exchange','外匯交易':'Foreign exchange','認識心儀對象':'Meet crushes','下載存檔檔案':'Download save file','簡單模式（依年齡逐步解鎖功能）':'Simple mode (unlock by age)','回饋統計（只存在你的手機）':'Stats (local only)','版權與資料來源':'Credits','每週工時':'Weekly hours','徵才（今年每個職缺只能應徵一次）':'Jobs (one try per opening)','比賽紀錄與名聲':'Records & fame','🔍 主動認識新對象':'Meet someone','🍼 領養孩子':'Adopt a child','← 返回家庭':'← Back to family','💌 告白':'Confess','🚪 放下這段心意':'Let go','💘 戀愛攻略':'Dating guide','原創食譜':'Original recipe','融合料理':'Fusion dish','我的原創食譜':'My recipes','融合創作':'Fusion work','資金與股權':'Funding & equity','進階':'Advanced','出版食譜書':'Publish cookbook','傳授':'Teach','收一位徒弟':'Take an apprentice','加入菜單':'Add to menu','移出菜單':'Remove from menu','版權、資料來源與法規':'Credits & laws','健康醫療':'Health care','檢查':'Check-up','技能（影響求職、賺錢與生活）':'Skills','個性（由你的選擇慢慢形塑）':'Personality','才藝與比賽實力':'Talents & contests','學業與工作':'School & work','個性（會隨經歷慢慢改變）':'Personality','技能（工作會累積，不用會生疏）':'Skills (use it or lose it)','各繼承人分得（稅後）':'Heir shares (after tax)','若你現在過世（試算）':'If you died now','信託':'Trust','撤銷信託取回資產':'Revoke trust','專屬章節與互動':'Chapters & interactions','新手導覽':'Tour','深入了解':'Learn more','每個人的收支':'Per-person cash flow','不計入收支的項目':'Excluded items','可執行的行動（每項每年一次）':'Actions (once a year each)','經營改善行動':'Improvement actions','族群與文化':'Ethnicity & culture','今年多練習母語':'Practice mother tongue','施政（每年一項）':'Policies (one a year)','參選紀錄':'Election record','同等學力測驗':'Equivalency exam','空中大學':'Open university','搬遷':'Relocate','開分店':'Open branch','各代淨資產':'Net worth by generation','家族檔案（歷代財富與壽命）':'Family archive','一鍵請客送禮':'Treat & gift','配件':'Accessories','身體與保養':'Body & care','進階項目':'Advanced items','家族面孔':'Family faces','頭像設定':'Avatar','今年參與宗教活動':'Religious activity','社會保險':'Social insurance','今年的扣繳':'Withholding this year','累積':'Accumulated','語言 Language':'Language','遊學（語言與文化課程）':'Study tour','留學與在地就讀':'Study abroad','移居與工作':'Move & work','職涯成就':'Career achievements','孫子女的遺贈':'Bequest to grandchildren','歸化':'Naturalization','申請歸化':'Apply for naturalization','創辦人出資占比':'Founder share','共通稅務與公司法重點':'Tax & company law','出售持股':'Sell shares','← 重選產業':'← Pick industry','領養':'Adopt','主動認識新對象':'Meet someone','網路交友':'Online dating','精簡文字（按鈕說明只顯示一行）':'Compact text','跨界合作':'Collaboration','創作並發表':'Create & publish','合作推出':'Co-release','已收集的結局':'Endings collected','下一代':'Next generation','臺灣歷年現金／振興措施':'Taiwan relief payments','招募明星人才':'Recruit star talent','居住安排（租屋）':'Housing (rent)','才藝等級（練習後才有實力參賽）':'Talent levels','路跑個人最佳':'Running PB','歷年成績':'Past results','自動投資':'Auto-invest','家族里程碑':'Family milestones','定期定額與停損停利':'DCA & stop rules'
+});
+/* ---- 定期定額與停損停利 ---- */
+const DCAK=['bond','tw','us','gold'];
+function autoHTML(){
+ S.dca=S.dca||{};S.rl=S.rl||{};
+ const rows=DCAK.map(k=>{const d=S.dca[k]||0,r=S.rl[k]||0;return `<div class="item"><b>${PFNM[k]}</b><div class="sub">每年自動買進 ${d?money(d):'未設定'}・規則：${['無','停損 −20%','停損 −20%＋停利 +40%'][r]}</div><button class="btn" data-a="pfr:${k}">切換停損停利規則</button></div>`}).join('');
+ return `<div class="sec">自動投資</div><details><summary class="sub">定期定額與停損停利（點開）</summary><div class="sub">每年年底自動從現金買進，會收手續費。停損：當年報酬 ≤ −20% 就全數賣出；停利：當年報酬 ≥ +40% 就賣出一半。</div>${rows}${frmHTML('dca',{sl:'資產',opts:DCAK.map(k=>[k,PFNM[k]]),def:'120000',al:'每年投入金額（0 為取消）',chips:[0,120000,360000,600000],btns:[['go','設定','p']]})}</details>`;
+}
+const _ph145=pfHTML;pfHTML=function(){return _ph145()+autoHTML()};
+const _hd145=handle;
+handle=function(a){
+ if(typeof a==='string'&&S){
+  const m=/^pfr:(\w+)$/.exec(a);
+  if(m){S.rl=S.rl||{};S.rl[m[1]]=((S.rl[m[1]]||0)+1)%3;view.msg=N(`${PFNM[m[1]]}規則已更新。`);render();try{showSheet('ast')}catch(e){}return}
+  if(a==='frmgo:dca:go'){const g=frmGet('dca');if(DCAK.includes(g.s)){S.dca=S.dca||{};S.dca[g.s]=Math.max(0,Math.round(+g.a||0));view.msg=N(S.dca[g.s]?`${PFNM[g.s]}每年自動買進 ${money(S.dca[g.s])}。`:`${PFNM[g.s]}自動買進已取消。`);render();try{showSheet('ast')}catch(e){}}return}
+ }
+ return _hd145.apply(this,arguments);
+};
+const _yr145=yearly;
+yearly=function(){
+ _yr145.apply(this,arguments);
+ try{if(!S||S.dead||S.age<18)return;pfTrk();
+  for(const k of DCAK){const r=S.pfr&&S.pfr[k],rule=(S.rl||{})[k]||0;
+   if(rule&&r!=null&&(S.pf[k]||0)>0){
+    if(r<=-.2){const v=S.pf[k],f=Math.round(v*(.003+pfFee(k,1)));S.money+=v-f;S.pff+=f;S.pfc[k]=0;S.pf[k]=0;log(`${PFNM[k]}觸發停損，全部賣出（交易成本 ${money(f)}）。`,'bad')}
+    else if(rule===2&&r>=.4){const v=Math.round(S.pf[k]/2),f=Math.round(v*(.003+pfFee(k,1)));const b0=S.pf[k];S.pf[k]-=v;S.money+=v-f;S.pff+=f;S.pfc[k]=Math.round((S.pfc[k]||0)*S.pf[k]/b0);log(`${PFNM[k]}觸發停利，賣出一半（交易成本 ${money(f)}）。`,'good')}}
+   const d=(S.dca||{})[k];
+   if(d>0&&S.money>=d*1.5&&(typeof pfAvail!=='function'||pfAvail(k,calYear()))){const m=pfMove(k,d);if(m>0)log(`定期定額買進${PFNM[k]} ${money(m)}。`,'')}}
+ }catch(e){}
+};
+/* ---- 家族里程碑 ---- */
+const FAMM=[
+['gen3','三代同堂',h=>(S.gen||1)>=3,'傳到第 3 代'],
+['gen5','五代傳家',h=>(S.gen||1)>=5,'傳到第 5 代'],
+['rich','億萬家族',h=>h.some(x=>(x.net||0)>=1e8)||netWorth()>=1e8,'有一代淨資產破 1 億'],
+['old','長壽家族',h=>h.some(x=>(x.age||0)>=95)||S.age>=95,'有一代活到 95 歲以上'],
+['kids','子孫滿堂',h=>h.some(x=>(x.kids||0)>=3)||(S.kids||[]).length>=3,'有一代育有 3 個以上子女'],
+['world','跨國家族',h=>new Set(h.map(x=>x.cn).concat([S.cn||'TW'])).size>=2,'家族成員曾在不同國家生活']
+];
+function famMS(){const h=S.hist||[],got=lsGet('lifesim_famm',{});FAMM.forEach(m=>{try{if(m[2](h)&&!got[m[0]]){got[m[0]]=Date.now();log(`家族里程碑達成：${m[1]}（${m[3]}）`,'good')}}catch(e){}});lsSet('lifesim_famm',got);return got}
+const _ap145=applySuccession;
+applySuccession=function(){
+ const before=Object.keys(lsGet('lifesim_famm',{})).length;
+ const r=_ap145.apply(this,arguments);
+ try{const got=famMS(),n=Object.keys(got).length;if(n>0){const b=n*px(300000);S.money+=b;log(`家族里程碑（${n}／${FAMM.length}）帶來家業基礎，你多了 ${money(b)}。`,'good')}}catch(e){}
+ return r;
+};
+const _se145=showEnd;
+showEnd=function(){
+ _se145.apply(this,arguments);
+ try{const got=famMS(),b=document.getElementById('modalBody');if(!b)return;
+  const h=`<div class="item"><b>家族里程碑（${Object.keys(got).length}／${FAMM.length}）</b><div class="sub">${FAMM.map(m=>`${got[m[0]]?'✅':'⬜'} ${m[1]}：${m[3]}`).join('<br>')}</div></div>`;
+  b.innerHTML=b.innerHTML.replace('<p><b>人生結局',h+'<p><b>人生結局');
+ }catch(e){}
+};
+/* ---- p146：公司／家人／景氣事件情境變體（完整的新情境） ---- */
+ce('bank',3,()=>S.co.yrs>=2&&co0().L.loan<0,co=>({t:'往來銀行通知，貸款契約要重新議約，行員說可以談利率，但需要提供更多財報佐證。',c:[
+ ch('備齊文件爭取降息',()=>{cPay(co,rv(co)*.003);if(chance(.65)){cS(co,.006,3);return G('銀行同意降息，利息負擔減輕。')}return N('銀行維持原條件。')}),
+ ch('轉向另一家銀行',()=>{cPay(co,rv(co)*.006);if(chance(.5)){cS(co,.01,3);return G('新銀行給了較好的條件。')}cG(co,-.01,1);return B('轉貸過程拖了很久，周轉變得緊張。')}),
+ ch('接受現行條件',()=>N('你覺得先求穩。'))]}));
+ce('rent',3,cIn('餐飲','零售','教育','服務','醫療'),co=>({t:'房東通知下次續約要調漲租金 20%，但你的客人都在這個位置。',c:[
+ ch('接受漲租',()=>{cPay(co,rv(co)*.02);return N('成本增加，但客源不變。')}),
+ ch('搬到新據點',()=>{cPay(co,rv(co)*.04);if(chance(.5)){cG(co,.02,3);return G('新據點租金較低，客人願意跟過來。')}cG(co,-.04,2);return B('不少老客人沒有跟過來。')}),
+ ch('談長約換凍漲',()=>{if(chance(.6)){cS(co,.008,3);return G('房東同意三年不調漲。')}cPay(co,rv(co)*.02);return N('談不成，只能接受調漲。')})]}));
+ce('award',3,()=>S.co.yrs>=3,co=>({t:`「${co.name}」被選為年度優良中小企業候選，需要準備簡報與實績資料。`,c:[
+ ch('認真準備、出席頒獎',()=>{cPay(co,rv(co)*.003);if(chance(.45)){cG(co,.04,2);chg('happy',3);return G('獲獎！品牌曝光大增，客戶更有信心。')}return N('這次沒得獎，但累積了不少人脈。')}),
+ ch('委託公關公司包裝',()=>{cPay(co,rv(co)*.012);if(chance(.6)){cG(co,.035,2);return G('得獎，報導不少。')}return B('花了錢卻沒有成果。')}),
+ ch('婉拒，專注本業',()=>N('你把時間留給團隊。'))]}));
+ce('recall',3,cIn('製造','餐飲','零售','生技','醫療'),co=>({t:'品管發現某批產品可能有瑕疵，已經有部分流到客戶手中。',c:[
+ ch('主動召回並公告',()=>{cPay(co,rv(co)*.03);S.karma=cl((S.karma||50)+3);cG(co,.01,2);return N('召回花了一筆錢，卻贏得信任。')}),
+ ch('只通知已知客戶',()=>{cPay(co,rv(co)*.012);if(chance(.6))return N('風波很小，平穩落幕。');cPay(co,rv(co)*.04);cG(co,-.03,2);return B('有客戶投訴，被媒體報導。')}),
+ ch('先觀察、不處理',()=>{if(chance(.35))return N('沒有後續。');cPay(co,rv(co)*.08);S.stress=cl(S.stress+6);cG(co,-.05,2);return B('出了事故，賠償與商譽損失慘重。')})]}));
+ce('merge',3,()=>S.co.yrs>=3,co=>({t:'同業的老闆私下提議兩家公司合併，說可以省下不少重複成本。',c:[
+ ch('展開合併談判',()=>{cPay(co,rv(co)*.01);if(chance(.55)){cS(co,.015,3);cG(co,.03,3);return G('合併後成本下降、客群擴大。')}S.stress=cl(S.stress+4);return B('談判破局，浪費了不少時間。')}),
+ ch('只做業務合作',()=>{cG(co,.015,2);return N('雙方互相導客。')}),
+ ch('婉拒',()=>N('你不想失去主導權。'))]}));
+ce('intern',3,cIn('科技','服務','教育','娛樂','金融'),co=>({t:'一位名校實習生表現亮眼，主動問你有沒有機會轉為正職。',c:[
+ ch('給正職並培養',()=>{cPay(co,rv(co)*.008);if(chance(.6)){cG(co,.02,3);return G('他很快成為團隊重要戰力。')}return N('表現普通，但也學得很快。')}),
+ ch('簽約半年試用',()=>{cPay(co,rv(co)*.004);return N('雙方都保留彈性。')}),
+ ch('目前沒有名額',()=>N('你婉拒了他。'))]}));
+ce('esg',3,cIn('製造','能源','營建','農林漁牧','運輸'),co=>({t:'大客戶要求供應商提交減碳與永續報告，否則將重新評估合作關係。',c:[
+ ch('投資減碳與認證',()=>{cPay(co,rv(co)*.03);cG(co,.03,3);return G('取得認證，反而拿到新訂單。')}),
+ ch('只做基本報告',()=>{cPay(co,rv(co)*.006);if(chance(.55))return N('勉強過關。');cG(co,-.03,2);return B('客戶減少了訂單。')}),
+ ch('不理會',()=>{cG(co,-.04,2);return B('失去了一位重要客戶。')})]}));
+ce('cert',3,cIn('金融','醫療','教育','科技','營建'),co=>({t:'主管機關頒布新規範，產業內的公司都需要增加合規人力。',c:[
+ ch('聘請合規專員',()=>{cPay(co,rv(co)*.015);return N('合規到位，營運更踏實。')}),
+ ch('找外部顧問',()=>{cPay(co,rv(co)*.008);if(chance(.8))return N('順利符合規範。');cPay(co,rv(co)*.03);return B('顧問沒盯緊，被要求補正並罰款。')}),
+ ch('先觀望同業怎麼做',()=>{if(chance(.5))return N('同業也都拖著，沒有被處罰。');cPay(co,rv(co)*.04);return B('被抽查到，裁罰加補正。')})]}));
+ce('strike',2,cIn('運輸','製造','餐飲','零售'),co=>({t:'燃料與原物料價格大漲，利潤快被侵蝕。',c:[
+ ch('調漲售價',()=>{if(chance(.6)){cS(co,.01,2);return G('客人大致接受，毛利守住。')}cG(co,-.03,2);return B('部分客人流失。')}),
+ ch('縮小規格或份量',()=>{cS(co,.012,2);S.karma=cl((S.karma||50)-1);return N('成本降了，但有些客人察覺。')}),
+ ch('硬吞成本',()=>{cPay(co,rv(co)*.02);return N('今年利潤較差。')})]}));
+/* 家人 */
+E.push({id:'fa_grad',min:40,max:80,w:8,if:()=>S&&!S.dead&&!S.flags.fa_grad&&S.kids&&S.kids.some(k=>k.age>=21&&k.age<=24),run:()=>{const k=S.kids.find(k=>k.age>=21&&k.age<=24);S.flags.fa_grad=1;return {t:`${k.n}大學畢業了，邀你出席典禮，他說想聽你說幾句話。`,c:[
+ ch('親自出席並說出心裡話',()=>{k.rel=cl(k.rel+8);chg('happy',5);return G(`${k.n}紅了眼眶，說這是最重要的一天。`)}),
+ ch('只送上禮物',()=>{S.money-=px(50000);k.rel=cl(k.rel+2);return N('他有點失落，但還是謝謝你。')}),
+ ch('因為工作缺席',()=>{k.rel=cl(k.rel-8);chg('happy',-2);return B('你錯過了孩子人生的重要時刻。')})]}}});
+E.push({id:'fa_grand',min:55,max:95,w:8,if:()=>S&&!S.dead&&!S.flags.fa_grand&&S.kids&&S.kids.some(k=>k.age>=28&&k.rel>=50),run:()=>{const k=S.kids.find(k=>k.age>=28&&k.rel>=50);S.flags.fa_grand=1;return {t:`${k.n}說要生孩子了，你就要當祖父母了。`,c:[
+ ch('主動幫忙照顧',()=>{k.rel=cl(k.rel+8);chg('happy',6);S.stress=cl(S.stress+3);return G('你享受含飴弄孫的時光，雖然也有點累。')}),
+ ch('給紅包與建議',()=>{S.money-=px(100000);k.rel=cl(k.rel+3);chg('happy',3);return N('他很感謝你的心意。')}),
+ ch('保持距離，尊重他們',()=>{k.rel=cl(k.rel+1);return N('你覺得讓年輕人自己摸索比較好。')})]}}});
+/* 景氣 */
+E.push({id:'tm_infl',min:25,max:85,w:3,if:()=>tmOK()&&(S.cpi||0)>.035,run:()=>({t:'物價持續上漲，超市與帳單都貴了不少，你開始檢視自己的現金。',c:[
+ ch('把一部分現金換成黃金',()=>{const m=pfMove('gold',Math.round(S.money*.1));return N(`已買進黃金 ${money(m)}，用來對抗通膨。`)}),
+ ch('提高工作收入',()=>{if(S.job)S.job.perf=cl((S.job.perf||50)+2);S.stress=cl(S.stress+3);return N('你多接了一些工作，累一點，但收入增加。')}),
+ ch('縮衣節食',()=>{chg('happy',-2);S.money+=px(60000);return N('日子過得緊一點，但存下了錢。')})]})});
+E.push({id:'tm_bubble',min:28,max:75,w:2,if:()=>tmOK()&&(S.econ||0)>.03,run:()=>({t:'市場瀰漫「這次不一樣」的氣氛，計程車司機也在聊股票。',c:[
+ ch('賣出部分股票保住獲利',()=>{const g=pfSellPct(.25);return g>0?G(`你賣出 ${money(g)} 的股票落袋為安。`):N('你手上沒有股票可賣。')}),
+ ch('繼續抱著',()=>N('你相信這波行情還沒結束。')),
+ ch('追高買進',()=>{const m=pfMove('us',Math.round(Math.max(0,S.money)*.1));return N(`你買進美股 ${money(m)}，之後的漲跌就看運氣。`)})]})});
+for(const e of E){
+ const m=/^(ce_|cf_|pje_|fa_|th_|tm_)/.exec(e.id);if(!m||e.__t)continue;e.__t=1;
+ const r0=e.run,sf=TSUF[m[1]];
+ e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
+}
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
