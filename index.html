@@ -945,7 +945,7 @@ function foundHandle(x,y,z){
  }
 }
 /* ---- 公司主畫面 ---- */
-const pb=r=>`<div class="bar"><i style="width:${Math.max(0,Math.min(100,r))}%;background:#c0553a"></i></div>`;
+const pb=r=>`<div class="bar"><i style="width:${Math.max(0,Math.min(100,r))}%;background:#5a866b"></i></div>`;
 function coHTML(sub){
  const co=S.co,I=INDS[co.ind],L=co.L,r=co.rec;
  const back='<button class="btn" data-a="co:menu:main">← 公司主頁</button>';
@@ -2702,8 +2702,8 @@ function revHTML(){
  const wmax=Math.max(1,...hs.map(p=>p.w)),wmin=Math.min(0,...hs.map(p=>p.w));
  const svg=(b)=>`<svg viewBox="0 0 ${W} ${H}" style="width:100%;background:#fff;border:1px solid var(--line);border-radius:10px">${b}</svg>`;
  return `<h3>📈 年度回顧</h3><div class="sub">${hs[0].a}～${hs[hs.length-1].a} 歲</div><div class="sec">心情／壓力／健康／人脈（0–100）</div>`
- +svg(line('h','#d97706',100)+line('s','#64748b',100)+line('hp','#e11d48',100)+line('n','#c0553a',100))
- +`<div class="sub"><span style="color:#d97706">■快樂</span>　<span style="color:#64748b">■壓力</span>　<span style="color:#e11d48">■健康</span>　<span style="color:#c0553a">■人脈</span></div>`
+ +svg(line('h','#d97706',100)+line('s','#64748b',100)+line('hp','#e11d48',100)+line('n','#5a866b',100))
+ +`<div class="sub"><span style="color:#d97706">■快樂</span>　<span style="color:#64748b">■壓力</span>　<span style="color:#e11d48">■健康</span>　<span style="color:#5a866b">■人脈</span></div>`
  +`<div class="sec">淨資產（萬元，2026 年幣值）：最高 ${wmax.toLocaleString('en-US')}、最低 ${wmin.toLocaleString('en-US')}</div>`+svg(line('w','#2563eb',wmax,wmin))
  +`<button class="btn" data-a="back">← 返回</button>`;
 }
@@ -3751,7 +3751,7 @@ const COURSES=[['comm','簡報表達課',12000],['lead','管理領導課',30000]
 function bar5(v,c){return `<div class="bar"><i style="width:${v}%;background:${c}"></i></div>`}
 function skillHTML(){
  mFix();let h='<h3>🧬 個性與技能</h3><div class="sec">個性（會隨經歷慢慢改變）</div>';
- h+=PTN.map(([k,n])=>`<div class="item"><b>${n} ${S.pt[k]}</b>${bar5(S.pt[k],'#c0553a')}<div class="sub">${PTD[k]}</div></div>`).join('');
+ h+=PTN.map(([k,n])=>`<div class="item"><b>${n} ${S.pt[k]}</b>${bar5(S.pt[k],'#5a866b')}<div class="sub">${PTD[k]}</div></div>`).join('');
  h+='<div class="sec">技能（工作會累積，不用會生疏）</div>';
  h+=SKN.map(([k,n])=>`<div class="item"><b>${n} ${S.skl[k]}</b>${bar5(S.skl[k],'#4b7bec')}<div class="sub">${SKD[k]}</div></div>`).join('');
  h+='<div class="sec">進修</div><div class="sub">每項課程每年一次。未成年由爸媽出錢。</div>';
@@ -3879,7 +3879,7 @@ function compat(p){const a=ppt(p),b=S.pt;let d=0;for(const k of ['ext','agr','co
 const _pp26=partnerPage;
 partnerPage=function(){
  let h=_pp26();const p=S.partner;if(!p)return h;ppt(p);const c=compat(p);
- const add=`<div class="item"><b>個性契合度 ${c}</b>${bar5(c,'#c0553a')}<div class="sub">${PTN.map(([k,n])=>`${n} ${p.pt[k]}`).join('・')}<br>${c>=70?'你們很合得來。':c>=45?'有些差異，需要互相包容。':'個性差異大，相處需要多磨合。'}</div></div>`;
+ const add=`<div class="item"><b>個性契合度 ${c}</b>${bar5(c,'#5a866b')}<div class="sub">${PTN.map(([k,n])=>`${n} ${p.pt[k]}`).join('・')}<br>${c>=70?'你們很合得來。':c>=45?'有些差異，需要互相包容。':'個性差異大，相處需要多磨合。'}</div></div>`;
  return h.replace(/(<button class="btn" data-a="back">)/,add+'$1');
 };
 const _y26=yearly;
@@ -6495,16 +6495,16 @@ function sumHTML(){
 }
 function sumCanvas(){
  const d=sumData(),W=720,H=980,c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
- g.fillStyle='#f6efe6';g.fillRect(0,0,W,H);g.fillStyle='#c0553a';g.fillRect(0,0,W,14);
+ g.fillStyle='#f7efe4';g.fillRect(0,0,W,H);g.fillStyle='#5a866b';g.fillRect(0,0,W,14);
  g.fillStyle='#3a2a22';g.font='bold 44px sans-serif';g.fillText('人生模擬器',40,90);
- g.font='28px sans-serif';g.fillStyle='#c0553a';g.fillText(`${d.chal}・${d.title}`,40,140);
+ g.font='28px sans-serif';g.fillStyle='#5a866b';g.fillText(`${d.chal}・${d.title}`,40,140);
  g.fillStyle='#3a2a22';g.font='bold 36px sans-serif';g.fillText(`${d.name}　享年 ${d.age} 歲`,40,210);
  g.font='26px sans-serif';let y=262;
  const L=[`學歷：${d.edu}　職業：${d.job}`,`淨資產：${d.net}`,`資產高峰：${d.peak}`,`子女：${d.kids} 人　足跡：${d.ctr.length} 國`,`死因：${d.cause}`];
  L.forEach(t=>{g.fillText(t,40,y);y+=44});
- y+=14;g.font='bold 28px sans-serif';g.fillStyle='#c0553a';g.fillText('重大時刻',40,y);y+=44;g.font='24px sans-serif';g.fillStyle='#3a2a22';
+ y+=14;g.font='bold 28px sans-serif';g.fillStyle='#5a866b';g.fillText('重大時刻',40,y);y+=44;g.font='24px sans-serif';g.fillStyle='#3a2a22';
  d.pick.forEach(t=>{const s=t.length>26?t.slice(0,25)+'…':t;g.fillText(s,40,y);y+=40});
- y+=20;g.font='bold 28px sans-serif';g.fillStyle='#c0553a';g.fillText('家族',40,y);y+=42;g.font='24px sans-serif';g.fillStyle='#3a2a22';
+ y+=20;g.font='bold 28px sans-serif';g.fillStyle='#5a866b';g.fillText('家族',40,y);y+=42;g.font='24px sans-serif';g.fillStyle='#3a2a22';
  d.fam.slice(-5).forEach(t=>{g.fillText(t,40,y);y+=38});
  return c;
 }
@@ -7868,7 +7868,7 @@ const STHL=[
  ['karma','品德','做善事提高、犯罪降低；影響名聲與部分事件','休閒'],
  ['net','人脈','影響求職與引薦；聚會、社團、志工可提升','休閒']
 ];
-function stBar(v,bad){const c=bad?(v>=70?'#c0553a':v>=40?'#e0a030':'#4a9a6a'):(v<30?'#c0553a':v<60?'#e0a030':'#4a9a6a');return `<div class="bar"><i style="width:${Math.max(0,Math.min(100,v))}%;background:${c}"></i></div>`}
+function stBar(v,bad){const c=bad?(v>=70?'#c76b55':v>=40?'#d9b46a':'#7fa88d'):(v<30?'#c76b55':v<60?'#d9b46a':'#7fa88d');return `<div class="bar"><i style="width:${Math.max(0,Math.min(100,v))}%;background:${c}"></i></div>`}
 function stRow(n,v,d,go,bad){return `<div class="item"><div style="display:flex;justify-content:space-between"><b>${n}</b><span>${Math.round(v)}</span></div>${stBar(v,bad)}<div class="sub">${d}</div>${go?`<button class="mini" data-a="ac:go:${go}">去「${go}」提升</button>`:''}</div>`}
 function statHTML(){
  mFix();if(typeof tlInit==='function')tlInit();
@@ -10657,7 +10657,7 @@ astHTML=function(){
   const re=(S.house?S.house.value-(S.mort?S.mort.left:0):0)+(S.props?S.props.reduce((a,p)=>a+p.value-(p.mort?p.mort.left:0),0):0);
   const co=typeof stake==='function'?stake(S.co):0,pj=typeof pjTotal==='function'?pjTotal():0,car=S.car?S.car.value:0;
   const total=netWorth();
-  const parts=[['現金與存款',S.money+bank,'#c0553a'],['投資組合',pf,'#4b7bec'],['房產（扣貸款）',re,'#2f9e6b'],['公司股權',co,'#a46be0'],['大型專案',pj,'#e0a33b'],['車輛',car,'#6c7a91']];
+  const parts=[['現金與存款',S.money+bank,'#5a866b'],['投資組合',pf,'#4b7bec'],['房產（扣貸款）',re,'#2f9e6b'],['公司股權',co,'#a46be0'],['大型專案',pj,'#e0a33b'],['車輛',car,'#6c7a91']];
   const known=parts.reduce((a,x)=>a+x[1],0);parts.push(['其他資產',total-known,'#99a1ad']);
   const pos=parts.filter(x=>x[1]>0),sum=pos.reduce((a,x)=>a+x[1],0);
   if(sum<=0)return h;
@@ -10784,7 +10784,7 @@ showStory=function(){
     g0.font='28px sans-serif';
     const lines=[];t.split('\n').forEach(par=>{let cur='';for(const ch of par){if(g0.measureText(cur+ch).width>W-pad*2){lines.push(cur);cur=ch}else cur+=ch}lines.push(cur)});
     const H=Math.max(640,200+lines.length*40+90);c.width=W;c.height=H;const g=c.getContext('2d');
-    g.fillStyle='#f6efe6';g.fillRect(0,0,W,H);g.fillStyle='#c0553a';g.fillRect(0,0,W,14);
+    g.fillStyle='#f7efe4';g.fillRect(0,0,W,H);g.fillStyle='#5a866b';g.fillRect(0,0,W,14);
     g.fillStyle='#3a2a22';g.font='bold 44px sans-serif';g.fillText('人生故事',pad,96);
     g.font='28px sans-serif';g.fillStyle='#4a3a30';lines.forEach((l,i)=>g.fillText(l,pad,160+i*40));
     g.fillStyle='#8a7a6c';g.font='22px sans-serif';g.fillText('© 2026 yu-tinglu　人生模擬器',pad,H-34);
@@ -14254,7 +14254,7 @@ for(const e of E){
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
 /* ---- p147：版本編號（設定頁與標題畫面顯示；更新後第一次開啟會提示） ---- */
-const APPV=133,APPD='2026-11-20',APPN="版本顯示拿掉日期";
+const APPV=134,APPD='2026-11-20',APPN="全遊戲配色改為與圖示一致的鼠尾草綠";
 const verStr=n=>'v'+(n/100).toFixed(2);
 const verTxt=()=>`版本 ${verStr(APPV)}`;
 const _sh147=setHTML;
@@ -14339,7 +14339,7 @@ render=function(){
   const ha=document.getElementById('hAge');if(ha)ha.textContent=`${calYear()-S.age} 年生・${(typeof CNS!=='undefined'&&CNS[S.cn||'TW']?CNS[S.cn||'TW'].n:'台灣')}${S.dead?'・已逝世':''}`;
   document.querySelectorAll('#stats .st').forEach((el,i)=>{const s=STATS[i];if(!s)return;const k=s[0],v=S[k],em=el.querySelector('.lb em');
    if(!el.querySelector('.w148'))el.insertAdjacentHTML('beforeend',`<div class="w148">${hw148(k,v)}</div>`);
-   if(k==='stress'){const bar=el.querySelector('.bar i');if(bar)bar.style.background=v>=70?'var(--acc)':v>=45?'var(--gold)':'var(--acc2)';el.classList.toggle('good148',v<45)}});
+   if(k==='stress'){const bar=el.querySelector('.bar i');if(bar)bar.style.background=v>=70?'var(--warn)':v>=45?'#d9b46a':'var(--acc2)';el.classList.toggle('good148',v<45)}});
   const feed=document.getElementById('feed');
   if(feed){let last=-1,n=0;[...feed.querySelectorAll('.yr')].forEach(y=>{const a=parseInt((y.querySelector('h4')||{}).textContent,10);if(isNaN(a))return;
     const c=chapOf148(a);if(c!==last){last=c;n++;const h=document.createElement('div');h.className='chap148';h.innerHTML=`<b>第${'一二三四五六七'[c]}章｜${CHAP148[c][2]}</b>`;feed.insertBefore(h,y)}
@@ -14411,6 +14411,28 @@ const _ss148b=showStart;
 showStart=function(){_ss148b.apply(this,arguments);try{document.querySelectorAll('#startBody .hero svg.logo,#startBody .hero img.logo148').forEach(x=>{if(x.tagName==='IMG')return;x.outerHTML=LOGO148});[].forEach(x=>{x.outerHTML=LOGO148})}catch(e){}};
 
 ;(function(){try{const st=document.createElement('style');st.id='style148b';st.textContent="#start{--acc:#5a866b;background:url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200' preserveAspectRatio='none'><path d='M0 70Q100 20 200 60T400 40V200H0Z' fill='%23d5e4d3'/><path d='M0 120Q120 80 230 115T400 100V200H0Z' fill='%23b6cfb9'/></svg>\") bottom/100% 190px no-repeat,linear-gradient(180deg,#f7e3d3 0%,#fbf0e2 55%,#f6ecdc 100%)!important}#start .hero h1{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;font-weight:300;font-size:32px;letter-spacing:12px;padding-left:12px;color:#6f5648;margin:12px 0 8px}#start .hero p{color:#9a8576;letter-spacing:1px}#start .logo148{border-radius:28px;box-shadow:0 10px 26px rgba(138,106,82,.22);margin-bottom:4px}#start .scard{background:rgba(255,252,246,.85);border-color:#e6d9c6;box-shadow:0 4px 14px rgba(138,106,82,.10)}#start .scard .sc-av{background:#e6eee4}";document.head.appendChild(st)}catch(e){}})();
+/* ---- p149：全遊戲配色改為與圖示一致（鼠尾草綠 × 奶油粉橘） ---- */
+try{
+ const st=document.createElement('style');st.id='style149';
+ const HILL="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200' preserveAspectRatio='none'><path d='M0 70Q100 20 200 60T400 40V200H0Z' fill='%23d5e4d3'/><path d='M0 120Q120 80 230 115T400 100V200H0Z' fill='%23c1d7c4'/></svg>";
+ st.textContent=`
+:root{--bg:#F7EFE4;--card:#FFFCF6;--acc:#5a866b;--acc2:#7fa38d;--gold:#a3b8a0;--warn:#c76b55;--ink:#3d3530;--mute:#857a6d;--line:#e8dccb;--bad:#c76b55;--good:#4f8a68;--sh:0 1px 2px rgba(120,95,70,.05),0 6px 16px rgba(120,95,70,.07)}
+html.dark{--bg:#0e1316;--card:#171e22;--ink:#e8ece9;--mute:#97a39f;--line:#273036;--acc:#8fc3a0;--acc2:#6fa88a;--gold:#6f8f7c;--warn:#ff8f7e}
+html:not(.dark),html:not(.dark) body{background-color:#F7EFE4}
+html:not(.dark) body{background:transparent}
+html:not(.dark) body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url("data:image/svg+xml;utf8,${HILL}") bottom/100% 170px no-repeat,linear-gradient(180deg,#f7e3d3 0%,#fbf0e2 38%,#f7efe4 100%)}
+#ageBtn{background:var(--acc)!important;box-shadow:0 6px 16px rgba(90,134,107,.35),0 0 0 6px rgba(255,252,246,.9)!important}
+.st:nth-child(1) .bar i{background:#e4a1ab!important}
+.st:nth-child(2) .bar i{background:#e8c27a!important}
+.st:nth-child(3) .bar i{background:#8fb0cf!important}
+.st:nth-child(4) .bar i{background:#b9a3cc!important}
+.yr.major148 h4::before{color:var(--acc);border-color:var(--acc)}
+.chap148{color:#8aa591}
+.chap148::before,.chap148::after{background:linear-gradient(90deg,transparent,#a3b8a0,transparent)}
+.logo148{box-shadow:0 8px 22px rgba(138,106,82,.22)}
+`;
+ document.head.appendChild(st);
+}catch(e){}
 let view={tab:null,sub:null,msg:null,fsub:null,csub:null};
 function render(){
  if(S&&typeof mFix==='function')mFix();
@@ -14450,7 +14472,7 @@ function showStart(){
  $('go').onclick=()=>{newGame($('nm').value.trim(),sx);S.ori=oriPick(ori);$('start').classList.remove('on');render();save()};
  if(sv)$('cont').onclick=()=>{S=sv;busy=false;queue=[];$('start').classList.remove('on');render()};
 }
-function pbar(r){return `<div class="bar"><i style="width:${r}%;background:#c0553a"></i></div>`}
+function pbar(r){return `<div class="bar"><i style="width:${r}%;background:#5a866b"></i></div>`}
 function showSheet(tab,sub){
  if(!S)return;view.tab=tab;view.sub=sub||null;
  let h='';const m=view.msg;view.msg=null;
