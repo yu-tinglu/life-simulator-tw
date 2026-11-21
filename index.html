@@ -2700,7 +2700,7 @@ function revHTML(){
  const W=340,H=130,P=6,x=i=>P+i*(W-2*P)/Math.max(1,hs.length-1);
  const line=(k,c,mx,mn)=>{const lo=mn==null?0:mn,hi=mx;return `<polyline fill="none" stroke="${c}" stroke-width="2" points="${hs.map((p,i)=>x(i).toFixed(1)+','+(H-P-(Math.max(lo,Math.min(hi,p[k]))-lo)/(hi-lo||1)*(H-2*P)).toFixed(1)).join(' ')}"/>`};
  const wmax=Math.max(1,...hs.map(p=>p.w)),wmin=Math.min(0,...hs.map(p=>p.w));
- const svg=(b)=>`<svg viewBox="0 0 ${W} ${H}" style="width:100%;background:#fff;border:1px solid var(--line);border-radius:10px">${b}</svg>`;
+ const svg=(b)=>`<svg viewBox="0 0 ${W} ${H}" style="width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px">${b}</svg>`;
  return `<h3>📈 年度回顧</h3><div class="sub">${hs[0].a}～${hs[hs.length-1].a} 歲</div><div class="sec">心情／壓力／健康／人脈（0–100）</div>`
  +svg(line('h','#d97706',100)+line('s','#64748b',100)+line('hp','#e11d48',100)+line('n','#5a866b',100))
  +`<div class="sub"><span style="color:#d97706">■快樂</span>　<span style="color:#64748b">■壓力</span>　<span style="color:#e11d48">■健康</span>　<span style="color:#5a866b">■人脈</span></div>`
@@ -7312,7 +7312,7 @@ const _rd59=render;
 render=function(){_rd59();qbUpdate()};
 (function(){try{
  const st=document.createElement('style');
- st.textContent='#qbar{display:flex;gap:6px;align-items:center;padding:6px 12px;overflow-x:auto;white-space:nowrap;border-bottom:1px solid var(--line)}#qbar button{flex:none;border:1px solid var(--line);background:#fff;border-radius:14px;padding:5px 12px;font-size:13px;color:var(--ink)}#qbar .qs{flex:none;margin-left:auto;font-size:11px;color:var(--mute);padding-left:6px}.acat{display:flex;gap:6px;overflow-x:auto;margin:6px 0 10px;padding-bottom:2px}.acat button{flex:none;border:1px solid var(--line);background:#fff;border-radius:14px;padding:6px 14px;font-size:14px;color:var(--ink)}.acat button.on{background:var(--accent,#c0553a);color:#fff;border-color:transparent}button.msec{display:flex;justify-content:space-between;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 2px;margin:6px 0 0;font-size:14px;font-weight:700;color:var(--ink);text-align:left}';
+ st.textContent='#qbar{display:flex;gap:6px;align-items:center;padding:6px 12px;overflow-x:auto;white-space:nowrap;border-bottom:1px solid var(--line)}#qbar button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:5px 12px;font-size:13px;color:var(--ink)}#qbar .qs{flex:none;margin-left:auto;font-size:11px;color:var(--mute);padding-left:6px}.acat{display:flex;gap:6px;overflow-x:auto;margin:6px 0 10px;padding-bottom:2px}.acat button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:6px 14px;font-size:14px;color:var(--ink)}.acat button.on{background:var(--acc);color:#fff;border-color:transparent}button.msec{display:flex;justify-content:space-between;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 2px;margin:6px 0 0;font-size:14px;font-weight:700;color:var(--ink);text-align:left}';
  document.head.appendChild(st);
 }catch(e){}})();
 /* ---- 更多頁：分組收合（常用展開、其餘點開） ---- */
@@ -12891,9 +12891,9 @@ E.push({id:'np_m2',min:50,max:80,w:30,if:()=>NP().mentor&&NP().mentor.s===1,run:
 function goalHTML(){
  const g=S.goal?GOALS.find(x=>x.id===S.goal):null,p=Math.round(goalProg()*100),got=lsGet(ACHK,{}),left=achLeft();
  let h=`<h3>人生目標</h3>`;
- h+=g?`<div class="item"><b>${g.n}</b><div class="sub">${g.d}</div><div class="bar" style="margin:6px 0"><i style="width:${p}%;background:#c0553a"></i></div><div class="sub">${S.flags.goalDone?'已達成':'進度 '+p+'%'}</div></div>`:'<div class="sub">還沒有目標。選一個，遊戲會幫你追蹤進度。</div>';
+ h+=g?`<div class="item"><b>${g.n}</b><div class="sub">${g.d}</div><div class="bar" style="margin:6px 0"><i style="width:${p}%;background:var(--acc)"></i></div><div class="sub">${S.flags.goalDone?'已達成':'進度 '+p+'%'}</div></div>`:'<div class="sub">還沒有目標。選一個，遊戲會幫你追蹤進度。</div>';
  h+=`<div class="sec op">${g?'更換目標':'選擇目標'}</div>`+GOALS.map(x=>`<button class="btn ${S.goal===x.id?'p':''}" data-a="lf:goal:set:${x.id}">${x.n}<small>${x.d}</small></button>`).join('');
- h+=`<div class="sec">成就收集（${ACH.length-left.length}／${ACH.length}）</div><div class="bar" style="margin:4px 0"><i style="width:${Math.round((ACH.length-left.length)/ACH.length*100)}%;background:#c0553a"></i></div>`+(left.length?`<div class="sub">還沒達成：${left.slice(0,8).map(x=>esc(x[1])).join('、')}${left.length>8?'…':''}</div>`:'<div class="sub">全部成就都收集完了。</div>');
+ h+=`<div class="sec">成就收集（${ACH.length-left.length}／${ACH.length}）</div><div class="bar" style="margin:4px 0"><i style="width:${Math.round((ACH.length-left.length)/ACH.length*100)}%;background:var(--acc)"></i></div>`+(left.length?`<div class="sub">還沒達成：${left.slice(0,8).map(x=>esc(x[1])).join('、')}${left.length>8?'…':''}</div>`:'<div class="sub">全部成就都收集完了。</div>');
  return h+famHTML();
 }
 const _lh127=lifeHTML;
@@ -14254,7 +14254,7 @@ for(const e of E){
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
 /* ---- p147：版本編號（設定頁與標題畫面顯示；更新後第一次開啟會提示） ---- */
-const APPV=138,APPD='2026-11-20',APPN="各系統加深：生活習慣、職涯與職場人際、婚姻與教養、保險、司法流程、學業、技能瓶頸、時代浪潮";
+const APPV=139,APPD='2026-11-20',APPN="深色模式按鈕與選單修正、配色殘留清理";
 const verStr=n=>'v'+(n/100).toFixed(2);
 const verTxt=()=>`版本 ${verStr(APPV)}`;
 const _sh147=setHTML;
@@ -14266,7 +14266,7 @@ try{
  if(last!==APPV){
   lsSet('lifesim_ver',APPV);
   if(last&&typeof document!=='undefined'&&document.body&&document.createElement){
-   setTimeout(()=>{try{const d=document.createElement('div');d.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:9999;background:#c0553a;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3)';d.innerHTML=`已更新到<b>版本 ${verStr(APPV)}</b>（${APPD}）<br><span style="opacity:.9">${APPN}</span>`;d.onclick=()=>d.remove();document.body.appendChild(d);setTimeout(()=>d.remove(),8000)}catch(e){}},800)}
+   setTimeout(()=>{try{const d=document.createElement('div');d.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:9999;background:#5a866b;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3)';d.innerHTML=`已更新到<b>版本 ${verStr(APPV)}</b>（${APPD}）<br><span style="opacity:.9">${APPN}</span>`;d.onclick=()=>d.remove();document.body.appendChild(d);setTimeout(()=>d.remove(),8000)}catch(e){}},800)}
  }
 }catch(e){}
 
@@ -14437,6 +14437,10 @@ h1,h2,h3,h4{font-weight:500;letter-spacing:1.5px}
 .sec{color:#6d9580;letter-spacing:1.5px;font-weight:600}
 .item>b,.scard b{font-weight:500;letter-spacing:.5px}
 .agebox b,.agebox .big,.agebox>*:first-child{font-weight:400!important}
+.btn.p{background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 72%,#d9b46a))!important;box-shadow:0 6px 16px color-mix(in srgb,var(--acc) 32%,transparent)!important}
+html.dark .btn:not(.p),html.dark .mini,html.dark .tile,html.dark .seg button:not(.on),html.dark #qbar button,html.dark .chip{background:var(--card)!important;color:var(--ink)}
+html.dark .btn.p{color:#0e1a14!important}
+html.dark .seg button.on{background:color-mix(in srgb,var(--acc) 28%,var(--card))!important;color:var(--ink)!important;border-color:var(--acc)!important}
 .logo148{box-shadow:0 8px 22px rgba(138,106,82,.22)}
 `;
  document.head.appendChild(st);
