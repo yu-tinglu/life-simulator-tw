@@ -6731,7 +6731,7 @@ const avC01=x=>Math.max(0,Math.min(1,x)),avRnd=()=>Math.random(),avRr=(a,b)=>a+(
 const AVSET='lifesim_tw_avs';
 const avS=()=>Object.assign({bg:0,sh:0,pres:'auto',outfit:'auto',hdr:1,mut:1,rec:1,sz:1,show:0,expr:1},lsGet(AVSET,{}));
 function nameToCode(n){for(const k in CNS)if(CNS[k].n===n)return k;return null}
-function avFill(g,reg){const r=AVREG[reg]||AVREG.EA,d={ut:avRnd(),hd:avRr(.3,1),hl:Math.floor(avRnd()*3),fl:avRr(.82,1.2),jw:avRr(.6,1.15),chn:avRnd(),es:avRr(.72,1.38),esp:avRr(.78,1.28),ed:avRnd()<r.ed?1:0,br:avRnd(),ba2:avRnd(),nb:avRnd()<r.nb?avRr(.55,1):avRr(0,.5),nw:avRr(.6,1.5),lw:avRr(.7,1.35),er:avRr(.6,1.5),bm:avRnd(),mo:Math.floor(avRnd()*3.3),bmk:avRnd()<.06?1:0,ac:avRnd(),bd:avRnd(),fs:Math.floor(avRnd()*5),fw:avRr(.8,1.22),nz:avRr(.5,1.6),lp:avRr(.55,1.6),hw:avRnd(),hs:Math.floor(avRnd()*12),ey:Math.floor(avRnd()*3),ht:avRnd(),sk:avRr(r.sk[0],r.sk[1]),hc:avWp(r.hc),ec:avWp(r.ec),ba:avRnd()<.3?1:0,my:avRnd()<.35?1:0,fr:avRnd()<.12?1:0,dm:avRnd()<.15?1:0,gm:avRnd()<.12?1:0};
+function avFill(g,reg){const r=AVREG[reg]||AVREG.EA,d={ut:avRnd(),hd:avRr(.3,1),hl:Math.floor(avRnd()*3),fl:avRr(.82,1.2),jw:avRr(.6,1.15),chn:avRnd(),es:avRr(.72,1.38),esp:avRr(.78,1.28),ed:avRnd()<r.ed?1:0,br:avRnd(),ba2:avRnd(),nb:avRnd()<r.nb?avRr(.55,1):avRr(0,.5),nw:avRr(.6,1.5),lw:avRr(.7,1.35),er:avRr(.6,1.5),bm:avRnd(),mo:Math.floor(avRnd()*3.3),bmk:avRnd()<.06?1:0,ac:avRnd(),bd:avRnd(),fs:Math.floor(avRnd()*5),fw:avRr(.8,1.22),nz:avRr(.5,1.6),lp:avRr(.55,1.6),hw:avRnd(),hs:Math.floor(avRnd()*12),ey:Math.floor(avRnd()*6),fsh:Math.floor(avRnd()*6),bs:Math.floor(avRnd()*4),hz:avRnd()<.02?1:0,ht:avRnd(),sk:avRr(r.sk[0],r.sk[1]),hc:avWp(r.hc),ec:avWp(r.ec),ba:avRnd()<.3?1:0,my:avRnd()<.35?1:0,fr:avRnd()<.12?1:0,dm:avRnd()<.15?1:0,gm:avRnd()<.12?1:0};
  for(const k in d)if(g[k]==null)g[k]=d[k];return g}
 function genFor(code,ethSub){const reg=regOf(code),g=avFill({},reg);if(ethSub==='原住民')g.sk=avC01(g.sk+.12);return g}
 function avMixC(a,b,sd){const w=avRr(.3,.7),m=(S&&S.av&&0)||1;return avC01(a*w+b*(1-w)+(avRnd()-.5)*sd*(avS().mut===0?.4:avS().mut===2?1.8:1))}
@@ -6740,7 +6740,7 @@ function avChild(a0,b0){
  const domH=(x,y)=>(x===0||y===0)?(avRnd()<.72/rec?0:(avRnd()<.5?x:y)):(avRnd()<.5?x:y),pk=(x,y)=>avRnd()<.5?x:y;
  const sc=(k,lo,hi,sd)=>lo+avMixC((a[k]-lo)/(hi-lo),(b[k]-lo)/(hi-lo),sd)*(hi-lo);
  const g={sk:avMixC(a.sk,b.sk,.12),ut:avMixC(a.ut,b.ut,.2),hc:domH(a.hc,b.hc),hs:pk(a.hs,b.hs),hw:avMixC(a.hw,b.hw,.2),hd:avMixC(a.hd,b.hd,.2),hl:pk(a.hl,b.hl),fs:pk(a.fs,b.fs),
-  fw:sc('fw',.8,1.22,.2),fl:sc('fl',.82,1.2,.2),jw:sc('jw',.6,1.15,.2),chn:avMixC(a.chn,b.chn,.2),ey:pk(a.ey,b.ey),es:sc('es',.72,1.38,.2),esp:sc('esp',.78,1.28,.2),
+  fw:sc('fw',.8,1.22,.2),fl:sc('fl',.82,1.2,.2),jw:sc('jw',.6,1.15,.2),chn:avMixC(a.chn,b.chn,.2),ey:avRnd()<.05*mut?Math.floor(avRnd()*6):pk(a.ey,b.ey),fsh:avRnd()<.06*mut?Math.floor(avRnd()*6):pk(a.fsh,b.fsh),bs:pk(a.bs,b.bs),hz:(a.hz||b.hz)?(avRnd()<.3?1:0):(avRnd()<.008?1:0),es:sc('es',.72,1.38,.2),esp:sc('esp',.78,1.28,.2),
   ed:(a.ed||b.ed)?(avRnd()<.75?1:0):0,ec:domH(a.ec,b.ec),br:avMixC(a.br,b.br,.2),ba2:avMixC(a.ba2,b.ba2,.2),nz:sc('nz',.5,1.6,.2),nb:avMixC(a.nb,b.nb,.2),nw:sc('nw',.6,1.5,.2),lp:sc('lp',.55,1.6,.2),lw:sc('lw',.7,1.35,.2),er:sc('er',.6,1.5,.2),
   ht:avMixC(a.ht,b.ht,.15),bm:avMixC(a.bm,b.bm,.2),mo:Math.max(0,Math.min(3,pk(a.mo,b.mo)+(avRnd()<.2?1:0))),bmk:(a.bmk||b.bmk)?(avRnd()<.3?1:0):(avRnd()<.03?1:0),ac:avMixC(a.ac,b.ac,.2),bd:avMixC(a.bd,b.bd,.2),
   ba:(a.ba||b.ba)?(avRnd()<.5?1:0):(avRnd()<.05?1:0),my:(a.my&&b.my)?(avRnd()<.8?1:0):(a.my||b.my)?(avRnd()<.45?1:0):(avRnd()<.12?1:0),fr:(a.fr||b.fr)?(avRnd()<.5?1:0):0,dm:(a.dm||b.dm)?(avRnd()<.5?1:0):0,gm:(a.gm||b.gm)?(avRnd()<.5?1:0):0};
@@ -6787,7 +6787,7 @@ function avSVG(a,size){
  const g=a.g,o=a.o||{},age=a.age,st=avS(),pres=o.pres||st.pres,male=pres==='中性'?a.sx!=='女':pres==='男'||(pres==='auto'&&a.sx!=='女'),dead=a.dead;
  const sc=age<3?.8:age<7?.85:age<13?.91:age<19?.96:1,sk0=avSkinCol(o.tan?avC01(g.sk+o.tan):g.sk,g.ut),pale=(a.health<30)?.12:0,sk=pale?avMix(sk0,'#d9d2c8',pale):sk0,skd=avMix(sk,'#6b4430',.25);
  const grayT=avC01((age-(g.gm?30:46))/32),hcol=o.dye||avMix(AVHC[g.hc],'#d9d9d9',grayT);
- const fw=g.fw*(1+Math.max(0,(o.build||0))*.08+(o.fwAdd||0)),rx=21*fw*(age<3?1.12:1),ry=25*g.fl*(age<3?.95:1),jw=Math.max(.6,Math.min(1.15,g.jw+(o.jwAdd||0)));
+ const fm=[[1,1,1],[1.08,.93,1.08],[1.04,.97,1.2],[.92,1.12,.95],[1.02,1,.72],[.95,1.03,.78]][g.fsh|0]||[1,1,1],fw=fm[0]*g.fw*(1+Math.max(0,(o.build||0))*.08+(o.fwAdd||0)),rx=21*fw*(age<3?1.12:1),ry=25*fm[1]*g.fl*(age<3?.95:1),jw=Math.max(.55,Math.min(1.3,(g.jw+(o.jwAdd||0))*fm[2]));
  const cy=46+(age<3?4:0),sw=26+(o.build||0)*5+(male?3:0)+(g.ht-.5)*4+(g.bm-.5)*3,outf=avOutfit({job:a.job,age,sx:a.sx,o}),bald=male&&g.ba&&age>35&&!o.hair,balF=avC01((age-35)/35);
  const hs=o.hs!=null?o.hs:g.hs,X={hs,rx,cy,ry,hcol,g,bald,balF};
  let s=`<svg viewBox="0 0 100 100" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" ${dead?'style="filter:grayscale(1);opacity:.75"':''}><circle cx="50" cy="50" r="49" fill="${['#efe3d6','#dbe8f1','#e5efd9','#f3dfe6','#e8e1f2','#f1ead0'][st.bg]||'#efe3d6'}"/><g transform="translate(50 100) scale(${sc}) translate(-50 -100)">`;
@@ -6807,9 +6807,9 @@ function avSVG(a,size){
  s=avHairFront(s,X);
  /* 眼 */
  const ey=cy-1,es=(age<7?1.2:1)*g.es,er2=3.3*es*(g.ey===1?1.15:1),ec=o.lens!=null?o.lens:g.ec,ecol=AVEC[ec],sp=8.5*g.esp,fem=pres==='女'||(pres==='auto'&&a.sx==='女');
- const tl=(g.er-1.05)*16;
+ const tl=(g.er-1.05)*16+(g.ey===3?-8:g.ey===4?9:0);
  [-1,1].forEach(d=>{const x=50+d*sp;
-  s+=`<g transform="rotate(${-d*tl} ${x} ${ey})"><ellipse cx="${x}" cy="${ey}" rx="${er2*1.25}" ry="${g.ey===0?er2*.8:er2}" fill="#fff"/><circle cx="${x}" cy="${ey}" r="${er2*(.68+g.ba2*.2)}" fill="${ecol}"/><circle cx="${x+.7}" cy="${ey-.7}" r="${er2*.25}" fill="#fff"/>`;
+  s+=`<g transform="rotate(${-d*tl} ${x} ${ey})"><ellipse cx="${x}" cy="${ey}" rx="${er2*1.25}" ry="${g.ey===0?er2*.8:g.ey===5?er2*1.18:er2}" fill="#fff"/><circle cx="${x}" cy="${ey}" r="${er2*(.68+g.ba2*.2)}" fill="${(g.hz&&d===1)?AVEC[(ec+3)%AVEC.length]:ecol}"/><circle cx="${x+.7}" cy="${ey-.7}" r="${er2*.25}" fill="#fff"/>`;
   const ed=o.ed!=null?o.ed:g.ed;
   if(ed||g.ey===2)s+=`<path d="M${x-er2*1.3} ${ey-er2*.5} Q${x} ${ey-er2*1.5} ${x+er2*1.3} ${ey-er2*.5}" stroke="${skd}" stroke-width="1.1" fill="none"/>`;
   else s+=`<path d="M${x-er2*1.3} ${ey-er2*.2} Q${x} ${ey-er2*1} ${x+er2*1.3} ${ey-er2*.2}" stroke="${skd}" stroke-width=".7" fill="none" opacity=".5"/>`;
@@ -6817,7 +6817,7 @@ function avSVG(a,size){
   if(o.shadow)s+=`<path d="M${x-er2*1.4} ${ey-er2*.4} Q${x} ${ey-er2*2.3} ${x+er2*1.4} ${ey-er2*.4} Z" fill="${o.shadow}" opacity=".45"/>`;
   s+='</g>';
   const bt=(.8+g.br*1)*(male?1.15:.85),ar=g.ba2*3;
-  s+=`<path d="M${x-5} ${ey-6.2} Q${x+d*0} ${ey-8.2-ar*.4} ${x+5} ${ey-6.2-ar*.2}" stroke="${avMix(hcol,'#000000',.2)}" stroke-width="${bt}" fill="none" stroke-linecap="round"/>`;
+  {const bsh=g.bs|0,k=bsh===3?.7:1,ix=x-d*5*k,ox=x+d*5*k,iy=ey-6.2+(bsh===2?.8:0),oy=ey-6.2-(bsh===2?2.2:0)-ar*.2,cy2=ey-8.2-ar*.4+(bsh===1?1.8:0);s+=`<path d="M${ix} ${iy} Q${x} ${cy2} ${ox} ${oy}" stroke="${avMix(hcol,'#000000',.2)}" stroke-width="${bt*(bsh===3?1.5:1)}" fill="none" stroke-linecap="round"/>`}
   if((a.stress>65||a.health<35)&&age>12)s+=`<ellipse cx="${x}" cy="${ey+5.2}" rx="4.2" ry="1.6" fill="#7a5a8a" opacity=".28"/>`});
  /* 鼻口 */
  const EXH={happy:92,sad:12,cry:6,angry:18,sick:22,shock:50},nz=g.nz,hp=a.ex&&EXH[a.ex]!=null?EXH[a.ex]:(a.happy==null?50:a.happy),smi=Math.max(-3,Math.min(5,(hp-50)/10)),lw=6*g.lp*g.lw,nbw=g.nb;
@@ -14260,7 +14260,7 @@ for(const e of E){
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
 /* ---- p147：版本編號（設定頁與標題畫面顯示；更新後第一次開啟會提示） ---- */
-const APPV=145,APPD='2026-11-22',APPN="臉型與眼睛差異加大（每個人長相更不一樣）、修正家庭頁版面";
+const APPV=146,APPD='2026-11-22',APPN="遺傳外貌更多樣：6 種臉型、6 種眼型、4 種眉型、異色瞳（會遺傳）";
 const verStr=n=>'v'+(n/100).toFixed(2);
 const verTxt=()=>`版本 ${verStr(APPV)}`;
 const _sh147=setHTML;
