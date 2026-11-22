@@ -14260,7 +14260,7 @@ for(const e of E){
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
 /* ---- p147：版本編號（設定頁與標題畫面顯示；更新後第一次開啟會提示） ---- */
-const APPV=146,APPD='2026-11-22',APPN="遺傳外貌更多樣：6 種臉型、6 種眼型、4 種眉型、異色瞳（會遺傳）";
+const APPV=147,APPD='2026-11-22',APPN="頂部小語完整顯示不再被截斷";
 const verStr=n=>'v'+(n/100).toFixed(2);
 const verTxt=()=>`版本 ${verStr(APPV)}`;
 const _sh147=setHTML;
@@ -14309,7 +14309,7 @@ try{
 .yr.major148 h4::before{content:"重要";order:-1;align-self:center;font-size:10px;letter-spacing:1px;color:var(--acc);border:1px solid var(--acc);border-radius:4px;padding:0 4px;margin-right:2px;opacity:.8;font-family:inherit;font-weight:600}
 .fbar .mini#hlTog{white-space:nowrap;flex:none}
 .logo148{display:block;margin:0 auto 6px;border-radius:30px;box-shadow:0 8px 22px rgba(63,16,23,.28)}
-#hd .quote148{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#hd .quote148{white-space:normal;overflow:visible;max-width:100%;font-size:12px;line-height:1.45;text-wrap:balance}
 .st .w148{font-size:10.5px;color:var(--mute);margin-top:2px;white-space:nowrap}
 .st.good148 .w148{color:var(--acc2)}
 #ageBtn{width:84px;height:84px;line-height:1.25;font-size:14px;letter-spacing:1px;background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--acc) 70%,#fff),var(--acc) 62%)}
