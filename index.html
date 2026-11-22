@@ -14260,7 +14260,7 @@ for(const e of E){
  e.run=function(){const r=r0.apply(this,arguments);try{if(r&&r.t&&!r.t.includes('（')&&!/^今年|^前陣子|^某個|^年底|^一個深夜|^這幾個月|^最近/.test(r.t)){const p=pick(TPRE);r.t=p+r.t+(chance(.6)?pick(sf):'')}}catch(e){}return r};
 }
 /* ---- p147：版本編號（設定頁與標題畫面顯示；更新後第一次開啟會提示） ---- */
-const APPV=149,APPD='2026-11-22',APPN="頂部小語改成圓角小標籤";
+const APPV=150,APPD='2026-11-22',APPN="頂部小語恢復原本位置，整句同一行完整顯示";
 const verStr=n=>'v'+(n/100).toFixed(2);
 const verTxt=()=>`版本 ${verStr(APPV)}`;
 const _sh147=setHTML;
@@ -14309,7 +14309,7 @@ try{
 .yr.major148 h4::before{content:"重要";order:-1;align-self:center;font-size:10px;letter-spacing:1px;color:var(--acc);border:1px solid var(--acc);border-radius:4px;padding:0 4px;margin-right:2px;opacity:.8;font-family:inherit;font-weight:600}
 .fbar .mini#hlTog{white-space:nowrap;flex:none}
 .logo148{display:block;margin:0 auto 6px;border-radius:30px;box-shadow:0 8px 22px rgba(63,16,23,.28)}
-.quote148.q2{display:flex;align-items:center;gap:6px;width:fit-content;max-width:calc(100% - 32px);margin:8px auto 10px;padding:5px 14px;border-radius:999px;background:#fffdf8;border:1px solid rgba(95,134,107,.28);box-shadow:0 1px 3px rgba(80,60,40,.08);font-size:12px;font-style:italic;color:var(--mute);text-align:left}.quote148.q2 svg{flex:0 0 auto}
+#hd .quote148{white-space:nowrap;overflow:visible;max-width:none;font-size:12.5px}
 .st .w148{font-size:10.5px;color:var(--mute);margin-top:2px;white-space:nowrap}
 .st.good148 .w148{color:var(--acc2)}
 #ageBtn{width:84px;height:84px;line-height:1.25;font-size:14px;letter-spacing:1px;background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--acc) 70%,#fff),var(--acc) 62%)}
@@ -14339,9 +14339,9 @@ render=function(){
   if(!S)return;
   const hd=document.getElementById('hd');if(hd)hd.classList.add('hd148');
   const who=document.querySelector('#hd .who');
-  if(who){who.querySelectorAll('.dos148').forEach(x=>x.remove());document.querySelectorAll('.quote148').forEach(x=>x.remove());
+  if(who){who.querySelectorAll('.dos148,.quote148').forEach(x=>x.remove());
    const d=document.createElement('div');d.className='dos148';d.textContent='人生檔案 No.'+String(S.no||1).padStart(3,'0');who.insertBefore(d,who.firstChild);
-   const q=document.createElement('div');q.className='quote148';q.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="#5f866b"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg><span></span>';q.lastChild.textContent=(S.dead?'故事寫到這裡，謝謝你。':CHAP148[chapOf148(S.age)][3]);q.classList.add('q2');document.querySelectorAll('.quote148').forEach(x=>x.remove());if(hd&&hd.parentNode)hd.parentNode.insertBefore(q,hd.nextSibling)}
+   const q=document.createElement('div');q.className='quote148';q.textContent='「'+(S.dead?'故事寫到這裡，謝謝你。':CHAP148[chapOf148(S.age)][3])+'」';who.appendChild(q)}
   const ha=document.getElementById('hAge');if(ha)ha.textContent=`${calYear()-S.age} 年生・${(typeof CNS!=='undefined'&&CNS[S.cn||'TW']?CNS[S.cn||'TW'].n:'台灣')}${S.dead?'・已逝世':''}`;
   document.querySelectorAll('#stats .st').forEach((el,i)=>{const s=STATS[i];if(!s)return;const k=s[0],v=S[k],em=el.querySelector('.lb em');
    if(!el.querySelector('.w148'))el.insertAdjacentHTML('beforeend',`<div class="w148">${hw148(k,v)}</div>`);
